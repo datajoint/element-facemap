@@ -1,4 +1,4 @@
-# DataJoint Element - Functional Calcium Imaging
+# DataJoint Element - Facemap
 This repository features DataJoint pipeline design for videographic processing of head-fixed rodent behavior with `Facemap`.
 
 The element presented here is not a complete workflow by itself,
