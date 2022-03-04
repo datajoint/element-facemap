@@ -45,7 +45,7 @@ def activate(fm_schema_name, *, create_schema=True, create_tables=True,
     assert inspect.ismodule(linking_module),\
         "The argument 'dependency' must be a module's name or a module"
     assert hasattr(linking_module, 'get_fm_root_data_dir'),\
-        "The linking module must specify a lookup funtion for a root data directory"
+        "The linking module must specify a lookup function for a root data directory"
 
     global _linking_module
     _linking_module = linking_module
