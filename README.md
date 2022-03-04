@@ -22,6 +22,3 @@ See [Background](Background.md) for the background information and development t
      ```
      pip install --upgrade element-facemap
      ```
-
-
-    
