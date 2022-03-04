@@ -70,12 +70,12 @@ def get_fm_root_data_dir() -> list:
         :return: a string for full path to the behavioral root data directory,
          or list of strings for possible root data directories
     """
-    root_directories = _linking_module.get_dlc_root_data_dir()
+    root_directories = _linking_module.get_fm_root_data_dir()
     if isinstance(root_directories, (str, Path)):
         root_directories = [root_directories]
 
-    if hasattr(_linking_module, 'get_dlc_processed_data_dir'):
-        root_directories.append(_linking_module.get_dlc_processed_data_dir(None))
+    if hasattr(_linking_module, 'get_fm_processed_data_dir'):
+        root_directories.append(_linking_module.get_fm_processed_data_dir(None))
 
     return root_directories
 
@@ -90,7 +90,7 @@ def get_fm_processed_data_dir() -> str:
         will be stored.
     """
     if hasattr(_linking_module, 'get_fm_processed_data_dir'):
-        return _linking_module.get_dlc_processed_data_dir()
+        return _linking_module.get_fm_processed_data_dir()
     else:
         return get_fm_root_data_dir()[0]
 
