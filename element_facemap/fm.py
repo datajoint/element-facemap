@@ -1,12 +1,14 @@
+import datajoint as dj
+import os
+import cv2
 import pathlib
 import inspect
 import importlib
-import datajoint as dj
 from element_interface.utils import find_full_path, dict_to_uuid, find_root_directory
 
 schema = dj.schema()
-_linking_module = None
 
+_linking_module = None
 
 def activate(fm_schema_name, *, create_schema=True, create_tables=True,
              linking_module=None):
@@ -78,11 +80,11 @@ def get_fm_root_data_dir() -> list:
 
 def get_fm_processed_data_dir() -> str:
     """
-    If specified by the user, this function provides DeepLabCut with an output
+    If specified by the user, this function provides Facemapp with an output
     directory for processed files. If unspecified, output files will be stored
-    in the session directory 'videos' folder, per DeepLabCut default
-    get_dlc_processed_data_dir -> str
-        This user-provided function specifies where DeepLabCut output files
+    in the session directory 'videos' folder, per Facemap default
+    get_fm_processed_data_dir -> str
+        This user-provided function specifies where Facemap output files
         will be stored.
     """
     if hasattr(_linking_module, 'get_fm_processed_data_dir'):
@@ -91,34 +93,54 @@ def get_fm_processed_data_dir() -> str:
         return get_fm_root_data_dir()[0]
 
 
+def get_video_files(video_key: dict) -> str:
+    """
+    Retrieve the list of video files (e.g. *.avi) associated with a given video recording
+    :param video_key: key of a video recording
+    :return: list of Video files' full file-paths
+    """
+    return _linking_module.get_video_files(video_key)
+
+
 # ----------------------------- Table declarations ----------------------
 
 
 @schema
 class VideoRecording(dj.Manual):
     definition = """
+    -> Subject
     -> Session
     -> Device
-    recording_id: int
-    ---
-    recording_start_time: datetime
+    file_path:          : varchar(40)  # filepath of video, relative to root data directory
     """
 
-    class File(dj.Part):
-        definition = """
-        -> master
-        file_path: varchar(255)  # filepath of video, relative to root data directory
-        """
     
-    class Info(dj.Part):
-        definition = """
-        -> master
-        ---
-        px_height         : smallint  # height in pixels
-        px_width          : smallint  # width in pixels
-        fps               : float     # (Hz) frames per second
-        """
+class RecordingInfo(dj.Imported):
+    definition = """
+    -> VideoRecording
+    ---
+    px_height               : smallint  # height in pixels
+    px_width                : smallint  # width in pixels
+    nframes                 : smallint  # number of frames 
+    fps                     : float     # (Hz) frames per second
+    duration                : float     # video duration in seconds
+    recording_time = NULL   : datetime  # Time at the beginning of the recording
+    """
 
+    def make(self, key):
+        file_path = (VideoRecording.File & key).fetch1('file_path')
+
+        cap = cv2.VideoCapture(file_path)
+
+        self.insert1({
+            **key,
+            'px_height': int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            'px_width': int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+            'nframes': int(cap.get(cv2.CAP_PROP_FRAME_COUNT)),
+            'fps': cap.get(cv2.CAP_PROP_FPS),
+            'duration': 0,
+        })
+    
 
 @schema
 class FacemapParamSet(dj.Lookup):
@@ -126,17 +148,15 @@ class FacemapParamSet(dj.Lookup):
     # Parameters used to run the Facemap algorithm
     paramset_idx    : smallint
     ---
-    paramset_desc: varchar(128)
-    param_set_hash  : uuid        # hash identifying this parameterset
-    unique index (param_set_hash)
-    params: longblob  # dictionary of all applicable parameters
+    paramset_desc   : varchar(128)
+    param_set_hash  : uuid          # hash identifying this parameter set
+    params          : longblob      # dictionary of all applicable parameters
     """
 
     @classmethod
     def insert_new_params(cls, processing_method: str, paramset_idx: int,
                           paramset_desc: str, params: dict):
-        param_dict = {'processing_method': processing_method,
-                      'paramset_idx': paramset_idx,
+        param_dict = {'paramset_idx': paramset_idx,
                       'paramset_desc': paramset_desc,
                       'params': params,
                       'param_set_hash': dict_to_uuid(params)}
@@ -153,8 +173,10 @@ class FacemapParamSet(dj.Lookup):
             cls.insert1(param_dict)
 
 
+### Not sure if the auto_generate_entries & infer_output_dir methods are relevant.
+
 @schema
-class ProcessingTask(dj.Manual):
+class FacemapTask(dj.Manual):
     definition = """  # Manual table for defining a processing task ready to be run
     -> VideoRecording
     -> FacemapParamSet
@@ -163,44 +185,91 @@ class ProcessingTask(dj.Manual):
     task_mode='load': enum('load', 'trigger')   # 'load': load computed analysis results, 'trigger': trigger computation
     """
 
+    @classmethod
+    def infer_output_dir(cls, video_key,  relative=False, mkdir=False):
+
+        video_dir = find_full_path(get_fm_root_data_dir(), get_video_files(video_key)[0]).parent
+        root_dir = find_root_directory(get_fm_root_data_dir(), video_dir)
+        
+        paramset_key = FacemapParamSet.fetch1()
+        processed_dir = pathlib.Path(get_fm_processed_data_dir())
+        output_dir = (processed_dir
+                / video_dir.relative_to(root_dir)
+                / f'facemap_{paramset_key["paramset_idx"]}')
+
+        if mkdir:
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+        return output_dir.relative_to(processed_dir) if relative else output_dir
+
+    @classmethod
+    def auto_generate_entries(cls, video_key, task_mode):
+        """
+        Method to auto-generate ProcessingTask entries for a particular Scan using a default paramater set.
+        """
+
+        default_paramset_idx = os.environ.get('DEFAULT_PARAMSET_IDX', 0)
+        
+        output_dir = cls.infer_output_dir(video_key, relative=False, mkdir=True)
+        
+        try:
+            from . import facemap_loader
+            loaded_dataset = facemap_loader.Facemap(output_dir)
+        except FileNotFoundError:
+            task_mode = 'trigger'
+        else:
+            task_mode = 'load'
+
+        cls.insert1({
+            **video_key, 'paramset_idx': default_paramset_idx,
+            'processing_output_dir': output_dir, 'task_mode': task_mode})
+
 
 @schema
-class Processing(dj.Computed):
+class FacemapProcessing(dj.Computed):
     definition = """  # Processing Procedure
-    -> ProcessingTask
+    -> FacemapTask
     ---
     processing_time     : datetime  # time of generation of the facemap results
     package_version=''  : varchar(16)
     """
     
     
-    # Run processing only on Scan with ScanInfo inserted
+    # Processing only the VideoRecordings that have their Info inserted.
     @property
     def key_source(self):
-        return ProcessingTask & VideoRecording.File
+        return FacemapTask & RecordingInfo.File
 
     def make(self, key):
-        task_mode = (ProcessingTask & key).fetch1('task_mode')
+        task_mode = (FacemapTask & key).fetch1('task_mode')
 
-        output_dir = (ProcessingTask & key).fetch1('processing_output_dir')
+        output_dir = (FacemapTask & key).fetch1('processing_output_dir')
+
         if not output_dir:
-            output_dir = ProcessingTask.infer_output_dir(key, relative=True, mkdir=True)
+            output_dir = FacemapTask.infer_output_dir(key, relative=True, mkdir=True)
             # update processing_output_dir
-            ProcessingTask.update1({**key, 'processing_output_dir': output_dir.as_posix()})
+            FacemapTask.update1({**key, 'processing_output_dir': output_dir.as_posix()})
 
         if task_mode == 'load':
-            method, imaging_dataset = get_loader_result(key, ProcessingTask)
-            if method == 'suite2p':
-                if (scan.ScanInfo & key).fetch1('nrois') > 0:
-                    raise NotImplementedError(f'Suite2p ingestion error - Unable to handle'
-                                              f' ScanImage multi-ROI scanning mode yet')
-                suite2p_dataset = imaging_dataset
-                key = {**key, 'processing_time': suite2p_dataset.creation_time}
-            elif method == 'caiman':
-                caiman_dataset = imaging_dataset
-                key = {**key, 'processing_time': caiman_dataset.creation_time}
-            else:
-                raise NotImplementedError('Unknown method: {}'.format(method))
+            facemap_result = get_loader_result(key, FacemapTask)
+
+            key = {**key, 'processing_time': facemap_result.creation_time}
+        elif task_mode == 'trigger':
+            import facemap
+            facemap_params = (FacemapTask * FacemapParamSet & key).fetch1('params')
+
+            video_files = (FacemapTask * VideoRecording * RecordingInfo & key).fetch1('file_path')
+            video_files = [find_full_path(get_fm_root_data_dir(), video_file) for video_file in video_files]
+
+            ### Add the parameters from npy files
+            facemap.process.run(video_files, movSVD=True, savepath=output_dir)
+
+            _, video_dataset = get_loader_result(key, FacemapTask)
+            facemap_dataset = video_dataset
+            key = {**key, 'processing_time': facemap_dataset.creation_time}
+
+
+
 
 
 
