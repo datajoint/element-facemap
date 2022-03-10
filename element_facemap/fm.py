@@ -111,7 +111,7 @@ class VideoRecording(dj.Manual):
     -> Subject
     -> Session
     -> Device
-    file_path:          : varchar(40)  # filepath of video, relative to root data directory
+    file_path          : varchar(40)  # filepath of video, relative to root data directory
     """
 
     
