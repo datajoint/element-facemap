@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="405pt" height="570pt" viewBox="0.00 0.00 405.00 570.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 566)">
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-566 401,-566 401,4 -4,4"/>
+<!-- FacialSignal.Regions -->
+<g id="node1" class="node">
+<title>FacialSignal.Regions</title>
+<g id="a_node1"><a xlink:title="→ FacialSignalroi_id               ------------------------------roi_name=&quot;&quot;          xrange               yrange               xrange_bin           yrange_bin           ">
+<polygon fill="transparent" stroke="transparent" points="109,-74 0,-74 0,-55 109,-55 109,-74"/>
+<text text-anchor="start" x="8" y="-63" font-family="arial" text-decoration="underline" font-size="10.00">FacialSignal.Regions</text>
+</a>
+</g>
+</g>
+<!-- FacialSignal.Vectors -->
+<g id="node4" class="node">
+<title>FacialSignal.Vectors</title>
+<g id="a_node4"><a xlink:title="→ FacialSignal.Regions------------------------------motsvd               movsvd               motmask_reshape      movmask_reshape      motion               ">
+<polygon fill="transparent" stroke="transparent" points="107.5,-19 1.5,-19 1.5,0 107.5,0 107.5,-19"/>
+<text text-anchor="middle" x="54.5" y="-7" font-family="arial" font-size="10.00">FacialSignal.Vectors</text>
+</a>
+</g>
+</g>
+<!-- FacialSignal.Regions&#45;&gt;FacialSignal.Vectors -->
+<g id="edge1" class="edge">
+<title>FacialSignal.Regions-&gt;FacialSignal.Vectors</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M54.5,-54.75C54.5,-44.87 54.5,-28.9 54.5,-19.09"/>
+</g>
+<!-- FacemapProcessing -->
+<g id="node2" class="node">
+<title>FacemapProcessing</title>
+<g id="a_node2"><a xlink:title="→ FacemapTask------------------------------processing_time      package_version=&quot;&quot;   ">
+<ellipse fill="#ff0000" fill-opacity="0.125490" stroke="#ff0000" stroke-opacity="0.125490" cx="184.5" cy="-194" rx="13" ry="13"/>
+<text text-anchor="middle" x="184.5" y="-190.9" font-family="arial" font-size="12.00" fill="#7f0000" fill-opacity="0.627451">FacemapProcessing</text>
+</a>
+</g>
+</g>
+<!-- FacialSignal -->
+<g id="node7" class="node">
+<title>FacialSignal</title>
+<g id="a_node7"><a xlink:title="→ FacemapProcessing">
+<ellipse fill="#00007f" fill-opacity="0.250980" stroke="#00007f" stroke-opacity="0.250980" cx="184.5" cy="-127.5" rx="52.5" ry="17.5"/>
+<text text-anchor="middle" x="184.5" y="-124.4" font-family="arial" font-size="12.00" fill="#00007f" fill-opacity="0.627451">FacialSignal</text>
+</a>
+</g>
+</g>
+<!-- FacemapProcessing&#45;&gt;FacialSignal -->
+<g id="edge2" class="edge">
+<title>FacemapProcessing-&gt;FacialSignal</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M184.5,-180.87C184.5,-170.8 184.5,-156.37 184.5,-145.2"/>
+</g>
+<!-- FacemapParamSet -->
+<g id="node3" class="node">
+<title>FacemapParamSet</title>
+<g id="a_node3"><a xlink:title="→ VideoRecordingparamset_idx         ------------------------------params               param_set_hash       do_mot_svd=1         do_mov_svd=0         paramset_desc=&quot;&quot;     ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="244.5,-349 124.5,-349 124.5,-314 244.5,-314 244.5,-349"/>
+<text text-anchor="start" x="132.5" y="-329.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">FacemapParamSet</text>
+</a>
+</g>
+</g>
+<!-- FacemapTask -->
+<g id="node11" class="node">
+<title>FacemapTask</title>
+<g id="a_node11"><a xlink:title="→ FacemapParamSet------------------------------processing_output_dir task_mode=&quot;load&quot;     ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="230.5,-278 138.5,-278 138.5,-243 230.5,-243 230.5,-278"/>
+<text text-anchor="middle" x="184.5" y="-257.4" font-family="arial" font-size="12.00" fill="darkgreen">FacemapTask</text>
+</a>
+</g>
+</g>
+<!-- FacemapParamSet&#45;&gt;FacemapTask -->
+<g id="edge3" class="edge">
+<title>FacemapParamSet-&gt;FacemapTask</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M184.5,-313.8C184.5,-302.95 184.5,-288.87 184.5,-278.05"/>
+</g>
+<!-- Device -->
+<g id="node5" class="node">
+<title>Device</title>
+<g id="a_node5"><a xlink:title="recorder             ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="242.5,-491 188.5,-491 188.5,-456 242.5,-456 242.5,-491"/>
+<text text-anchor="start" x="196.5" y="-471.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">Device</text>
+</a>
+</g>
+</g>
+<!-- VideoRecording -->
+<g id="node13" class="node">
+<title>VideoRecording</title>
+<g id="a_node13"><a xlink:title="→ Session→ Devicerecording_id         ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="304,-420 201,-420 201,-385 304,-385 304,-420"/>
+<text text-anchor="start" x="209" y="-400.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">VideoRecording</text>
+</a>
+</g>
+</g>
+<!-- Device&#45;&gt;VideoRecording -->
+<g id="edge4" class="edge">
+<title>Device-&gt;VideoRecording</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M224.46,-455.8C230.27,-444.95 237.82,-430.87 243.63,-420.05"/>
+</g>
+<!-- Subject -->
+<g id="node6" class="node">
+<title>Subject</title>
+<g id="a_node6"><a xlink:title="subject              ------------------------------sex                  subject_birth_date   subject_description=&quot;&quot; ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="319,-562 262,-562 262,-527 319,-527 319,-562"/>
+<text text-anchor="start" x="270" y="-542.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">Subject</text>
+</a>
+</g>
+</g>
+<!-- Session -->
+<g id="node10" class="node">
+<title>Session</title>
+<g id="a_node10"><a xlink:title="→ Subjectsession_id           ------------------------------session_datetime     ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="320.5,-491 260.5,-491 260.5,-456 320.5,-456 320.5,-491"/>
+<text text-anchor="start" x="268.5" y="-471.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">Session</text>
+</a>
+</g>
+</g>
+<!-- Subject&#45;&gt;Session -->
+<g id="edge5" class="edge">
+<title>Subject-&gt;Session</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M290.5,-526.8C290.5,-515.95 290.5,-501.87 290.5,-491.05"/>
+</g>
+<!-- FacialSignal&#45;&gt;FacialSignal.Regions -->
+<g id="edge6" class="edge">
+<title>FacialSignal-&gt;FacialSignal.Regions</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M155.33,-112.81C130.02,-100.94 94.19,-84.12 72.75,-74.06"/>
+</g>
+<!-- FacialSignal.Summary -->
+<g id="node9" class="node">
+<title>FacialSignal.Summary</title>
+<g id="a_node9"><a xlink:title="→ FacialSignal------------------------------sbin                 avgframe             avgmotion            ">
+<polygon fill="transparent" stroke="transparent" points="242,-74 127,-74 127,-55 242,-55 242,-74"/>
+<text text-anchor="middle" x="184.5" y="-62" font-family="arial" font-size="10.00">FacialSignal.Summary</text>
+</a>
+</g>
+</g>
+<!-- FacialSignal&#45;&gt;FacialSignal.Summary -->
+<g id="edge7" class="edge">
+<title>FacialSignal-&gt;FacialSignal.Summary</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M184.5,-109.83C184.5,-98.26 184.5,-83.32 184.5,-74.08"/>
+</g>
+<!-- FacialSignal.SingularValues -->
+<g id="node12" class="node">
+<title>FacialSignal.SingularValues</title>
+<g id="a_node12"><a xlink:title="→ FacialSignal------------------------------mot_sv               mov_sv               ">
+<polygon fill="transparent" stroke="transparent" points="397,-74 260,-74 260,-55 397,-55 397,-74"/>
+<text text-anchor="middle" x="328.5" y="-62" font-family="arial" font-size="10.00">FacialSignal.SingularValues</text>
+</a>
+</g>
+</g>
+<!-- FacialSignal&#45;&gt;FacialSignal.SingularValues -->
+<g id="edge8" class="edge">
+<title>FacialSignal-&gt;FacialSignal.SingularValues</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M215.75,-113.26C243.87,-101.35 284.36,-84.2 308.4,-74.02"/>
+</g>
+<!-- RecordingInfo -->
+<g id="node8" class="node">
+<title>RecordingInfo</title>
+<g id="a_node8"><a xlink:title="→ VideoRecording------------------------------px_height            px_width             nframes              fps                  recording_duration=null recording_time=null  ">
+<ellipse fill="#00007f" fill-opacity="0.250980" stroke="#00007f" stroke-opacity="0.250980" cx="320.5" cy="-331.5" rx="57.5" ry="17.5"/>
+<text text-anchor="middle" x="320.5" y="-328.4" font-family="arial" font-size="12.00" fill="#00007f" fill-opacity="0.627451">RecordingInfo</text>
+</a>
+</g>
+</g>
+<!-- Session&#45;&gt;VideoRecording -->
+<g id="edge9" class="edge">
+<title>Session-&gt;VideoRecording</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M281.3,-455.8C275.33,-444.95 267.57,-430.87 261.61,-420.05"/>
+</g>
+<!-- FacemapTask&#45;&gt;FacemapProcessing -->
+<g id="edge10" class="edge">
+<title>FacemapTask-&gt;FacemapProcessing</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M184.5,-242.89C184.5,-231.69 184.5,-217.17 184.5,-207.07"/>
+</g>
+<!-- VideoRecording&#45;&gt;FacemapParamSet -->
+<g id="edge11" class="edge">
+<title>VideoRecording-&gt;FacemapParamSet</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M236.04,-384.8C225.35,-373.95 211.47,-359.87 200.81,-349.05"/>
+</g>
+<!-- VideoRecording&#45;&gt;RecordingInfo -->
+<g id="edge12" class="edge">
+<title>VideoRecording-&gt;RecordingInfo</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M268.96,-384.8C279.81,-373.79 293.94,-359.45 304.66,-348.57"/>
+</g>
+</g>
+</svg>
