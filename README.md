@@ -67,3 +67,6 @@ To activate the `element-facemap`, ones need to provide:
     + get_facemap_processed_data_dir(): Returns your output root data directory
     + get_facemap_video_files(): Returns your video files
 
+### Example usage
+
+See [this project](https://github.com/datajoint/workflow-facemap) for an example usage of this Facemap Element.
