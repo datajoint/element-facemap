@@ -1,182 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="405pt" height="570pt" viewBox="0.00 0.00 405.00 570.00">
-<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 566)">
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-566 401,-566 401,4 -4,4"/>
-<!-- FacialSignal.Regions -->
-<g id="node1" class="node">
-<title>FacialSignal.Regions</title>
-<g id="a_node1"><a xlink:title="→ FacialSignalroi_id               ------------------------------roi_name=&quot;&quot;          xrange               yrange               xrange_bin           yrange_bin           ">
-<polygon fill="transparent" stroke="transparent" points="109,-74 0,-74 0,-55 109,-55 109,-74"/>
-<text text-anchor="start" x="8" y="-63" font-family="arial" text-decoration="underline" font-size="10.00">FacialSignal.Regions</text>
-</a>
-</g>
-</g>
-<!-- FacialSignal.Vectors -->
-<g id="node4" class="node">
-<title>FacialSignal.Vectors</title>
-<g id="a_node4"><a xlink:title="→ FacialSignal.Regions------------------------------motsvd               movsvd               motmask_reshape      movmask_reshape      motion               ">
-<polygon fill="transparent" stroke="transparent" points="107.5,-19 1.5,-19 1.5,0 107.5,0 107.5,-19"/>
-<text text-anchor="middle" x="54.5" y="-7" font-family="arial" font-size="10.00">FacialSignal.Vectors</text>
-</a>
-</g>
-</g>
-<!-- FacialSignal.Regions&#45;&gt;FacialSignal.Vectors -->
-<g id="edge1" class="edge">
-<title>FacialSignal.Regions-&gt;FacialSignal.Vectors</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M54.5,-54.75C54.5,-44.87 54.5,-28.9 54.5,-19.09"/>
-</g>
-<!-- FacemapProcessing -->
-<g id="node2" class="node">
-<title>FacemapProcessing</title>
-<g id="a_node2"><a xlink:title="→ FacemapTask------------------------------processing_time      package_version=&quot;&quot;   ">
-<ellipse fill="#ff0000" fill-opacity="0.125490" stroke="#ff0000" stroke-opacity="0.125490" cx="184.5" cy="-194" rx="13" ry="13"/>
-<text text-anchor="middle" x="184.5" y="-190.9" font-family="arial" font-size="12.00" fill="#7f0000" fill-opacity="0.627451">FacemapProcessing</text>
-</a>
-</g>
-</g>
-<!-- FacialSignal -->
-<g id="node7" class="node">
-<title>FacialSignal</title>
-<g id="a_node7"><a xlink:title="→ FacemapProcessing">
-<ellipse fill="#00007f" fill-opacity="0.250980" stroke="#00007f" stroke-opacity="0.250980" cx="184.5" cy="-127.5" rx="52.5" ry="17.5"/>
-<text text-anchor="middle" x="184.5" y="-124.4" font-family="arial" font-size="12.00" fill="#00007f" fill-opacity="0.627451">FacialSignal</text>
-</a>
-</g>
-</g>
-<!-- FacemapProcessing&#45;&gt;FacialSignal -->
-<g id="edge2" class="edge">
-<title>FacemapProcessing-&gt;FacialSignal</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M184.5,-180.87C184.5,-170.8 184.5,-156.37 184.5,-145.2"/>
-</g>
-<!-- FacemapParamSet -->
-<g id="node3" class="node">
-<title>FacemapParamSet</title>
-<g id="a_node3"><a xlink:title="→ VideoRecordingparamset_idx         ------------------------------params               param_set_hash       do_mot_svd=1         do_mov_svd=0         paramset_desc=&quot;&quot;     ">
-<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="244.5,-349 124.5,-349 124.5,-314 244.5,-314 244.5,-349"/>
-<text text-anchor="start" x="132.5" y="-329.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">FacemapParamSet</text>
-</a>
-</g>
-</g>
-<!-- FacemapTask -->
-<g id="node11" class="node">
-<title>FacemapTask</title>
-<g id="a_node11"><a xlink:title="→ FacemapParamSet------------------------------processing_output_dir task_mode=&quot;load&quot;     ">
-<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="230.5,-278 138.5,-278 138.5,-243 230.5,-243 230.5,-278"/>
-<text text-anchor="middle" x="184.5" y="-257.4" font-family="arial" font-size="12.00" fill="darkgreen">FacemapTask</text>
-</a>
-</g>
-</g>
-<!-- FacemapParamSet&#45;&gt;FacemapTask -->
-<g id="edge3" class="edge">
-<title>FacemapParamSet-&gt;FacemapTask</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M184.5,-313.8C184.5,-302.95 184.5,-288.87 184.5,-278.05"/>
-</g>
-<!-- Device -->
-<g id="node5" class="node">
-<title>Device</title>
-<g id="a_node5"><a xlink:title="recorder             ">
-<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="242.5,-491 188.5,-491 188.5,-456 242.5,-456 242.5,-491"/>
-<text text-anchor="start" x="196.5" y="-471.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">Device</text>
-</a>
-</g>
-</g>
-<!-- VideoRecording -->
-<g id="node13" class="node">
-<title>VideoRecording</title>
-<g id="a_node13"><a xlink:title="→ Session→ Devicerecording_id         ">
-<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="304,-420 201,-420 201,-385 304,-385 304,-420"/>
-<text text-anchor="start" x="209" y="-400.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">VideoRecording</text>
-</a>
-</g>
-</g>
-<!-- Device&#45;&gt;VideoRecording -->
-<g id="edge4" class="edge">
-<title>Device-&gt;VideoRecording</title>
-<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M224.46,-455.8C230.27,-444.95 237.82,-430.87 243.63,-420.05"/>
-</g>
-<!-- Subject -->
-<g id="node6" class="node">
-<title>Subject</title>
-<g id="a_node6"><a xlink:title="subject              ------------------------------sex                  subject_birth_date   subject_description=&quot;&quot; ">
-<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="319,-562 262,-562 262,-527 319,-527 319,-562"/>
-<text text-anchor="start" x="270" y="-542.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">Subject</text>
-</a>
-</g>
-</g>
-<!-- Session -->
-<g id="node10" class="node">
-<title>Session</title>
-<g id="a_node10"><a xlink:title="→ Subjectsession_id           ------------------------------session_datetime     ">
-<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="320.5,-491 260.5,-491 260.5,-456 320.5,-456 320.5,-491"/>
-<text text-anchor="start" x="268.5" y="-471.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">Session</text>
-</a>
-</g>
-</g>
-<!-- Subject&#45;&gt;Session -->
-<g id="edge5" class="edge">
-<title>Subject-&gt;Session</title>
-<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M290.5,-526.8C290.5,-515.95 290.5,-501.87 290.5,-491.05"/>
-</g>
-<!-- FacialSignal&#45;&gt;FacialSignal.Regions -->
-<g id="edge6" class="edge">
-<title>FacialSignal-&gt;FacialSignal.Regions</title>
-<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M155.33,-112.81C130.02,-100.94 94.19,-84.12 72.75,-74.06"/>
-</g>
-<!-- FacialSignal.Summary -->
-<g id="node9" class="node">
-<title>FacialSignal.Summary</title>
-<g id="a_node9"><a xlink:title="→ FacialSignal------------------------------sbin                 avgframe             avgmotion            ">
-<polygon fill="transparent" stroke="transparent" points="242,-74 127,-74 127,-55 242,-55 242,-74"/>
-<text text-anchor="middle" x="184.5" y="-62" font-family="arial" font-size="10.00">FacialSignal.Summary</text>
-</a>
-</g>
-</g>
-<!-- FacialSignal&#45;&gt;FacialSignal.Summary -->
-<g id="edge7" class="edge">
-<title>FacialSignal-&gt;FacialSignal.Summary</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M184.5,-109.83C184.5,-98.26 184.5,-83.32 184.5,-74.08"/>
-</g>
-<!-- FacialSignal.SingularValues -->
-<g id="node12" class="node">
-<title>FacialSignal.SingularValues</title>
-<g id="a_node12"><a xlink:title="→ FacialSignal------------------------------mot_sv               mov_sv               ">
-<polygon fill="transparent" stroke="transparent" points="397,-74 260,-74 260,-55 397,-55 397,-74"/>
-<text text-anchor="middle" x="328.5" y="-62" font-family="arial" font-size="10.00">FacialSignal.SingularValues</text>
-</a>
-</g>
-</g>
-<!-- FacialSignal&#45;&gt;FacialSignal.SingularValues -->
-<g id="edge8" class="edge">
-<title>FacialSignal-&gt;FacialSignal.SingularValues</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M215.75,-113.26C243.87,-101.35 284.36,-84.2 308.4,-74.02"/>
-</g>
-<!-- RecordingInfo -->
-<g id="node8" class="node">
-<title>RecordingInfo</title>
-<g id="a_node8"><a xlink:title="→ VideoRecording------------------------------px_height            px_width             nframes              fps                  recording_duration=null recording_time=null  ">
-<ellipse fill="#00007f" fill-opacity="0.250980" stroke="#00007f" stroke-opacity="0.250980" cx="320.5" cy="-331.5" rx="57.5" ry="17.5"/>
-<text text-anchor="middle" x="320.5" y="-328.4" font-family="arial" font-size="12.00" fill="#00007f" fill-opacity="0.627451">RecordingInfo</text>
-</a>
-</g>
-</g>
-<!-- Session&#45;&gt;VideoRecording -->
-<g id="edge9" class="edge">
-<title>Session-&gt;VideoRecording</title>
-<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M281.3,-455.8C275.33,-444.95 267.57,-430.87 261.61,-420.05"/>
-</g>
-<!-- FacemapTask&#45;&gt;FacemapProcessing -->
-<g id="edge10" class="edge">
-<title>FacemapTask-&gt;FacemapProcessing</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M184.5,-242.89C184.5,-231.69 184.5,-217.17 184.5,-207.07"/>
-</g>
-<!-- VideoRecording&#45;&gt;FacemapParamSet -->
-<g id="edge11" class="edge">
-<title>VideoRecording-&gt;FacemapParamSet</title>
-<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M236.04,-384.8C225.35,-373.95 211.47,-359.87 200.81,-349.05"/>
-</g>
-<!-- VideoRecording&#45;&gt;RecordingInfo -->
-<g id="edge12" class="edge">
-<title>VideoRecording-&gt;RecordingInfo</title>
-<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M268.96,-384.8C279.81,-373.79 293.94,-359.45 304.66,-348.57"/>
-</g>
-</g>
-</svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Do not edit this file with editors other than diagrams.net -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="822px" height="1157px" viewBox="-0.5 -0.5 822 1157" content="&lt;mxfile host=&quot;app.diagrams.net&quot; modified=&quot;2022-03-22T19:31:05.465Z&quot; agent=&quot;5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36&quot; etag=&quot;F46eyMM-avesjnz3EMq5&quot; version=&quot;16.4.11&quot; type=&quot;device&quot;&gt;&lt;diagram id=&quot;EzIjJG_-RRp54xcE6FOv&quot; name=&quot;Page-1&quot;&gt;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&lt;/diagram&gt;&lt;/mxfile&gt;"><defs/><g><image x="-0.5" y="-0.6799999999999999" width="820.27" height="1155.93" xlink:href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNDA1cHQiIGhlaWdodD0iNTcwcHQiIHZpZXdCb3g9IjAuMDAgMC4wMCA0MDUuMDAgNTcwLjAwIj4mI3hhOzxnIGlkPSJncmFwaDAiIGNsYXNzPSJncmFwaCIgdHJhbnNmb3JtPSJzY2FsZSgxIDEpIHJvdGF0ZSgwKSB0cmFuc2xhdGUoNCA1NjYpIj4mI3hhOzxwb2x5Z29uIGZpbGw9IndoaXRlIiBzdHJva2U9InRyYW5zcGFyZW50IiBwb2ludHM9Ii00LDQgLTQsLTU2NiA0MDEsLTU2NiA0MDEsNCAtNCw0Ii8+JiN4YTs8IS0tIEZhY2lhbFNpZ25hbC5SZWdpb25zIC0tPiYjeGE7PGcgaWQ9Im5vZGUxIiBjbGFzcz0ibm9kZSI+JiN4YTs8dGl0bGU+RmFjaWFsU2lnbmFsLlJlZ2lvbnM8L3RpdGxlPiYjeGE7PGcgaWQ9ImFfbm9kZTEiPjxhIHhsaW5rOnRpdGxlPSLihpIgRmFjaWFsU2lnbmFsJiMxMDtyb2lfaWQgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCYjMTA7LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tJiMxMDtyb2lfbmFtZT0mcXVvdDsmcXVvdDsgwqDCoMKgwqDCoMKgwqDCoMKgJiMxMDt4cmFuZ2UgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCYjMTA7eXJhbmdlIMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAmIzEwO3hyYW5nZV9iaW4gwqDCoMKgwqDCoMKgwqDCoMKgwqAmIzEwO3lyYW5nZV9iaW4gwqDCoMKgwqDCoMKgwqDCoMKgwqAmIzEwOyI+JiN4YTs8cG9seWdvbiBmaWxsPSJ0cmFuc3BhcmVudCIgc3Ryb2tlPSJ0cmFuc3BhcmVudCIgcG9pbnRzPSIxMDksLTc0IDAsLTc0IDAsLTU1IDEwOSwtNTUgMTA5LC03NCIvPiYjeGE7PHRleHQgdGV4dC1hbmNob3I9InN0YXJ0IiB4PSI4IiB5PSItNjMiIGZvbnQtZmFtaWx5PSJhcmlhbCIgdGV4dC1kZWNvcmF0aW9uPSJ1bmRlcmxpbmUiIGZvbnQtc2l6ZT0iMTAuMDAiPkZhY2lhbFNpZ25hbC5SZWdpb25zPC90ZXh0PiYjeGE7PC9hPiYjeGE7PC9nPiYjeGE7PC9nPiYjeGE7PCEtLSBGYWNpYWxTaWduYWwuVmVjdG9ycyAtLT4mI3hhOzxnIGlkPSJub2RlNCIgY2xhc3M9Im5vZGUiPiYjeGE7PHRpdGxlPkZhY2lhbFNpZ25hbC5WZWN0b3JzPC90aXRsZT4mI3hhOzxnIGlkPSJhX25vZGU0Ij48YSB4bGluazp0aXRsZT0i4oaSIEZhY2lhbFNpZ25hbC5SZWdpb25zJiMxMDstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0mIzEwO21vdHN2ZCDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgJiMxMDttb3ZzdmQgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCYjMTA7bW90bWFza19yZXNoYXBlIMKgwqDCoMKgwqAmIzEwO21vdm1hc2tfcmVzaGFwZSDCoMKgwqDCoMKgJiMxMDttb3Rpb24gwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCYjMTA7Ij4mI3hhOzxwb2x5Z29uIGZpbGw9InRyYW5zcGFyZW50IiBzdHJva2U9InRyYW5zcGFyZW50IiBwb2ludHM9IjEwNy41LC0xOSAxLjUsLTE5IDEuNSwwIDEwNy41LDAgMTA3LjUsLTE5Ii8+JiN4YTs8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSI1NC41IiB5PSItNyIgZm9udC1mYW1pbHk9ImFyaWFsIiBmb250LXNpemU9IjEwLjAwIj5GYWNpYWxTaWduYWwuVmVjdG9yczwvdGV4dD4mI3hhOzwvYT4mI3hhOzwvZz4mI3hhOzwvZz4mI3hhOzwhLS0gRmFjaWFsU2lnbmFsLlJlZ2lvbnMmIzQ1OyZndDtGYWNpYWxTaWduYWwuVmVjdG9ycyAtLT4mI3hhOzxnIGlkPSJlZGdlMSIgY2xhc3M9ImVkZ2UiPiYjeGE7PHRpdGxlPkZhY2lhbFNpZ25hbC5SZWdpb25zLSZndDtGYWNpYWxTaWduYWwuVmVjdG9yczwvdGl0bGU+JiN4YTs8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMjUwOTgwIiBkPSJNNTQuNSwtNTQuNzVDNTQuNSwtNDQuODcgNTQuNSwtMjguOSA1NC41LC0xOS4wOSIvPiYjeGE7PC9nPiYjeGE7PCEtLSBGYWNlbWFwUHJvY2Vzc2luZyAtLT4mI3hhOzxnIGlkPSJub2RlMiIgY2xhc3M9Im5vZGUiPiYjeGE7PHRpdGxlPkZhY2VtYXBQcm9jZXNzaW5nPC90aXRsZT4mI3hhOzxnIGlkPSJhX25vZGUyIj48YSB4bGluazp0aXRsZT0i4oaSIEZhY2VtYXBUYXNrJiMxMDstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0mIzEwO3Byb2Nlc3NpbmdfdGltZSDCoMKgwqDCoMKgJiMxMDtwYWNrYWdlX3ZlcnNpb249JnF1b3Q7JnF1b3Q7IMKgwqAmIzEwOyI+JiN4YTs8ZWxsaXBzZSBmaWxsPSIjZmYwMDAwIiBmaWxsLW9wYWNpdHk9IjAuMTI1NDkwIiBzdHJva2U9IiNmZjAwMDAiIHN0cm9rZS1vcGFjaXR5PSIwLjEyNTQ5MCIgY3g9IjE4NC41IiBjeT0iLTE5NCIgcng9IjEzIiByeT0iMTMiLz4mI3hhOzx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjE4NC41IiB5PSItMTkwLjkiIGZvbnQtZmFtaWx5PSJhcmlhbCIgZm9udC1zaXplPSIxMi4wMCIgZmlsbD0iIzdmMDAwMCIgZmlsbC1vcGFjaXR5PSIwLjYyNzQ1MSI+RmFjZW1hcFByb2Nlc3Npbmc8L3RleHQ+JiN4YTs8L2E+JiN4YTs8L2c+JiN4YTs8L2c+JiN4YTs8IS0tIEZhY2lhbFNpZ25hbCAtLT4mI3hhOzxnIGlkPSJub2RlNyIgY2xhc3M9Im5vZGUiPiYjeGE7PHRpdGxlPkZhY2lhbFNpZ25hbDwvdGl0bGU+JiN4YTs8ZyBpZD0iYV9ub2RlNyI+PGEgeGxpbms6dGl0bGU9IuKGkiBGYWNlbWFwUHJvY2Vzc2luZyYjMTA7Ij4mI3hhOzxlbGxpcHNlIGZpbGw9IiMwMDAwN2YiIGZpbGwtb3BhY2l0eT0iMC4yNTA5ODAiIHN0cm9rZT0iIzAwMDA3ZiIgc3Ryb2tlLW9wYWNpdHk9IjAuMjUwOTgwIiBjeD0iMTg0LjUiIGN5PSItMTI3LjUiIHJ4PSI1Mi41IiByeT0iMTcuNSIvPiYjeGE7PHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMTg0LjUiIHk9Ii0xMjQuNCIgZm9udC1mYW1pbHk9ImFyaWFsIiBmb250LXNpemU9IjEyLjAwIiBmaWxsPSIjMDAwMDdmIiBmaWxsLW9wYWNpdHk9IjAuNjI3NDUxIj5GYWNpYWxTaWduYWw8L3RleHQ+JiN4YTs8L2E+JiN4YTs8L2c+JiN4YTs8L2c+JiN4YTs8IS0tIEZhY2VtYXBQcm9jZXNzaW5nJiM0NTsmZ3Q7RmFjaWFsU2lnbmFsIC0tPiYjeGE7PGcgaWQ9ImVkZ2UyIiBjbGFzcz0iZWRnZSI+JiN4YTs8dGl0bGU+RmFjZW1hcFByb2Nlc3NpbmctJmd0O0ZhY2lhbFNpZ25hbDwvdGl0bGU+JiN4YTs8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMjUwOTgwIiBkPSJNMTg0LjUsLTE4MC44N0MxODQuNSwtMTcwLjggMTg0LjUsLTE1Ni4zNyAxODQuNSwtMTQ1LjIiLz4mI3hhOzwvZz4mI3hhOzwhLS0gRmFjZW1hcFBhcmFtU2V0IC0tPiYjeGE7PGcgaWQ9Im5vZGUzIiBjbGFzcz0ibm9kZSI+JiN4YTs8dGl0bGU+RmFjZW1hcFBhcmFtU2V0PC90aXRsZT4mI3hhOzxnIGlkPSJhX25vZGUzIj48YSB4bGluazp0aXRsZT0i4oaSIFZpZGVvUmVjb3JkaW5nJiMxMDtwYXJhbXNldF9pZHggwqDCoMKgwqDCoMKgwqDCoCYjMTA7LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tJiMxMDtwYXJhbXMgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCYjMTA7cGFyYW1fc2V0X2hhc2ggwqDCoMKgwqDCoMKgJiMxMDtkb19tb3Rfc3ZkPTEgwqDCoMKgwqDCoMKgwqDCoCYjMTA7ZG9fbW92X3N2ZD0wIMKgwqDCoMKgwqDCoMKgwqAmIzEwO3BhcmFtc2V0X2Rlc2M9JnF1b3Q7JnF1b3Q7IMKgwqDCoMKgJiMxMDsiPiYjeGE7PHBvbHlnb24gZmlsbD0iIzAwZmYwMCIgZmlsbC1vcGFjaXR5PSIwLjE4ODIzNSIgc3Ryb2tlPSIjMDBmZjAwIiBzdHJva2Utb3BhY2l0eT0iMC4xODgyMzUiIHBvaW50cz0iMjQ0LjUsLTM0OSAxMjQuNSwtMzQ5IDEyNC41LC0zMTQgMjQ0LjUsLTMxNCAyNDQuNSwtMzQ5Ii8+JiN4YTs8dGV4dCB0ZXh0LWFuY2hvcj0ic3RhcnQiIHg9IjEzMi41IiB5PSItMzI5LjQiIGZvbnQtZmFtaWx5PSJhcmlhbCIgdGV4dC1kZWNvcmF0aW9uPSJ1bmRlcmxpbmUiIGZvbnQtc2l6ZT0iMTIuMDAiIGZpbGw9ImRhcmtncmVlbiI+RmFjZW1hcFBhcmFtU2V0PC90ZXh0PiYjeGE7PC9hPiYjeGE7PC9nPiYjeGE7PC9nPiYjeGE7PCEtLSBGYWNlbWFwVGFzayAtLT4mI3hhOzxnIGlkPSJub2RlMTEiIGNsYXNzPSJub2RlIj4mI3hhOzx0aXRsZT5GYWNlbWFwVGFzazwvdGl0bGU+JiN4YTs8ZyBpZD0iYV9ub2RlMTEiPjxhIHhsaW5rOnRpdGxlPSLihpIgRmFjZW1hcFBhcmFtU2V0JiMxMDstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0mIzEwO3Byb2Nlc3Npbmdfb3V0cHV0X2RpciAmIzEwO3Rhc2tfbW9kZT0mcXVvdDtsb2FkJnF1b3Q7IMKgwqDCoMKgJiMxMDsiPiYjeGE7PHBvbHlnb24gZmlsbD0iIzAwZmYwMCIgZmlsbC1vcGFjaXR5PSIwLjE4ODIzNSIgc3Ryb2tlPSIjMDBmZjAwIiBzdHJva2Utb3BhY2l0eT0iMC4xODgyMzUiIHBvaW50cz0iMjMwLjUsLTI3OCAxMzguNSwtMjc4IDEzOC41LC0yNDMgMjMwLjUsLTI0MyAyMzAuNSwtMjc4Ii8+JiN4YTs8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSIxODQuNSIgeT0iLTI1Ny40IiBmb250LWZhbWlseT0iYXJpYWwiIGZvbnQtc2l6ZT0iMTIuMDAiIGZpbGw9ImRhcmtncmVlbiI+RmFjZW1hcFRhc2s8L3RleHQ+JiN4YTs8L2E+JiN4YTs8L2c+JiN4YTs8L2c+JiN4YTs8IS0tIEZhY2VtYXBQYXJhbVNldCYjNDU7Jmd0O0ZhY2VtYXBUYXNrIC0tPiYjeGE7PGcgaWQ9ImVkZ2UzIiBjbGFzcz0iZWRnZSI+JiN4YTs8dGl0bGU+RmFjZW1hcFBhcmFtU2V0LSZndDtGYWNlbWFwVGFzazwvdGl0bGU+JiN4YTs8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMjUwOTgwIiBkPSJNMTg0LjUsLTMxMy44QzE4NC41LC0zMDIuOTUgMTg0LjUsLTI4OC44NyAxODQuNSwtMjc4LjA1Ii8+JiN4YTs8L2c+JiN4YTs8IS0tIERldmljZSAtLT4mI3hhOzxnIGlkPSJub2RlNSIgY2xhc3M9Im5vZGUiPiYjeGE7PHRpdGxlPkRldmljZTwvdGl0bGU+JiN4YTs8ZyBpZD0iYV9ub2RlNSI+PGEgeGxpbms6dGl0bGU9InJlY29yZGVyIMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCYjMTA7Ij4mI3hhOzxwb2x5Z29uIGZpbGw9IiMwMGZmMDAiIGZpbGwtb3BhY2l0eT0iMC4xODgyMzUiIHN0cm9rZT0iIzAwZmYwMCIgc3Ryb2tlLW9wYWNpdHk9IjAuMTg4MjM1IiBwb2ludHM9IjI0Mi41LC00OTEgMTg4LjUsLTQ5MSAxODguNSwtNDU2IDI0Mi41LC00NTYgMjQyLjUsLTQ5MSIvPiYjeGE7PHRleHQgdGV4dC1hbmNob3I9InN0YXJ0IiB4PSIxOTYuNSIgeT0iLTQ3MS40IiBmb250LWZhbWlseT0iYXJpYWwiIHRleHQtZGVjb3JhdGlvbj0idW5kZXJsaW5lIiBmb250LXNpemU9IjEyLjAwIiBmaWxsPSJkYXJrZ3JlZW4iPkRldmljZTwvdGV4dD4mI3hhOzwvYT4mI3hhOzwvZz4mI3hhOzwvZz4mI3hhOzwhLS0gVmlkZW9SZWNvcmRpbmcgLS0+JiN4YTs8ZyBpZD0ibm9kZTEzIiBjbGFzcz0ibm9kZSI+JiN4YTs8dGl0bGU+VmlkZW9SZWNvcmRpbmc8L3RpdGxlPiYjeGE7PGcgaWQ9ImFfbm9kZTEzIj48YSB4bGluazp0aXRsZT0i4oaSIFNlc3Npb24mIzEwO+KGkiBEZXZpY2UmIzEwO3JlY29yZGluZ19pZCDCoMKgwqDCoMKgwqDCoMKgJiMxMDsiPiYjeGE7PHBvbHlnb24gZmlsbD0iIzAwZmYwMCIgZmlsbC1vcGFjaXR5PSIwLjE4ODIzNSIgc3Ryb2tlPSIjMDBmZjAwIiBzdHJva2Utb3BhY2l0eT0iMC4xODgyMzUiIHBvaW50cz0iMzA0LC00MjAgMjAxLC00MjAgMjAxLC0zODUgMzA0LC0zODUgMzA0LC00MjAiLz4mI3hhOzx0ZXh0IHRleHQtYW5jaG9yPSJzdGFydCIgeD0iMjA5IiB5PSItNDAwLjQiIGZvbnQtZmFtaWx5PSJhcmlhbCIgdGV4dC1kZWNvcmF0aW9uPSJ1bmRlcmxpbmUiIGZvbnQtc2l6ZT0iMTIuMDAiIGZpbGw9ImRhcmtncmVlbiI+VmlkZW9SZWNvcmRpbmc8L3RleHQ+JiN4YTs8L2E+JiN4YTs8L2c+JiN4YTs8L2c+JiN4YTs8IS0tIERldmljZSYjNDU7Jmd0O1ZpZGVvUmVjb3JkaW5nIC0tPiYjeGE7PGcgaWQ9ImVkZ2U0IiBjbGFzcz0iZWRnZSI+JiN4YTs8dGl0bGU+RGV2aWNlLSZndDtWaWRlb1JlY29yZGluZzwvdGl0bGU+JiN4YTs8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLW9wYWNpdHk9IjAuMjUwOTgwIiBkPSJNMjI0LjQ2LC00NTUuOEMyMzAuMjcsLTQ0NC45NSAyMzcuODIsLTQzMC44NyAyNDMuNjMsLTQyMC4wNSIvPiYjeGE7PC9nPiYjeGE7PCEtLSBTdWJqZWN0IC0tPiYjeGE7PGcgaWQ9Im5vZGU2IiBjbGFzcz0ibm9kZSI+JiN4YTs8dGl0bGU+U3ViamVjdDwvdGl0bGU+JiN4YTs8ZyBpZD0iYV9ub2RlNiI+PGEgeGxpbms6dGl0bGU9InN1YmplY3QgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAmIzEwOy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSYjMTA7c2V4IMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAmIzEwO3N1YmplY3RfYmlydGhfZGF0ZSDCoMKgJiMxMDtzdWJqZWN0X2Rlc2NyaXB0aW9uPSZxdW90OyZxdW90OyAmIzEwOyI+JiN4YTs8cG9seWdvbiBmaWxsPSIjMDBmZjAwIiBmaWxsLW9wYWNpdHk9IjAuMTg4MjM1IiBzdHJva2U9IiMwMGZmMDAiIHN0cm9rZS1vcGFjaXR5PSIwLjE4ODIzNSIgcG9pbnRzPSIzMTksLTU2MiAyNjIsLTU2MiAyNjIsLTUyNyAzMTksLTUyNyAzMTksLTU2MiIvPiYjeGE7PHRleHQgdGV4dC1hbmNob3I9InN0YXJ0IiB4PSIyNzAiIHk9Ii01NDIuNCIgZm9udC1mYW1pbHk9ImFyaWFsIiB0ZXh0LWRlY29yYXRpb249InVuZGVybGluZSIgZm9udC1zaXplPSIxMi4wMCIgZmlsbD0iZGFya2dyZWVuIj5TdWJqZWN0PC90ZXh0PiYjeGE7PC9hPiYjeGE7PC9nPiYjeGE7PC9nPiYjeGE7PCEtLSBTZXNzaW9uIC0tPiYjeGE7PGcgaWQ9Im5vZGUxMCIgY2xhc3M9Im5vZGUiPiYjeGE7PHRpdGxlPlNlc3Npb248L3RpdGxlPiYjeGE7PGcgaWQ9ImFfbm9kZTEwIj48YSB4bGluazp0aXRsZT0i4oaSIFN1YmplY3QmIzEwO3Nlc3Npb25faWQgwqDCoMKgwqDCoMKgwqDCoMKgwqAmIzEwOy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSYjMTA7c2Vzc2lvbl9kYXRldGltZSDCoMKgwqDCoCYjMTA7Ij4mI3hhOzxwb2x5Z29uIGZpbGw9IiMwMGZmMDAiIGZpbGwtb3BhY2l0eT0iMC4xODgyMzUiIHN0cm9rZT0iIzAwZmYwMCIgc3Ryb2tlLW9wYWNpdHk9IjAuMTg4MjM1IiBwb2ludHM9IjMyMC41LC00OTEgMjYwLjUsLTQ5MSAyNjAuNSwtNDU2IDMyMC41LC00NTYgMzIwLjUsLTQ5MSIvPiYjeGE7PHRleHQgdGV4dC1hbmNob3I9InN0YXJ0IiB4PSIyNjguNSIgeT0iLTQ3MS40IiBmb250LWZhbWlseT0iYXJpYWwiIHRleHQtZGVjb3JhdGlvbj0idW5kZXJsaW5lIiBmb250LXNpemU9IjEyLjAwIiBmaWxsPSJkYXJrZ3JlZW4iPlNlc3Npb248L3RleHQ+JiN4YTs8L2E+JiN4YTs8L2c+JiN4YTs8L2c+JiN4YTs8IS0tIFN1YmplY3QmIzQ1OyZndDtTZXNzaW9uIC0tPiYjeGE7PGcgaWQ9ImVkZ2U1IiBjbGFzcz0iZWRnZSI+JiN4YTs8dGl0bGU+U3ViamVjdC0mZ3Q7U2Vzc2lvbjwvdGl0bGU+JiN4YTs8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLW9wYWNpdHk9IjAuMjUwOTgwIiBkPSJNMjkwLjUsLTUyNi44QzI5MC41LC01MTUuOTUgMjkwLjUsLTUwMS44NyAyOTAuNSwtNDkxLjA1Ii8+JiN4YTs8L2c+JiN4YTs8IS0tIEZhY2lhbFNpZ25hbCYjNDU7Jmd0O0ZhY2lhbFNpZ25hbC5SZWdpb25zIC0tPiYjeGE7PGcgaWQ9ImVkZ2U2IiBjbGFzcz0iZWRnZSI+JiN4YTs8dGl0bGU+RmFjaWFsU2lnbmFsLSZndDtGYWNpYWxTaWduYWwuUmVnaW9uczwvdGl0bGU+JiN4YTs8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMC43NSIgc3Ryb2tlLW9wYWNpdHk9IjAuMjUwOTgwIiBkPSJNMTU1LjMzLC0xMTIuODFDMTMwLjAyLC0xMDAuOTQgOTQuMTksLTg0LjEyIDcyLjc1LC03NC4wNiIvPiYjeGE7PC9nPiYjeGE7PCEtLSBGYWNpYWxTaWduYWwuU3VtbWFyeSAtLT4mI3hhOzxnIGlkPSJub2RlOSIgY2xhc3M9Im5vZGUiPiYjeGE7PHRpdGxlPkZhY2lhbFNpZ25hbC5TdW1tYXJ5PC90aXRsZT4mI3hhOzxnIGlkPSJhX25vZGU5Ij48YSB4bGluazp0aXRsZT0i4oaSIEZhY2lhbFNpZ25hbCYjMTA7LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tJiMxMDtzYmluIMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgJiMxMDthdmdmcmFtZSDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAmIzEwO2F2Z21vdGlvbiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgJiMxMDsiPiYjeGE7PHBvbHlnb24gZmlsbD0idHJhbnNwYXJlbnQiIHN0cm9rZT0idHJhbnNwYXJlbnQiIHBvaW50cz0iMjQyLC03NCAxMjcsLTc0IDEyNywtNTUgMjQyLC01NSAyNDIsLTc0Ii8+JiN4YTs8dGV4dCB0ZXh0LWFuY2hvcj0ibWlkZGxlIiB4PSIxODQuNSIgeT0iLTYyIiBmb250LWZhbWlseT0iYXJpYWwiIGZvbnQtc2l6ZT0iMTAuMDAiPkZhY2lhbFNpZ25hbC5TdW1tYXJ5PC90ZXh0PiYjeGE7PC9hPiYjeGE7PC9nPiYjeGE7PC9nPiYjeGE7PCEtLSBGYWNpYWxTaWduYWwmIzQ1OyZndDtGYWNpYWxTaWduYWwuU3VtbWFyeSAtLT4mI3hhOzxnIGlkPSJlZGdlNyIgY2xhc3M9ImVkZ2UiPiYjeGE7PHRpdGxlPkZhY2lhbFNpZ25hbC0mZ3Q7RmFjaWFsU2lnbmFsLlN1bW1hcnk8L3RpdGxlPiYjeGE7PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1vcGFjaXR5PSIwLjI1MDk4MCIgZD0iTTE4NC41LC0xMDkuODNDMTg0LjUsLTk4LjI2IDE4NC41LC04My4zMiAxODQuNSwtNzQuMDgiLz4mI3hhOzwvZz4mI3hhOzwhLS0gRmFjaWFsU2lnbmFsLlNpbmd1bGFyVmFsdWVzIC0tPiYjeGE7PGcgaWQ9Im5vZGUxMiIgY2xhc3M9Im5vZGUiPiYjeGE7PHRpdGxlPkZhY2lhbFNpZ25hbC5TaW5ndWxhclZhbHVlczwvdGl0bGU+JiN4YTs8ZyBpZD0iYV9ub2RlMTIiPjxhIHhsaW5rOnRpdGxlPSLihpIgRmFjaWFsU2lnbmFsJiMxMDstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0mIzEwO21vdF9zdiDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgJiMxMDttb3Zfc3YgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoCYjMTA7Ij4mI3hhOzxwb2x5Z29uIGZpbGw9InRyYW5zcGFyZW50IiBzdHJva2U9InRyYW5zcGFyZW50IiBwb2ludHM9IjM5NywtNzQgMjYwLC03NCAyNjAsLTU1IDM5NywtNTUgMzk3LC03NCIvPiYjeGE7PHRleHQgdGV4dC1hbmNob3I9Im1pZGRsZSIgeD0iMzI4LjUiIHk9Ii02MiIgZm9udC1mYW1pbHk9ImFyaWFsIiBmb250LXNpemU9IjEwLjAwIj5GYWNpYWxTaWduYWwuU2luZ3VsYXJWYWx1ZXM8L3RleHQ+JiN4YTs8L2E+JiN4YTs8L2c+JiN4YTs8L2c+JiN4YTs8IS0tIEZhY2lhbFNpZ25hbCYjNDU7Jmd0O0ZhY2lhbFNpZ25hbC5TaW5ndWxhclZhbHVlcyAtLT4mI3hhOzxnIGlkPSJlZGdlOCIgY2xhc3M9ImVkZ2UiPiYjeGE7PHRpdGxlPkZhY2lhbFNpZ25hbC0mZ3Q7RmFjaWFsU2lnbmFsLlNpbmd1bGFyVmFsdWVzPC90aXRsZT4mI3hhOzxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2Utb3BhY2l0eT0iMC4yNTA5ODAiIGQ9Ik0yMTUuNzUsLTExMy4yNkMyNDMuODcsLTEwMS4zNSAyODQuMzYsLTg0LjIgMzA4LjQsLTc0LjAyIi8+JiN4YTs8L2c+JiN4YTs8IS0tIFJlY29yZGluZ0luZm8gLS0+JiN4YTs8ZyBpZD0ibm9kZTgiIGNsYXNzPSJub2RlIj4mI3hhOzx0aXRsZT5SZWNvcmRpbmdJbmZvPC90aXRsZT4mI3hhOzxnIGlkPSJhX25vZGU4Ij48YSB4bGluazp0aXRsZT0i4oaSIFZpZGVvUmVjb3JkaW5nJiMxMDstLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0mIzEwO3B4X2hlaWdodCDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgJiMxMDtweF93aWR0aCDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAmIzEwO25mcmFtZXMgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqAmIzEwO2ZwcyDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgwqDCoMKgJiMxMDtyZWNvcmRpbmdfZHVyYXRpb249bnVsbCAmIzEwO3JlY29yZGluZ190aW1lPW51bGwgwqAmIzEwOyI+JiN4YTs8ZWxsaXBzZSBmaWxsPSIjMDAwMDdmIiBmaWxsLW9wYWNpdHk9IjAuMjUwOTgwIiBzdHJva2U9IiMwMDAwN2YiIHN0cm9rZS1vcGFjaXR5PSIwLjI1MDk4MCIgY3g9IjMyMC41IiBjeT0iLTMzMS41IiByeD0iNTcuNSIgcnk9IjE3LjUiLz4mI3hhOzx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjMyMC41IiB5PSItMzI4LjQiIGZvbnQtZmFtaWx5PSJhcmlhbCIgZm9udC1zaXplPSIxMi4wMCIgZmlsbD0iIzAwMDA3ZiIgZmlsbC1vcGFjaXR5PSIwLjYyNzQ1MSI+UmVjb3JkaW5nSW5mbzwvdGV4dD4mI3hhOzwvYT4mI3hhOzwvZz4mI3hhOzwvZz4mI3hhOzwhLS0gU2Vzc2lvbiYjNDU7Jmd0O1ZpZGVvUmVjb3JkaW5nIC0tPiYjeGE7PGcgaWQ9ImVkZ2U5IiBjbGFzcz0iZWRnZSI+JiN4YTs8dGl0bGU+U2Vzc2lvbi0mZ3Q7VmlkZW9SZWNvcmRpbmc8L3RpdGxlPiYjeGE7PHBhdGggZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjAuNzUiIHN0cm9rZS1vcGFjaXR5PSIwLjI1MDk4MCIgZD0iTTI4MS4zLC00NTUuOEMyNzUuMzMsLTQ0NC45NSAyNjcuNTcsLTQzMC44NyAyNjEuNjEsLTQyMC4wNSIvPiYjeGE7PC9nPiYjeGE7PCEtLSBGYWNlbWFwVGFzayYjNDU7Jmd0O0ZhY2VtYXBQcm9jZXNzaW5nIC0tPiYjeGE7PGcgaWQ9ImVkZ2UxMCIgY2xhc3M9ImVkZ2UiPiYjeGE7PHRpdGxlPkZhY2VtYXBUYXNrLSZndDtGYWNlbWFwUHJvY2Vzc2luZzwvdGl0bGU+JiN4YTs8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMjUwOTgwIiBkPSJNMTg0LjUsLTI0Mi44OUMxODQuNSwtMjMxLjY5IDE4NC41LC0yMTcuMTcgMTg0LjUsLTIwNy4wNyIvPiYjeGE7PC9nPiYjeGE7PCEtLSBWaWRlb1JlY29yZGluZyYjNDU7Jmd0O0ZhY2VtYXBQYXJhbVNldCAtLT4mI3hhOzxnIGlkPSJlZGdlMTEiIGNsYXNzPSJlZGdlIj4mI3hhOzx0aXRsZT5WaWRlb1JlY29yZGluZy0mZ3Q7RmFjZW1hcFBhcmFtU2V0PC90aXRsZT4mI3hhOzxwYXRoIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLXdpZHRoPSIwLjc1IiBzdHJva2Utb3BhY2l0eT0iMC4yNTA5ODAiIGQ9Ik0yMzYuMDQsLTM4NC44QzIyNS4zNSwtMzczLjk1IDIxMS40NywtMzU5Ljg3IDIwMC44MSwtMzQ5LjA1Ii8+JiN4YTs8L2c+JiN4YTs8IS0tIFZpZGVvUmVjb3JkaW5nJiM0NTsmZ3Q7UmVjb3JkaW5nSW5mbyAtLT4mI3hhOzxnIGlkPSJlZGdlMTIiIGNsYXNzPSJlZGdlIj4mI3hhOzx0aXRsZT5WaWRlb1JlY29yZGluZy0mZ3Q7UmVjb3JkaW5nSW5mbzwvdGl0bGU+JiN4YTs8cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLW9wYWNpdHk9IjAuMjUwOTgwIiBkPSJNMjY4Ljk2LC0zODQuOEMyNzkuODEsLTM3My43OSAyOTMuOTQsLTM1OS40NSAzMDQuNjYsLTM0OC41NyIvPiYjeGE7PC9nPiYjeGE7PC9nPiYjeGE7PC9zdmc+" preserveAspectRatio="none"/><path d="M 290 197 L 450 268 L 670 268 L 790 197" fill="none" stroke="rgb(0, 0, 0)" stroke-width="4" stroke-miterlimit="10" stroke-dasharray="12 12" pointer-events="stroke"/><rect x="325" y="43" width="160" height="40" fill="none" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 63px; margin-left: 405px;"><div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;"><div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: nowrap;"><font style="font-size: 25px"><b>UPSTREAM<br />PIPELINE</b></font></div></div></div></foreignObject><text x="405" y="67" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="12px" text-anchor="middle">UPSTREAM...</text></switch></g><rect x="545" y="638" width="140" height="60" fill="none" stroke="none" pointer-events="all"/><g transform="translate(-0.5 -0.5)"><switch><foreignObject pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility" style="overflow: visible; text-align: left;"><div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 1px; height: 1px; padding-top: 668px; margin-left: 615px;"><div data-drawio-colors="color: rgb(0, 0, 0); " style="box-sizing: border-box; font-size: 0px; text-align: center;"><div style="display: inline-block; font-size: 23px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.2; pointer-events: all; white-space: nowrap;"><b style="font-size: 25px">FACEMAP<br />PIPELINE</b></div></div></div></foreignObject><text x="615" y="675" fill="rgb(0, 0, 0)" font-family="Helvetica" font-size="23px" text-anchor="middle">FACEMAP...</text></switch></g></g><switch><g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/><a transform="translate(0,-5)" xlink:href="https://www.diagrams.net/doc/faq/svg-export-text-problems" target="_blank"><text text-anchor="middle" font-size="10px" x="50%" y="100%">Text is not SVG - cannot display</text></a></switch></svg>
