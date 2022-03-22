@@ -14,7 +14,20 @@ See [Background](Background.md) for the background information and development t
 
 ![element-facemap diagram](images/attached_facemap_element.svg)
 
-As the diagram depicts, the facemap element starts immediately downstream from ***Session***, ...
+As the diagram depicts, the facemap element starts immediately downstream from ***Session*** and ***Device***.
+We provide an example workflow with a [pipeline script](https://github.com/datajoint/workflow-facemap/blob/main/workflow_facemap/pipeline.py) 
+that models combining this Element with the corresponding [Element-Session](https://github.com/datajoint/element-session).
+
+### Video Recording
+
++ ***VideoRecording***: All recordings from a given session.
++ ***RecordingInfo***: Meta information of each video recording (number of frames, pixel lengths, fps, etc.)
++ ***FacialSignal***: Set of results from SVD of user defined regions.
++ ***FacialSignal.Regions***: Information about each region (region name, pixel indices, etc)
++ ***FacialSignal.Vectors***: Principle components, absolute motion energies, and latent factors of each region
++ ***FacialSignal.SingularValues***: Singular values of the diagonal matrix.
++ ***FacialSignal.Summary***: Average frame, average motion, spatial binning factor
+
 
 ## Installation
 
@@ -43,8 +56,7 @@ As the diagram depicts, the facemap element starts immediately downstream from *
 To activate the `element-facemap`, ones need to provide:
 
 1. Schema names
-    + schema name for the probe module
-    + schema name for the ephys module
+    + schema name for the facial behavior estimation module
 
 2. Upstream tables
     + Session table: A set of keys identifying a recording session (see [Element-Session](https://github.com/datajoint/element-session)).
@@ -52,4 +64,6 @@ To activate the `element-facemap`, ones need to provide:
 
 3. Utility functions
     + get_facemap_root_data_dir(): Returns your root data directory.
+    + get_facemap_processed_data_dir(): Returns your output root data directory
+    + get_facemap_video_files(): Returns your video files
 
