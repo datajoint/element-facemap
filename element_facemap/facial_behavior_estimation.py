@@ -286,7 +286,7 @@ class FacialSignal(dj.Imported):
         """
 
     class SingularValues(dj.Part):
-        # Values of the diagonal square matrix in 1d
+        # Diagonal elements of the square matrix in 1d
         definition = """
         -> master
         ---
