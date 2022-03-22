@@ -58,7 +58,7 @@ To activate the `element-facemap`, ones need to provide:
 
 2. Upstream tables
     + Session table: A set of keys identifying a recording session (see [Element-Session](https://github.com/datajoint/element-session)).
-    + Device table: A reference table for device, specifying the videorecording reference.
+    + Device table: A Device table to specify a video recording.
 
 3. Utility functions
     + get_facemap_root_data_dir(): Returns your root data directory.
