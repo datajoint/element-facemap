@@ -274,24 +274,24 @@ class FacialSignal(dj.Imported):
         yrange_bin          : longblob          # 1d np.array - binned y pixel indices of the region
         """
 
-        class Vectors(dj.Part):
-            definition = """
-            -> Regions
-            ---
-            motsvd              : longblob         # 2d np.array - motion SVD for each region (nframes, components) -- reviewed
-            movsvd              : longblob         # 2d np.array - movie SVD for each region (nframes, components) -- reviewed
-            motmask_reshape     : longblob         # 3d np array - motion mask (y, x, components) - principle components -- reviewed
-            movmask_reshape     : longblob         # 3d np array - movie mask (y, x, components) - principle components -- reviewed
-            motion              : longblob         # 1d np.array - absolute motion energies across time (nframes) -- reviewed
-            """
+    class Vectors(dj.Part):
+        definition = """
+        -> master.Regions
+        ---
+        motsvd              : longblob          # 2d np.array - motion SVD for each region (nframes, components)
+        movsvd              : longblob          # 2d np.array - movie SVD for each region (nframes, components)
+        motmask_reshape     : longblob          # 3d np array - motion mask (y, x, components) - principle components
+        movmask_reshape     : longblob          # 3d np array - movie mask (y, x, components) - principle components
+        motion              : longblob          # 1d np.array - absolute motion energies across time (nframes)
+        """
 
     class SingularValues(dj.Part):
         # Values of the diagonal square matrix in 1d
         definition = """
         -> master
         ---
-        mot_sv: longblob                       # 1d np.array - singular values for the motion SVD - S_mot -- reviewed
-        mov_sv: longblob                       # 1d np.array - singular values of the movie SVD - S_mov -- reviewed
+        mot_sv: longblob                       # 1d np.array - singular values for the motion SVD - S_mot
+        mov_sv: longblob                       # 1d np.array - singular values of the movie SVD - S_mov
         """
 
     class Summary(dj.Part):
@@ -319,7 +319,7 @@ class FacialSignal(dj.Imported):
 
         self.SingularValues.insert1({**key, 'mot_sv': dataset['motSv'], 'mov_sv': dataset['movSv']})
 
-        self.Regions.Vectors.insert([
+        self.Vectors.insert([
             dict(
                 key,
                 roi_id=i,
