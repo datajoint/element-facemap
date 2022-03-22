@@ -5,7 +5,7 @@ import importlib
 import numpy as np
 from pathlib import Path
 from datetime import datetime
-from element_interface.utils import find_full_path, dict_to_uuid, find_root_directory
+from element_interface.utils import find_full_path, find_root_directory
 
 schema = dj.schema()
 
@@ -192,12 +192,25 @@ class FacemapTask(dj.Manual):
 
     @classmethod
     def infer_output_dir(cls, video_key,  relative=False, mkdir=False):
-        ### TODO: fill this part.
-        pass 
+        video_file = (FacemapParamSet * VideoRecording.File & video_key).fetch('file_path')[0]  # Take 1 video file
+        video_dir = find_full_path(get_facemap_root_data_dir(), video_file)  # find video file's full path
+        root_dir = find_root_directory(get_facemap_root_data_dir(), video_dir)  # find the video file's root directory
+
+        paramset_key = FacemapParamSet.fetch1()
+        processed_dir = Path(get_facemap_processed_data_dir())
+        output_dir = processed_dir / video_dir.relative_to(root_dir) / f'facemap_{paramset_key["paramset_idx"]}'
+
+        if mkdir:
+            output_dir.mkdir(parents=True, exist_ok=True)
+        
+        return output_dir.relative_to(processed_dir) if relative else output_dir
 
     @classmethod
     def auto_generate_entries(cls, video_key, task_mode):
         ### TODO: fill this part.
+        ### Should we do this?
+
+        output_dir = cls.infer_output_dir(video_key, relative=False, mkdir=True)
         pass 
     
 
@@ -245,55 +258,76 @@ class FacemapProcessing(dj.Computed):
 
 @schema
 class FacialSignal(dj.Imported):
-    definition = """
-    # Facial behavioral variables estimated with Facemap
+    definition = """  # Facial behavioral variables estimated with Facemap
     -> FacemapProcessing
     """
-        
-    class SingularValues(dj.Part):
+
+    class Regions(dj.Part):
         definition = """
         -> master
+        roi_id              : int               # Region no
         ---
-        mot_sv: longblob                 # Singular values for motSVD 1d numpy array            shape 500
-        mov_sv: longblob                 # 1d numpy array            shape 500 
+        roi_name=''         : varchar(16)       # user-friendly name of the roi
+        xrange              : longblob          # 1d np.array - x pixel indices of the region
+        yrange              : longblob          # 1d np.array - y pixel indices of the region
+        xrange_bin          : longblob          # 1d np.array - binned x pixel indices of the region
+        yrange_bin          : longblob          # 1d np.array - binned y pixel indices of the region
         """
 
-    class Region(dj.Part):
+    class SingularValues(dj.Part):
+        # Values of the diagonal square matrix in 1d
         definition = """
         -> master
-        roi_id              : int              # Region no
         ---
-        roi_name=''         : varchar(16)      # user-friendly name of the roi
-        motsvd              : longblob         # Motion SVD for each region (nframes, components)   [shape of each entry: 31135, 500]
-        movsvd              : longblob         # Movie SVD for each region (nframes, components) [shape of each entry: 31135, 3750]
-        motmask_reshape     : longblob         # 3d np array for each region   [shape of each entry: 30, 33, 500]
-        movmask_reshape     : longblob         # 3d np array for each region   [shape of each entry: 30, 33, 3750]
+        mot_sv: longblob                       # 1d np.array - singular values for the motion SVD - S_mot -- reviewed
+        mov_sv: longblob                       # 1d np.array - singular values of the movie SVD - S_mov -- reviewed
+        """
+
+    class Vectors(dj.Part):
+        definition = """
+        -> Regions
+        ---
+        motsvd              : longblob         # 2d np.array - motion SVD for each region (nframes, components) -- reviewed
+        movsvd              : longblob         # 2d np.array - movie SVD for each region (nframes, components) -- reviewed
+        motmask_reshape     : longblob         # 3d np array - motion mask (y, x, components) - principle components -- reviewed
+        movmask_reshape     : longblob         # 3d np array - movie mask (y, x, components) - principle components -- reviewed
+        motion              : longblob         # 1d np.array - absolute motion energies across time (nframes) -- reviewed
         """
 
     class Summary(dj.Part):
         definition = """
         -> master
         ---
-        avgframe            : longblob          # Average of a portion of binned frames in 1D np.array (equavalent to binnedframes.mean(0).ravel()) [shape: 27040]
-        avgmotion           : longblob          # Average of a portion of binned motion frames in 2D np.array (equavalent to binnedframes.diff(1).mean(0)) [shape: 169, 160]
-        avgframe_reshape    : longblob          # avgframe reshaped to 2D np.array image [shape: 169, 160]
-        avgmotion_reshape   : longblob          # 2d numpy array    [shape: 169, 160]
-        motion              : longblob          # Absolute motion energies across time in 1D np.array for each region [shape of each entry: 31135]
+        sbin                : int               # spatial bin size
+        avgframe            : longblob          # 2d np.array - average binned frame -- reviewed
+        avgmotion           : longblob          # 2d nd.array - average binned motion frame -- reviewed
         """
 
     def make(self, key):
         dataset = get_loader_result(key, FacemapTask)
 
-        self.SingularValues.insert1({**key, 'mot_sv': dataset['motSv'], 'mov_sv': dataset['mov_Sv']})
-
-        self.Region.insert([
+        self.Regions.insert([
             dict(
                 key,
-                no=i,
-                motSVD=dataset['motsvd'][i],
-                movSVD=dataset['motsvd'][i],
-                motMask_reshape=dataset['motmask_reshape'][i],
-                movMask_reshape=dataset['movmask_reshape'][i]
+                roi_id=i,
+                xrange=dataset['rois'][i]['xrange'],
+                yrange=dataset['rois'][i]['yrange'],
+                xrange_bin=dataset['rois'][i]['xrange_bin'],
+                yrange_bin=dataset['rois'][i]['yrange_bin']
+            ) for i in range(1, len(dataset['rois']))
+        ])
+
+        self.SingularValues.insert1({**key, 'mot_sv': dataset['motSv'], 'mov_sv': dataset['movSv']})
+
+        self.Vectors.insert([
+            dict(
+                key,
+                roi_id=i,
+                motsvd=dataset['motSVD'][i],
+                movsvd=dataset['motSVD'][i],
+                motmask_reshape=dataset['motMask_reshape'][i],
+                movmask_reshape=dataset['movMask_reshape'][i],
+                motion=dataset['motion'][i]
             ) for i in range(1, len(dataset['rois']))
         ])
 
@@ -301,10 +335,7 @@ class FacialSignal(dj.Imported):
             dict(
                 key,
                 avgframe=dataset['avgframe'],
-                avgmotion=dataset['avgmotion'],
-                avgframe_reshape=dataset['avgframe_reshape'],
-                avgmotion_reshape=dataset['avgmotion_reshape'],
-                motion=dataset['motion']
+                avgmotion=dataset['avgmotion'],                
             )
         )
 
@@ -322,7 +353,6 @@ def get_loader_result(key, table):
     output_dir = (FacemapParamSet * table & key).fetch1('processed_output_dir')
 
     output_path = find_full_path(get_facemap_root_data_dir(), output_dir)
-
     
     loaded_dataset = np.load(output_path, allow_pickle=True).item()
     creation_time = (datetime.fromtimestamp(Path(output_path).stat().st_ctime)).isoformat()
