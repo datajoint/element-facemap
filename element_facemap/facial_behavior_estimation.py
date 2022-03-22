@@ -249,7 +249,6 @@ class FacemapProcessing(dj.Computed):
 
             facemap_run(video_files, motSVD=motSVD, movSVD=movSVD, proc=facemap_params, savepath=output_dir, parent=None)
 
-        # TODO, how are the results written for multiple input files
         _, facemap_dataset = get_loader_result(key, FacemapTask)
         key = {**key, 'processing_time': facemap_dataset.creation_time}
 
@@ -258,7 +257,8 @@ class FacemapProcessing(dj.Computed):
 
 @schema
 class FacialSignal(dj.Imported):
-    definition = """  # Facial behavioral variables estimated with Facemap
+    definition = """
+    # Facial behavioral variables estimated with Facemap
     -> FacemapProcessing
     """
 
@@ -274,6 +274,17 @@ class FacialSignal(dj.Imported):
         yrange_bin          : longblob          # 1d np.array - binned y pixel indices of the region
         """
 
+        class Vectors(dj.Part):
+            definition = """
+            -> Regions
+            ---
+            motsvd              : longblob         # 2d np.array - motion SVD for each region (nframes, components) -- reviewed
+            movsvd              : longblob         # 2d np.array - movie SVD for each region (nframes, components) -- reviewed
+            motmask_reshape     : longblob         # 3d np array - motion mask (y, x, components) - principle components -- reviewed
+            movmask_reshape     : longblob         # 3d np array - movie mask (y, x, components) - principle components -- reviewed
+            motion              : longblob         # 1d np.array - absolute motion energies across time (nframes) -- reviewed
+            """
+
     class SingularValues(dj.Part):
         # Values of the diagonal square matrix in 1d
         definition = """
@@ -281,17 +292,6 @@ class FacialSignal(dj.Imported):
         ---
         mot_sv: longblob                       # 1d np.array - singular values for the motion SVD - S_mot -- reviewed
         mov_sv: longblob                       # 1d np.array - singular values of the movie SVD - S_mov -- reviewed
-        """
-
-    class Vectors(dj.Part):
-        definition = """
-        -> Regions
-        ---
-        motsvd              : longblob         # 2d np.array - motion SVD for each region (nframes, components) -- reviewed
-        movsvd              : longblob         # 2d np.array - movie SVD for each region (nframes, components) -- reviewed
-        motmask_reshape     : longblob         # 3d np array - motion mask (y, x, components) - principle components -- reviewed
-        movmask_reshape     : longblob         # 3d np array - movie mask (y, x, components) - principle components -- reviewed
-        motion              : longblob         # 1d np.array - absolute motion energies across time (nframes) -- reviewed
         """
 
     class Summary(dj.Part):
@@ -319,7 +319,7 @@ class FacialSignal(dj.Imported):
 
         self.SingularValues.insert1({**key, 'mot_sv': dataset['motSv'], 'mov_sv': dataset['movSv']})
 
-        self.Vectors.insert([
+        self.Regions.Vectors.insert([
             dict(
                 key,
                 roi_id=i,
@@ -334,6 +334,7 @@ class FacialSignal(dj.Imported):
         self.Summary.insert1(
             dict(
                 key,
+                sbin=dataset['sbin'],
                 avgframe=dataset['avgframe'],
                 avgmotion=dataset['avgmotion'],                
             )
