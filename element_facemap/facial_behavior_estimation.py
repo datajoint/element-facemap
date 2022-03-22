@@ -299,8 +299,8 @@ class FacialSignal(dj.Imported):
         -> master
         ---
         sbin                : int               # spatial bin size
-        avgframe            : longblob          # 2d np.array - average binned frame -- reviewed
-        avgmotion           : longblob          # 2d nd.array - average binned motion frame -- reviewed
+        avgframe            : longblob          # 2d np.array - average binned frame
+        avgmotion           : longblob          # 2d nd.array - average binned motion frame
         """
 
     def make(self, key):
