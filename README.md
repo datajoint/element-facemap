@@ -18,8 +18,6 @@ As the diagram depicts, the facemap element starts immediately downstream from *
 We provide an example workflow with a [pipeline script](https://github.com/datajoint/workflow-facemap/blob/main/workflow_facemap/pipeline.py) 
 that models combining this Element with the corresponding [Element-Session](https://github.com/datajoint/element-session).
 
-### Video Recording
-
 + ***VideoRecording***: All recordings from a given session.
 + ***RecordingInfo***: Meta information of each video recording (number of frames, pixel lengths, fps, etc.)
 + ***FacialSignal***: Set of results from SVD of user defined regions.
