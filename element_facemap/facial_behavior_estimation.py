@@ -286,8 +286,7 @@ class FacialSignal(dj.Imported):
         """
 
     class SingularValues(dj.Part):
-        # Diagonal elements of the square matrix in 1d
-        definition = """
+        definition = """ # Diagonal elements of the square matrix in 1d
         -> master
         ---
         mot_sv: longblob                       # 1d np.array - singular values for the motion SVD - S_mot
