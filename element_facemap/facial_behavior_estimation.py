@@ -194,7 +194,7 @@ class FacemapTask(dj.Manual):
 
     @classmethod
     def infer_output_dir(cls, video_key,  relative=False, mkdir=False):
-        video_file = (FacemapParamSet * VideoRecording.File & video_key).fetch('file_path')[0]  # Take 1 video file
+        video_file = (FacemapParamSet * VideoRecording.File & video_key).fetch('file_path', limit=1)[0]  # Take 1 video file
         video_dir = find_full_path(get_facemap_root_data_dir(), video_file)  # find video file's full path
         root_dir = find_root_directory(get_facemap_root_data_dir(), video_dir)  # find the video file's root directory
 
