@@ -118,6 +118,8 @@ class VideoRecording(dj.Manual):
     class File(dj.Part):
         definition = """
         -> master
+        file_id       : int         # File id
+        ---
         file_path: varchar(255)     # filepath of video, relative to root data directory
         """
 
