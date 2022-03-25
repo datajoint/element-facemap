@@ -22,8 +22,8 @@ that models combining this Element with the corresponding [Element-Session](http
 + ***RecordingInfo***: Meta information of each video recording (number of frames, pixel lengths, fps, etc.)
 + ***FacialSignal***: Set of results from SVD of user defined regions.
 + ***FacialSignal.Regions***: Information about each region (region name, pixel indices, etc)
-+ ***FacialSignal.Vectors***: Principle components, absolute motion energies, and latent factors of each region
-+ ***FacialSignal.SingularValues***: Singular values of the diagonal matrix.
++ ***FacialSignal.MovieSVD***: Principle components, projections, singular values for each movie region
++ ***FacialSignal.MotionSVD***: Principle components, projections, singular values for each motion region
 + ***FacialSignal.Summary***: Average frame, average motion, spatial binning factor
 
 
