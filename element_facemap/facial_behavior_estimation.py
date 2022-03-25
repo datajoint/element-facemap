@@ -3,6 +3,7 @@ import cv2
 import inspect
 import importlib
 import numpy as np
+from glob import glob
 from pathlib import Path
 from datetime import datetime
 from element_interface.utils import find_full_path, find_root_directory
@@ -110,15 +111,16 @@ def get_facemap_video_files(video_key: dict) -> str:
 class VideoRecording(dj.Manual):
     definition = """
     -> Session
-    -> Device
     recording_id                : int
+    ---
+    -> Device
     """
 
     # One VideoRecording can be saved in multiple files
     class File(dj.Part):
         definition = """
         -> master
-        file_id         : int           # file id
+        file_id         : smallint
         ---
         file_path       : varchar(255)  # filepath of video, relative to root data directory
         """
@@ -132,7 +134,7 @@ class RecordingInfo(dj.Imported):
     px_height                 : smallint  # height in pixels
     px_width                  : smallint  # width in pixels
     nframes                   : smallint  # number of frames 
-    fps                       : float     # (Hz) frames per second
+    fps = NULL                : int     # (Hz) frames per second
     recording_duration = NULL : float     # video duration in seconds
     recording_time = NULL     : datetime  # Time at the beginning of the recording with respect to the session
     """
@@ -142,79 +144,60 @@ class RecordingInfo(dj.Imported):
         return VideoRecording & VideoRecording.File
 
     def make(self, key):
-        file_paths = (VideoRecording & key).fetch('file_path')
+        file_paths = (VideoRecording.File & key).fetch('file_path')
 
         nframes = 0
         px_height, px_width, fps = None, None, None
 
         for file_path in file_paths:
             file_path = (find_full_path(get_facemap_root_data_dir(), file_path)).as_posix()
-            # Open the video
-            with cv2.VideoCapture(file_path) as cap:
-                info = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FPS))
-                if px_height is not None:
-                    assert (px_height, px_width, fps) == info
-                px_height, px_width, fps = info
-                nframes += int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+            cap = cv2.VideoCapture(file_path)
+            info = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FPS))
+            if px_height is not None:
+                assert (px_height, px_width, fps) == info
+            px_height, px_width, fps = info
+            nframes += int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            cap.release()
 
         self.insert1({
             **key,
             'px_height': px_height,
             'px_width': px_width,
             'nframes': nframes,
-            'fps': fps,  # Assuming that this keyword is set correctly but it's usually not.
-            'duration': nframes / fps,                     # TODO Something to think about.
+            'fps': fps,                   # Assuming that this keyword is set correctly but it's usually not.
+            'recording_duration': nframes / fps,    # TODO: Something to think about given the fact above
         })
     
 
 @schema
-class FacemapParamSet(dj.Manual):
-    definition = """
+class FacemapTask(dj.Manual):
+    definition = """  # Configuration for a facemap analysis task on a particular VideoRecording
     # Parameters used to run the Facemap on each Recording
     -> VideoRecording
-    paramset_idx        :  smallint
+    facemap_task_id             : smallint
     ---
-    params              : longblob
-    param_set_hash      : uuid          # unique index
-    do_mot_svd=1        : bool
-    do_mov_svd=0        : bool
-    paramset_desc=''    : varchar(128)
+    processing_output_dir=NULL  : varchar(255)              # output directory that will keep the facemap results
+    task_mode='load'            : enum('load', 'trigger')   # 'load': load computed analysis results, 'trigger': trigger computation
+    facemap_params              : longblob                  # dictionary with region of interest specification, and other params if applicable
+    do_mot_svd=1                : bool                      # whether to decompose the motion images
+    do_mov_svd=0                : bool                      # whether to decompose the movie images
+    task_description=''         : varchar(128)
     """
 
-
-@schema
-class FacemapTask(dj.Manual):
-    definition = """
-    # Manual table for defining a processing task ready to be run
-    -> FacemapParamSet
-    ---
-    processing_output_dir   : varchar(255)              # output directory that will keep the facemap results
-    task_mode='load'        : enum('load', 'trigger')   # 'load': load computed analysis results, 'trigger': trigger computation
-    """
-
-    @classmethod
-    def infer_output_dir(cls, video_key,  relative=False, mkdir=False):
-        video_file = (FacemapParamSet * VideoRecording.File & video_key).fetch('file_path', limit=1)[0]  # Take 1 video file
-        video_dir = find_full_path(get_facemap_root_data_dir(), video_file)  # find video file's full path
+    def infer_output_dir(self, key, relative=True, mkdir=True):
+        video_file = (VideoRecording.File & key).fetch('file_path', limit=1)[0]  # Take 1 video file
+        video_dir = find_full_path(get_facemap_root_data_dir(), video_file).parent  # find video file's full path
         root_dir = find_root_directory(get_facemap_root_data_dir(), video_dir)  # find the video file's root directory
 
-        paramset_key = FacemapParamSet.fetch1()
+        paramset_key = (FacemapTask & key).fetch1('facemap_task_id')
         processed_dir = Path(get_facemap_processed_data_dir())
-        output_dir = processed_dir / video_dir.relative_to(root_dir) / f'facemap_{paramset_key["paramset_idx"]}'
+        output_dir = processed_dir / video_dir.relative_to(root_dir) / f'facemap_{paramset_key}'
 
         if mkdir:
             output_dir.mkdir(parents=True, exist_ok=True)
         
         return output_dir.relative_to(processed_dir) if relative else output_dir
-
-    @classmethod
-    def auto_generate_entries(cls, video_key, task_mode):
-        ### TODO: fill this part.
-        ### Should we do this?
-
-        output_dir = cls.infer_output_dir(video_key, relative=False, mkdir=True)
-        pass 
-    
 
 
 @schema
@@ -223,36 +206,45 @@ class FacemapProcessing(dj.Computed):
     # Processing Procedure
     -> FacemapTask
     ---
-    processing_time     : datetime  # time of generation of the facemap results
-    package_version=''  : varchar(16)
+    processing_time             : datetime  # time of generation of the facemap results
+    package_version=''          : varchar(16)
     """
     
     # Processing only the VideoRecordings that have their Info inserted.
     @property
     def key_source(self):
-        return FacemapTask & RecordingInfo.File
+        return FacemapTask & VideoRecording.File
 
     def make(self, key):
+        video_key = (VideoRecording.File & FacemapTask & key).fetch('KEY')
+        print('video_key:', video_key)
         task_mode = (FacemapTask & key).fetch1('task_mode')
 
         output_dir = (FacemapTask & key).fetch1('processing_output_dir')
 
         if not output_dir:
-            output_dir = FacemapTask.infer_output_dir(key, relative=True, mkdir=True)
+            output_dir = FacemapTask().infer_output_dir(key, relative=True, mkdir=True)
+            print('output_dir:', output_dir)
             # update processing_output_dir
             FacemapTask.update1({**key, 'processing_output_dir': output_dir.as_posix()})
 
         if task_mode == 'trigger':
             from facemap.process import run as facemap_run
-            facemap_params, motSVD, movSVD = (FacemapTask * FacemapParamSet & key).fetch1('params', 'do_mot_svd', 'do_mov_svd')
+            facemap_params, motSVD, movSVD = (FacemapTask & key).fetch1('facemap_params', 'do_mot_svd', 'do_mov_svd')
 
             video_files = (FacemapTask * VideoRecording.File & key).fetch('file_path')
-            video_files = [find_full_path(get_facemap_root_data_dir(), video_file) for video_file in video_files]
+            video_files = [find_full_path(get_facemap_root_data_dir(), video_file).as_posix() for video_file in video_files]
+            print(video_files)
 
-            facemap_run(video_files, motSVD=motSVD, movSVD=movSVD, proc=facemap_params, savepath=output_dir, parent=None)
+            output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
+            
+            # facemap_params = np.load('/Volumes/DincerDJ/workflow_facemap_testset/subject0/session0/facevideo1_proc.npy', allow_pickle=True).item()
 
-        _, facemap_dataset = get_loader_result(key, FacemapTask)
-        key = {**key, 'processing_time': facemap_dataset.creation_time}
+            facemap_run([video_files], proc=facemap_params, savepath=output_dir.as_posix())
+
+        print('key:', key)
+        facemap_dataset, creation_time = get_loader_result(key, FacemapTask)
+        key = {**key, 'processing_time': creation_time}
 
         self.insert1(key)
 
@@ -260,57 +252,71 @@ class FacemapProcessing(dj.Computed):
 @schema
 class FacialSignal(dj.Imported):
     definition = """
-    # Facial behavioral variables estimated with Facemap
+    # PCA analysis results obtained with Facemap
     -> FacemapProcessing
     """
 
-    class Regions(dj.Part):
+    class Region(dj.Part):
         definition = """
         -> master
-        roi_id              : int               # Region no
+        roi_no              : int           # Region no
         ---
-        roi_name=''         : varchar(16)       # user-friendly name of the roi
-        xrange              : longblob          # 1d np.array - x pixel indices of the region
-        yrange              : longblob          # 1d np.array - y pixel indices of the region
-        xrange_bin          : longblob          # 1d np.array - binned x pixel indices of the region
-        yrange_bin          : longblob          # 1d np.array - binned y pixel indices of the region
+        roi_name=''         : varchar(16)   # user-friendly name of the roi
+        xrange              : longblob      # 1d np.array - x pixel indices of the region
+        yrange              : longblob      # 1d np.array - y pixel indices of the region
+        xrange_bin          : longblob      # 1d np.array - binned x pixel indices of the region
+        yrange_bin          : longblob      # 1d np.array - binned y pixel indices of the region
+        motion              : longblob      # 1d np.array - absolute motion energies across time (nframes)
         """
 
-    class Vectors(dj.Part):
+
+    class MotionSVD(dj.Part):
         definition = """
-        -> master.Regions
+        -> master.Region
+        component_no        : int           # principle component no
         ---
-        motsvd              : longblob          # 2d np.array - motion SVD for each region (nframes, components)
-        movsvd              : longblob          # 2d np.array - movie SVD for each region (nframes, components)
-        motmask_reshape     : longblob          # 3d np array - motion mask (y, x, components) - principle components
-        movmask_reshape     : longblob          # 3d np array - movie mask (y, x, components) - principle components
-        motion              : longblob          # 1d np.array - absolute motion energies across time (nframes)
+        singular_value      : float         # singular value corresponding to the principle component
+        motmask             : longblob      # principle component - 2D motion mask (y, x)
+        projection          : longblob      # projections onto the principle component - 1D motSVD array of length: nframes
         """
 
-    class SingularValues(dj.Part):
-        definition = """ # Diagonal elements of the square matrix in 1d
-        -> master
+    class MovieSVD(dj.Part):
+        definition = """
+        -> master.Region
+        component_no        : int           # principle component no
         ---
-        mot_sv: longblob                       # 1d np.array - singular values for the motion SVD - S_mot
-        mov_sv: longblob                       # 1d np.array - singular values of the movie SVD - S_mov
+        singular_value      : float         # singular value corresponding to the principle component
+        movmask             : longblob      # principle component - 2D motion mask (y, x)
+        projection          : longblob      # projections onto the principle component - 1D motSVD array of length: nframes
         """
 
     class Summary(dj.Part):
         definition = """
         -> master
         ---
-        sbin                : int               # spatial bin size
-        avgframe            : longblob          # 2d np.array - average binned frame
-        avgmotion           : longblob          # 2d nd.array - average binned motion frame
+        sbin                : int           # spatial bin size
+        avgframe            : longblob      # 2d np.array - average binned frame
+        avgmotion           : longblob      # 2d nd.array - average binned motion frame
         """
 
-    def make(self, key):
-        dataset = get_loader_result(key, FacemapTask)
 
-        self.Regions.insert([
+    def get_ncomponents(self, Svs, threshold=0.95):
+        # Calculate the number of PCA components that will make up to the first 95% variance.
+        squared_Svs = Svs ** 2
+        cumulative_explained_variances = np.cumsum(squared_Svs / sum(squared_Svs))
+        return sum(cumulative_explained_variances < threshold)
+
+
+    def make(self, key):
+        dataset, creation_time = get_loader_result(key, FacemapTask)
+        params = (FacemapTask & key).fetch1('facemap_params')
+        print('key:', key)
+        print('params', params)
+
+        self.Region.insert([
             dict(
                 key,
-                roi_id=i,
+                roi_no=i,
                 xrange=dataset['rois'][i]['xrange'],
                 yrange=dataset['rois'][i]['yrange'],
                 xrange_bin=dataset['rois'][i]['xrange_bin'],
@@ -318,26 +324,43 @@ class FacialSignal(dj.Imported):
             ) for i in range(1, len(dataset['rois']))
         ])
 
-        self.SingularValues.insert1({**key, 'mot_sv': dataset['motSv'], 'mov_sv': dataset['movSv']})
+        # MotionSVD
+        #do_mot_svd = params.keys() # (FacemapTask & key).fetch1('do_mot_svd')
+        if 'motSv' in params.keys():
+            n_components = self.get_ncomponents(dataset['motSv'])
+            for roi_no in range(len(dataset['rois'])):
+                self.MotionSVD.insert(
+                    dict(
+                        key,
+                        roi_no=roi_no,
+                        singular_value=dataset['motSv'][i],
+                        motmask=dataset['motMask_reshape'][roi_no+1][i],
+                        projection=dataset['motMask_reshape'][roi_no+1][:,:,i],
+                    ) for i in range(n_components)
+                )
 
-        self.Vectors.insert([
-            dict(
-                key,
-                roi_id=i,
-                motsvd=dataset['motSVD'][i],
-                movsvd=dataset['motSVD'][i],
-                motmask_reshape=dataset['motMask_reshape'][i],
-                movmask_reshape=dataset['movMask_reshape'][i],
-                motion=dataset['motion'][i]
-            ) for i in range(1, len(dataset['rois']))
-        ])
+        # MovieSVD
+        #do_mov_svd = (FacemapTask & key).fetch1('do_mov_svd')
+        #if do_mov_svd:
+        if 'movSv' in params.keys():
+            n_components = self.get_ncomponents(dataset['movSv'])
+            for roi_no in range(len(dataset['rois'])):
+                self.MovieSVD.insert(
+                    dict(
+                        key,
+                        roi_no=roi_no,
+                        singular_value=dataset['movSv'][i],
+                        motmask=dataset['movMask_reshape'][roi_no+1][i],
+                        projection=dataset['movMask_reshape'][roi_no+1][:,:,i],
+                    ) for i in range(n_components)
+                )
 
         self.Summary.insert1(
             dict(
                 key,
                 sbin=dataset['sbin'],
                 avgframe=dataset['avgframe'],
-                avgmotion=dataset['avgmotion'],                
+                avgmotion=dataset['avgmotion'],
             )
         )
 
@@ -352,11 +375,14 @@ def get_loader_result(key, table):
          the loaded results from (e.g. FacemapTask)
         :return: output dictionary in the _proc.npy and the creation date time 
     """
-    output_dir = (FacemapParamSet * table & key).fetch1('processed_output_dir')
+    output_dir = (table & key).fetch1('processing_output_dir')
 
     output_path = find_full_path(get_facemap_root_data_dir(), output_dir)
+    print('output_path:', output_path)
+    output_file = glob(output_path.as_posix() + '/*_proc.npy')[0]
+    print(output_file)
     
-    loaded_dataset = np.load(output_path, allow_pickle=True).item()
-    creation_time = (datetime.fromtimestamp(Path(output_path).stat().st_ctime)).isoformat()
+    loaded_dataset = np.load(output_file, allow_pickle=True).item()
+    creation_time = (datetime.fromtimestamp(Path(output_file).stat().st_ctime))#.isoformat()
 
     return loaded_dataset, creation_time
