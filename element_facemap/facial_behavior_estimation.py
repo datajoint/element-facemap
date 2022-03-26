@@ -216,6 +216,7 @@ class FacemapProcessing(dj.Computed):
         return FacemapTask & VideoRecording.File
 
     def make(self, key):
+        print(key)
         video_key = (VideoRecording.File & FacemapTask & key).fetch('KEY')
         print('video_key:', video_key)
         task_mode = (FacemapTask & key).fetch1('task_mode')
@@ -238,9 +239,7 @@ class FacemapProcessing(dj.Computed):
 
             output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
             
-            # facemap_params = np.load('/Volumes/DincerDJ/workflow_facemap_testset/subject0/session0/facevideo1_proc.npy', allow_pickle=True).item()
-
-            facemap_run([video_files], proc=facemap_params, savepath=output_dir.as_posix())
+            facemap_run([video_files], proc=facemap_params, savepath=output_dir.as_posix(), motSVD=motSVD, movSVD=movSVD)
 
         print('key:', key)
         facemap_dataset, creation_time = get_loader_result(key, FacemapTask)
@@ -299,19 +298,18 @@ class FacialSignal(dj.Imported):
         avgmotion           : longblob      # 2d nd.array - average binned motion frame
         """
 
-
-    def get_ncomponents(self, Svs, threshold=0.95):
+    @staticmethod
+    def get_ncomponents(Svs, threshold=0.95):
         # Calculate the number of PCA components that will make up to the first 95% variance.
         squared_Svs = Svs ** 2
         cumulative_explained_variances = np.cumsum(squared_Svs / sum(squared_Svs))
         return sum(cumulative_explained_variances < threshold)
 
-
     def make(self, key):
         dataset, creation_time = get_loader_result(key, FacemapTask)
         params = (FacemapTask & key).fetch1('facemap_params')
-        print('key:', key)
-        print('params', params)
+
+        self.insert1(key)
 
         self.Region.insert([
             dict(
@@ -327,12 +325,13 @@ class FacialSignal(dj.Imported):
         # MotionSVD
         #do_mot_svd = params.keys() # (FacemapTask & key).fetch1('do_mot_svd')
         if 'motSv' in params.keys():
-            n_components = self.get_ncomponents(dataset['motSv'])
+            n_components = self.get_ncomponents(Svs=dataset['motSv'])
             for roi_no in range(len(dataset['rois'])):
                 self.MotionSVD.insert(
                     dict(
                         key,
                         roi_no=roi_no,
+                        component_no=i,
                         singular_value=dataset['motSv'][i],
                         motmask=dataset['motMask_reshape'][roi_no+1][i],
                         projection=dataset['motMask_reshape'][roi_no+1][:,:,i],
@@ -349,6 +348,7 @@ class FacialSignal(dj.Imported):
                     dict(
                         key,
                         roi_no=roi_no,
+                        component_no=i,
                         singular_value=dataset['movSv'][i],
                         motmask=dataset['movMask_reshape'][roi_no+1][i],
                         projection=dataset['movMask_reshape'][roi_no+1][:,:,i],
@@ -359,8 +359,8 @@ class FacialSignal(dj.Imported):
             dict(
                 key,
                 sbin=dataset['sbin'],
-                avgframe=dataset['avgframe'],
-                avgmotion=dataset['avgmotion'],
+                avgframe=dataset['avgframe'][0],
+                avgmotion=dataset['avgmotion'][0],
             )
         )
 
