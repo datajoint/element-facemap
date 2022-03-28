@@ -216,13 +216,9 @@ class FacemapProcessing(dj.Computed):
         return FacemapTask & VideoRecording.File
 
     def make(self, key):
-        print(key)
-        video_key = (VideoRecording.File & FacemapTask & key).fetch('KEY')
-        print('video_key:', video_key)
         task_mode = (FacemapTask & key).fetch1('task_mode')
 
         output_dir = (FacemapTask & key).fetch1('processing_output_dir')
-
         if not output_dir:
             output_dir = FacemapTask().infer_output_dir(key, relative=True, mkdir=True)
             print('output_dir:', output_dir)
@@ -235,14 +231,11 @@ class FacemapProcessing(dj.Computed):
 
             video_files = (FacemapTask * VideoRecording.File & key).fetch('file_path')
             video_files = [find_full_path(get_facemap_root_data_dir(), video_file).as_posix() for video_file in video_files]
-            print(video_files)
 
             output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
-            
-            facemap_run([video_files], proc=facemap_params, savepath=output_dir.as_posix(), motSVD=motSVD, movSVD=movSVD)
+            facemap_run([video_files], sbin=facemap_params['sbin'], proc=facemap_params, savepath=output_dir.as_posix(), motSVD=facemap_params['motSVD'], movSVD=facemap_params['movSVD'])
 
-        print('key:', key)
-        facemap_dataset, creation_time = get_loader_result(key, FacemapTask)
+        _, creation_time = get_loader_result(key, FacemapTask)
         key = {**key, 'processing_time': creation_time}
 
         self.insert1(key)
@@ -265,7 +258,7 @@ class FacialSignal(dj.Imported):
         yrange              : longblob      # 1d np.array - y pixel indices of the region
         xrange_bin          : longblob      # 1d np.array - binned x pixel indices of the region
         yrange_bin          : longblob      # 1d np.array - binned y pixel indices of the region
-        motion              : longblob      # 1d np.array - absolute motion energies across time (nframes)
+        motion              : longblob      # 1d np.array - absolute motion energies across time (nframes) - sum of pixels in the motion frames constructed from motSVD
         """
 
 
@@ -301,13 +294,16 @@ class FacialSignal(dj.Imported):
     @staticmethod
     def get_ncomponents(Svs, threshold=0.95):
         # Calculate the number of PCA components that will make up to the first 95% variance.
-        squared_Svs = Svs ** 2
-        cumulative_explained_variances = np.cumsum(squared_Svs / sum(squared_Svs))
-        return sum(cumulative_explained_variances < threshold)
+        if Svs.sum() == 0.:
+            return len(Svs)
+        else:
+            squared_Svs = Svs ** 2
+            cumulative_explained_variances = np.cumsum(squared_Svs / sum(squared_Svs))
+            return sum(cumulative_explained_variances < threshold)
+
 
     def make(self, key):
-        dataset, creation_time = get_loader_result(key, FacemapTask)
-        params = (FacemapTask & key).fetch1('facemap_params')
+        dataset, _ = get_loader_result(key, FacemapTask)
 
         self.insert1(key)
 
@@ -318,43 +314,44 @@ class FacialSignal(dj.Imported):
                 xrange=dataset['rois'][i]['xrange'],
                 yrange=dataset['rois'][i]['yrange'],
                 xrange_bin=dataset['rois'][i]['xrange_bin'],
-                yrange_bin=dataset['rois'][i]['yrange_bin']
-            ) for i in range(1, len(dataset['rois']))
+                yrange_bin=dataset['rois'][i]['yrange_bin'],
+                motion=dataset['motion'][i]
+            ) for i in range(0, len(dataset['rois']))
         ])
 
         # MotionSVD
-        #do_mot_svd = params.keys() # (FacemapTask & key).fetch1('do_mot_svd')
-        if 'motSv' in params.keys():
-            n_components = self.get_ncomponents(Svs=dataset['motSv'])
-            for roi_no in range(len(dataset['rois'])):
-                self.MotionSVD.insert(
+        n_components = self.get_ncomponents(Svs=dataset['motSv'])
+        entry = []
+        for roi_no in range(len(dataset['rois'])):
+            for i in range(n_components):
+                entry.append(
                     dict(
                         key,
                         roi_no=roi_no,
                         component_no=i,
                         singular_value=dataset['motSv'][i],
-                        motmask=dataset['motMask_reshape'][roi_no+1][i],
-                        projection=dataset['motMask_reshape'][roi_no+1][:,:,i],
-                    ) for i in range(n_components)
-                )
+                        motmask=dataset['motMask_reshape'][roi_no+1][:,:,i],
+                        projection=dataset['motSVD'][roi_no+1][i],
+                    ))
+        self.MotionSVD.insert(entry)
 
         # MovieSVD
-        #do_mov_svd = (FacemapTask & key).fetch1('do_mov_svd')
-        #if do_mov_svd:
-        if 'movSv' in params.keys():
-            n_components = self.get_ncomponents(dataset['movSv'])
-            for roi_no in range(len(dataset['rois'])):
-                self.MovieSVD.insert(
+        n_components = self.get_ncomponents(Svs=dataset['movSv'])
+        entry = []
+        for roi_no in range(len(dataset['rois'])):
+            for i in range(n_components):
+                entry.append(
                     dict(
                         key,
                         roi_no=roi_no,
                         component_no=i,
                         singular_value=dataset['movSv'][i],
-                        motmask=dataset['movMask_reshape'][roi_no+1][i],
-                        projection=dataset['movMask_reshape'][roi_no+1][:,:,i],
-                    ) for i in range(n_components)
-                )
+                        movmask=dataset['movMask_reshape'][roi_no+1][:,:,i],
+                        projection=dataset['movSVD'][roi_no+1][i],
+                    ))
+        self.MovieSVD.insert(entry)
 
+        # Summary
         self.Summary.insert1(
             dict(
                 key,
@@ -378,9 +375,7 @@ def get_loader_result(key, table):
     output_dir = (table & key).fetch1('processing_output_dir')
 
     output_path = find_full_path(get_facemap_root_data_dir(), output_dir)
-    print('output_path:', output_path)
     output_file = glob(output_path.as_posix() + '/*_proc.npy')[0]
-    print(output_file)
     
     loaded_dataset = np.load(output_file, allow_pickle=True).item()
     creation_time = (datetime.fromtimestamp(Path(output_file).stat().st_ctime))#.isoformat()
