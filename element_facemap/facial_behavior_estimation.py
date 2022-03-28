@@ -316,7 +316,7 @@ class FacialSignal(dj.Imported):
                 xrange_bin=dataset['rois'][i]['xrange_bin'],
                 yrange_bin=dataset['rois'][i]['yrange_bin'],
                 motion=dataset['motion'][i]
-            ) for i in range(0, len(dataset['rois']))
+            ) for i in range(len(dataset['rois']))
         ])
 
         # MotionSVD
