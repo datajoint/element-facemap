@@ -185,7 +185,7 @@ class FacemapTask(dj.Manual):
     ---
     processing_output_dir=NULL  : varchar(255)
     task_mode='load'            : enum('load', 'trigger')
-    facemap_params              : longblob              # content of _proc.npy (dict)
+    facemap_params              : longblob  # content of facemap's _proc.npy as dict
     do_mot_svd=1                : bool
     do_mov_svd=0                : bool
     task_description=''         : varchar(128)
