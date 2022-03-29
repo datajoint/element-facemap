@@ -260,7 +260,7 @@ class FacialSignal(dj.Imported):
     class Region(dj.Part):
         definition = """
         -> master
-        roi_no        : int         # Region no
+        roi_no        : int         # region no
         ---
         roi_name=''   : varchar(16) # user-friendly name of the roi
         xrange        : longblob    # 1d np.array - x pixel indices
