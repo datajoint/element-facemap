@@ -39,14 +39,6 @@ that models combining this Element with the corresponding [Element-Session](http
      pip install --upgrade element-facemap
      ```
 
-+ Install `element-interface`
-
-    + `element-interface` is a dependency of `element-facemap`, however it is not contained within `requirements.txt`.
-     
-    ```
-    pip install "element-interface @ git+https://github.com/datajoint/element-interface"
-    ```
-
 ## Usage
 
 ### Element activation
