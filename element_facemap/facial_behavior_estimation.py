@@ -299,17 +299,6 @@ class FacialSignal(dj.Imported):
         avgmotion     : longblob    # 2d nd.array - average binned motion frame
         """
 
-    @staticmethod
-    def get_ncomponents(Svs, threshold=0.95):
-        # Calculate the number of PCA components that will make up to
-        # the first 95% variance.
-        if Svs.sum() == 0.:
-            return len(Svs)
-        else:
-            squared_Svs = Svs ** 2
-            cumulative_explained_variances = np.cumsum(squared_Svs / sum(squared_Svs))
-            return sum(cumulative_explained_variances < threshold)
-
     def make(self, key):
         dataset, _ = get_loader_result(key, FacemapTask)
 
@@ -328,10 +317,9 @@ class FacialSignal(dj.Imported):
         ])
 
         # MotionSVD
-        n_components = self.get_ncomponents(Svs=dataset['motSv'])
         entry = []
         for roi_no in range(len(dataset['rois'])):
-            for i in range(n_components):
+            for i in range(len(dataset['motSv'])):
                 entry.append(
                     dict(
                         key,
@@ -344,10 +332,9 @@ class FacialSignal(dj.Imported):
         self.MotionSVD.insert(entry)
 
         # MovieSVD
-        n_components = self.get_ncomponents(Svs=dataset['movSv'])
         entry = []
         for roi_no in range(len(dataset['rois'])):
-            for i in range(n_components):
+            for i in range(len(dataset['movSv'])):
                 entry.append(
                     dict(
                         key,
