@@ -2,6 +2,7 @@ import datajoint as dj
 import cv2
 import inspect
 import importlib
+import facemap
 import numpy as np
 from glob import glob
 from pathlib import Path
@@ -232,17 +233,27 @@ class FacemapProcessing(dj.Computed):
 
         if task_mode == 'trigger':
             from facemap.process import run as facemap_run
-            facemap_params, motSVD, movSVD = (FacemapTask & key).fetch1(
-                'facemap_params', 'do_mot_svd', 'do_mov_svd')
+            params = (FacemapTask & key).fetch1('facemap_params')
+
+            # motSVD is initially a boolean and then is overwritten with a combination
+            # of lists and arrays
+            if (params['motSVD'] is True) or (len(params['motSVD']) > 0):
+                do_motSVD = True
+            else:
+                do_motSVD = False
+
+            if (params['movSVD'] is True) or (len(params['movSVD']) > 0):
+                do_movSVD = True
+            else:
+                do_movSVD = False
 
             video_files = (FacemapTask * VideoRecording.File & key).fetch('file_path')
             video_files = [[find_full_path(get_facemap_root_data_dir(), video_file).as_posix() for video_file in video_files]]
 
             output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
             facemap_run(
-                video_files, sbin=facemap_params['sbin'], proc=facemap_params,
-                savepath=output_dir.as_posix(), motSVD=facemap_params['motSVD'],
-                movSVD=facemap_params['movSVD'])
+                video_files, sbin=params['sbin'], proc=params,
+                savepath=output_dir.as_posix(), motSVD=do_motSVD, movSVD=do_movSVD)
 
         _, creation_time = get_loader_result(key, FacemapTask)
         key = {**key, 'processing_time': creation_time}
