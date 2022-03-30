@@ -2,7 +2,6 @@ import datajoint as dj
 import cv2
 import inspect
 import importlib
-import facemap
 import numpy as np
 from glob import glob
 from pathlib import Path
