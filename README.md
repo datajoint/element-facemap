@@ -1,10 +1,11 @@
 # DataJoint Element - Facemap
-This repository features DataJoint pipeline design for facial behavior tracking of head-fixed rodent with ***Facemap***.
 
-The pipeline presented here is not a complete pipeline by itself,
++ This repository features DataJoint pipeline design for facial behavior tracking of head-fixed rodent with `Facemap`.
+
++ The pipeline presented here is not a complete pipeline by itself,
  but rather a modular design of tables and dependencies specific to the Facemap workflow. 
 
-This modular pipeline element can be flexibly attached downstream to 
++ This modular pipeline element can be flexibly attached downstream to 
 any particular design of experiment session, thus assembling 
 a fully functional facemap pipeline.
 
@@ -69,7 +70,7 @@ To activate the `element-facemap`, ones need to provide:
 
 ### Example usage
 
-See [this project](https://github.com/datajoint/workflow-facemap) for an example usage of this Facemap Element.
+See the [workflow-facemap](https://github.com/datajoint/workflow-facemap) repository for an example usage of this Facemap Element.
 
 ## Citation
 
