@@ -13,8 +13,7 @@ schema = dj.schema()
 _linking_module = None
 
 
-def activate(facemap_schema_name, *, create_schema=True, create_tables=True,
-             linking_module=None):
+def activate(facemap_schema_name, *, create_schema=True, create_tables=True, linking_module=None):
     """
     activate(schema_name, *, create_schema=True, create_tables=True,
              linking_module=None)
@@ -43,21 +42,25 @@ def activate(facemap_schema_name, *, create_schema=True, create_tables=True,
 
     if isinstance(linking_module, str):
         linking_module = importlib.import_module(linking_module)
-    assert inspect.ismodule(linking_module),\
-        "The argument 'dependency' must be a module's name or a module"
-    assert hasattr(linking_module, 'get_facemap_root_data_dir'),\
-        "The linking module must specify a lookup function for a root data directory"
+    assert inspect.ismodule(linking_module), "The argument 'dependency' must be a module's name or a module"
+    assert hasattr(
+        linking_module, "get_facemap_root_data_dir"
+    ), "The linking module must specify a lookup function for a root data directory"
 
     global _linking_module
     _linking_module = linking_module
 
     # activate
-    schema.activate(facemap_schema_name, create_schema=create_schema,
-                    create_tables=create_tables,
-                    add_objects=_linking_module.__dict__)
+    schema.activate(
+        facemap_schema_name,
+        create_schema=create_schema,
+        create_tables=create_tables,
+        add_objects=_linking_module.__dict__,
+    )
 
 
 # -------------- Functions required by element-facemap ---------------
+
 
 def get_facemap_root_data_dir() -> list:
     """
@@ -75,7 +78,7 @@ def get_facemap_root_data_dir() -> list:
     if isinstance(root_directories, (str, Path)):
         root_directories = [root_directories]
 
-    if hasattr(_linking_module, 'get_facemap_processed_data_dir'):
+    if hasattr(_linking_module, "get_facemap_processed_data_dir"):
         root_directories.append(_linking_module.get_facemap_processed_data_dir(None))
 
     return root_directories
@@ -90,7 +93,7 @@ def get_facemap_processed_data_dir() -> str:
         This user-provided function specifies where Facemap output files
         will be stored.
     """
-    if hasattr(_linking_module, 'get_facemap_processed_data_dir'):
+    if hasattr(_linking_module, "get_facemap_processed_data_dir"):
         return _linking_module.get_facemap_processed_data_dir()
     else:
         return get_facemap_root_data_dir()[0]
@@ -145,34 +148,36 @@ class RecordingInfo(dj.Imported):
         return VideoRecording & VideoRecording.File
 
     def make(self, key):
-        file_paths = (VideoRecording.File & key).fetch('file_path')
+        file_paths = (VideoRecording.File & key).fetch("file_path")
 
         nframes = 0
         px_height, px_width, fps = None, None, None
 
         for file_path in file_paths:
-            file_path = (find_full_path(
-                get_facemap_root_data_dir(), file_path)
-                ).as_posix()
+            file_path = (find_full_path(get_facemap_root_data_dir(), file_path)).as_posix()
 
             cap = cv2.VideoCapture(file_path)
-            info = (int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
-                    int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                    int(cap.get(cv2.CAP_PROP_FPS)))
+            info = (
+                int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+                int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                int(cap.get(cv2.CAP_PROP_FPS)),
+            )
             if px_height is not None:
                 assert (px_height, px_width, fps) == info
             px_height, px_width, fps = info
             nframes += int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             cap.release()
 
-        self.insert1({
-            **key,
-            'px_height': px_height,
-            'px_width': px_width,
-            'nframes': nframes,
-            'fps': fps,                 # usually user-defined and wrong
-            'duration': nframes / fps,  # see caution above
-        })
+        self.insert1(
+            {
+                **key,
+                "px_height": px_height,
+                "px_width": px_width,
+                "nframes": nframes,
+                "fps": fps,  # usually user-defined and wrong
+                "duration": nframes / fps,  # see caution above
+            }
+        )
 
 
 @schema
@@ -191,13 +196,13 @@ class FacemapTask(dj.Manual):
     """
 
     def infer_output_dir(self, key, relative=True, mkdir=True):
-        video_file = (VideoRecording.File & key).fetch('file_path', limit=1)[0]
+        video_file = (VideoRecording.File & key).fetch("file_path", limit=1)[0]
         video_dir = find_full_path(get_facemap_root_data_dir(), video_file).parent
         root_dir = find_root_directory(get_facemap_root_data_dir(), video_dir)
 
-        paramset_key = (FacemapTask & key).fetch1('facemap_task_id')
+        paramset_key = (FacemapTask & key).fetch1("facemap_task_id")
         processed_dir = Path(get_facemap_processed_data_dir())
-        output_dir = processed_dir / video_dir.relative_to(root_dir) / f'facemap_{paramset_key}'
+        output_dir = processed_dir / video_dir.relative_to(root_dir) / f"facemap_{paramset_key}"
 
         if mkdir:
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -221,41 +226,37 @@ class FacemapProcessing(dj.Computed):
         return FacemapTask & VideoRecording.File
 
     def make(self, key):
-        task_mode = (FacemapTask & key).fetch1('task_mode')
+        task_mode = (FacemapTask & key).fetch1("task_mode")
 
-        output_dir = (FacemapTask & key).fetch1('processing_output_dir')
+        output_dir = (FacemapTask & key).fetch1("processing_output_dir")
         if not output_dir:
             output_dir = FacemapTask().infer_output_dir(key, relative=True, mkdir=True)
-            print('output_dir:', output_dir)
+            print("output_dir:", output_dir)
             # update processing_output_dir
-            FacemapTask.update1({**key, 'processing_output_dir': output_dir.as_posix()})
+            FacemapTask.update1({**key, "processing_output_dir": output_dir.as_posix()})
 
-        if task_mode == 'trigger':
+        if task_mode == "trigger":
             from facemap.process import run as facemap_run
-            params = (FacemapTask & key).fetch1('facemap_params')
 
-            # motSVD is initially a boolean and then is overwritten with a combination
-            # of lists and arrays
-            if (params['motSVD'] is True) or (len(params['motSVD']) > 0):
-                do_motSVD = True
-            else:
-                do_motSVD = False
+            params = (FacemapTask & key).fetch1("facemap_params")
 
-            if (params['movSVD'] is True) or (len(params['movSVD']) > 0):
-                do_movSVD = True
-            else:
-                do_movSVD = False
-
-            video_files = (FacemapTask * VideoRecording.File & key).fetch('file_path')
-            video_files = [[find_full_path(get_facemap_root_data_dir(), video_file).as_posix() for video_file in video_files]]
+            video_files = (FacemapTask * VideoRecording.File & key).fetch("file_path")
+            video_files = [
+                [find_full_path(get_facemap_root_data_dir(), video_file).as_posix() for video_file in video_files]
+            ]
 
             output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
             facemap_run(
-                video_files, sbin=params['sbin'], proc=params,
-                savepath=output_dir.as_posix(), motSVD=do_motSVD, movSVD=do_movSVD)
+                video_files,
+                sbin=params["sbin"],
+                proc=params,
+                savepath=output_dir.as_posix(),
+                motSVD=params["motSVD"],
+                movSVD=params["movSVD"],
+            )
 
         _, creation_time = get_loader_result(key, FacemapTask)
-        key = {**key, 'processing_time': creation_time}
+        key = {**key, "processing_time": creation_time}
 
         self.insert1(key)
 
@@ -314,57 +315,63 @@ class FacialSignal(dj.Imported):
 
         self.insert1(key)
 
-        self.Region.insert([
-            dict(
-                key,
-                roi_no=i,
-                xrange=dataset['rois'][i]['xrange'],
-                yrange=dataset['rois'][i]['yrange'],
-                xrange_bin=dataset['rois'][i]['xrange_bin'],
-                yrange_bin=dataset['rois'][i]['yrange_bin'],
-                motion=dataset['motion'][i]
-            ) for i in range(len(dataset['rois']))
-        ])
+        self.Region.insert(
+            [
+                dict(
+                    key,
+                    roi_no=i,
+                    xrange=dataset["rois"][i]["xrange"],
+                    yrange=dataset["rois"][i]["yrange"],
+                    xrange_bin=dataset["rois"][i]["xrange_bin"],
+                    yrange_bin=dataset["rois"][i]["yrange_bin"],
+                    motion=dataset["motion"][i],
+                )
+                for i in range(len(dataset["rois"]))
+            ]
+        )
 
         # MotionSVD
         entry = []
-        for roi_no in range(len(dataset['rois'])):
-            for i in range(len(dataset['motSv'])):
+        for roi_no in range(len(dataset["rois"])):
+            for i in range(len(dataset["motSv"])):
                 entry.append(
                     dict(
                         key,
                         roi_no=roi_no,
                         pca_no=i,
-                        singular_value=dataset['motSv'][i],
-                        motmask=dataset['motMask_reshape'][roi_no+1][:, :, i],
-                        projection=dataset['motSVD'][roi_no+1][i],
-                    ))
+                        singular_value=dataset["motSv"][i],
+                        motmask=dataset["motMask_reshape"][roi_no + 1][:, :, i],
+                        projection=dataset["motSVD"][roi_no + 1][i],
+                    )
+                )
         self.MotionSVD.insert(entry)
 
         # MovieSVD
         entry = []
-        for roi_no in range(len(dataset['rois'])):
-            for i in range(len(dataset['movSv'])):
+        for roi_no in range(len(dataset["rois"])):
+            for i in range(len(dataset["movSv"])):
                 entry.append(
                     dict(
                         key,
                         roi_no=roi_no,
                         pca_no=i,
-                        singular_value=dataset['movSv'][i],
-                        movmask=dataset['movMask_reshape'][roi_no + 1][:, :, i],
-                        projection=dataset['movSVD'][roi_no + 1][i],
-                    ))
+                        singular_value=dataset["movSv"][i],
+                        movmask=dataset["movMask_reshape"][roi_no + 1][:, :, i],
+                        projection=dataset["movSVD"][roi_no + 1][i],
+                    )
+                )
         self.MovieSVD.insert(entry)
 
         # Summary
         self.Summary.insert1(
             dict(
                 key,
-                sbin=dataset['sbin'],
-                avgframe=dataset['avgframe'][0],
-                avgmotion=dataset['avgmotion'][0],
+                sbin=dataset["sbin"],
+                avgframe=dataset["avgframe"][0],
+                avgmotion=dataset["avgmotion"][0],
             )
         )
+
 
 # ---------------- HELPER FUNCTIONS ----------------
 
@@ -377,12 +384,12 @@ def get_loader_result(key, table):
          the loaded results from (e.g. FacemapTask)
         :return: output dictionary in the _proc.npy and the creation date time
     """
-    output_dir = (table & key).fetch1('processing_output_dir')
+    output_dir = (table & key).fetch1("processing_output_dir")
 
     output_path = find_full_path(get_facemap_root_data_dir(), output_dir)
-    output_file = glob(output_path.as_posix() + '/*_proc.npy')[0]
+    output_file = glob(output_path.as_posix() + "/*_proc.npy")[0]
 
     loaded_dataset = np.load(output_file, allow_pickle=True).item()
-    creation_time = (datetime.fromtimestamp(Path(output_file).stat().st_ctime))
+    creation_time = datetime.fromtimestamp(Path(output_file).stat().st_ctime)
 
     return loaded_dataset, creation_time
