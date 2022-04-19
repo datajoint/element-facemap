@@ -1,6 +1,6 @@
 # DataJoint Element - Facemap
 
-+ This repository features DataJoint pipeline design for facial behavior tracking of head-fixed rodent with `Facemap`.
++ This repository features DataJoint pipeline design for facial behavior tracking of head-fixed rodent with [MouseLand's Facemap](https://github.com/MouseLand/facemap).
 
 + The pipeline presented here is not a complete pipeline by itself,
  but rather a modular design of tables and dependencies specific to the Facemap workflow. 
