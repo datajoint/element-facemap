@@ -189,7 +189,7 @@ class FacemapTask(dj.Manual):
     -> VideoRecording
     facemap_task_id             : smallint
     ---
-    processing_output_dir=NULL  : varchar(255)
+    facemap_output_dir='': varchar(255)  # output directory - storing the results of Facemap analysis
     task_mode='load'            : enum('load', 'trigger')
     facemap_params              : longblob  # content of facemap's _proc.npy as dict
     do_mot_svd=1                : bool
