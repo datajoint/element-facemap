@@ -345,7 +345,7 @@ class FacialSignal(dj.Imported):
                             roi_no=roi_no,
                             pc_no=i,
                             singular_value=dataset["motSv"][i]
-                            if "motSV" in dataset.keys()
+                            if "motSV" in dataset
                             else None,
                             motmask=dataset["motMask_reshape"][roi_no + 1][:, :, i],
                             projection=dataset["motSVD"][roi_no + 1][i],
