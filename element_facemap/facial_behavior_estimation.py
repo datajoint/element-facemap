@@ -230,7 +230,7 @@ class FacemapProcessing(dj.Computed):
     def make(self, key):
         task_mode = (FacemapTask & key).fetch1("task_mode")
 
-        output_dir = (FacemapTask & key).fetch1("processing_output_dir")
+        output_dir = (FacemapTask & key).fetch1("facemap_output_dir")
         if not output_dir:
             output_dir = FacemapTask().infer_output_dir(key, relative=True, mkdir=True)
             # update processing_output_dir
