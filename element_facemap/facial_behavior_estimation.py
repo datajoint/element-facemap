@@ -289,21 +289,21 @@ class FacialSignal(dj.Imported):
     class MotionSVD(dj.Part):
         definition = """
         -> master.Region
-        pc_no         : int         # principle component (PC) no
+        pc_no               : int         # principle component (PC) no
         ---
-        singular_value: float       # singular value corresponding to the PC
-        motmask       : longblob    # PC (y, x)
-        projection    : longblob    # projections onto the principle component (nframes)
+        singular_value=null : float       # singular value corresponding to the PC
+        motmask             : longblob    # PC (y, x)
+        projection          : longblob    # projections onto the principle component (nframes)
         """
 
     class MovieSVD(dj.Part):
         definition = """
         -> master.Region
-        pc_no         : int         # principle component (PC) no
+        pc_no               : int         # principle component (PC) no
         ---
-        singular_value: float       # singular value corresponding to the PC
-        movmask       : longblob    # PC (y, x)
-        projection    : longblob    # projections onto the principle component (nframes)
+        singular_value=null : float       # singular value corresponding to the PC
+        movmask             : longblob    # PC (y, x)
+        projection          : longblob    # projections onto the principle component (nframes)
         """
 
     class Summary(dj.Part):
@@ -345,7 +345,9 @@ class FacialSignal(dj.Imported):
                             key,
                             roi_no=roi_no,
                             pca_no=i,
-                            singular_value=dataset["motSv"][i],
+                            singular_value=dataset["motSv"][i]
+                            if "motSV" in dataset.keys()
+                            else None,
                             motmask=dataset["motMask_reshape"][roi_no + 1][:, :, i],
                             projection=dataset["motSVD"][roi_no + 1][i],
                         )
@@ -362,7 +364,9 @@ class FacialSignal(dj.Imported):
                             key,
                             roi_no=roi_no,
                             pca_no=i,
-                            singular_value=dataset["movSv"][i],
+                            singular_value=dataset["movSv"][i]
+                            if "motSV" in dataset.keys()
+                            else None,
                             movmask=dataset["movMask_reshape"][roi_no + 1][:, :, i],
                             projection=dataset["movSVD"][roi_no + 1][i],
                         )
