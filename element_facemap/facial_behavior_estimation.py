@@ -141,7 +141,7 @@ class RecordingInfo(dj.Imported):
     px_width                  : smallint  # width in pixels
     nframes                   : smallint  # number of frames
     fps = NULL                : int       # frames per second in Hz
-    duration = NULL           : float     # video duration in seconds
+    recording_duration = NULL           : float     # video duration in seconds
     recording_time = NULL     : datetime  # time at the beginning of the recording
     """
 
