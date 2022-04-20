@@ -235,7 +235,7 @@ class FacemapProcessing(dj.Computed):
             output_dir = FacemapTask().infer_output_dir(key, relative=True, mkdir=True)
             print("output_dir:", output_dir)
             # update processing_output_dir
-            FacemapTask.update1({**key, "processing_output_dir": output_dir.as_posix()})
+            FacemapTask.update1({**key, "facemap_output_dir": output_dir.as_posix()})
 
         if task_mode == "trigger":
             from facemap.process import run as facemap_run
