@@ -42,7 +42,9 @@ def activate(facemap_schema_name, *, create_schema=True, create_tables=True, lin
 
     if isinstance(linking_module, str):
         linking_module = importlib.import_module(linking_module)
-    assert inspect.ismodule(linking_module), "The argument 'dependency' must be a module's name or a module"
+    assert inspect.ismodule(
+        linking_module
+    ), "The argument 'dependency' must be a module's name or a module"
     assert hasattr(
         linking_module, "get_facemap_root_data_dir"
     ), "The linking module must specify a lookup function for a root data directory"
@@ -242,7 +244,10 @@ class FacemapProcessing(dj.Computed):
 
             video_files = (FacemapTask * VideoRecording.File & key).fetch("file_path")
             video_files = [
-                [find_full_path(get_facemap_root_data_dir(), video_file).as_posix() for video_file in video_files]
+                [
+                    find_full_path(get_facemap_root_data_dir(), video_file).as_posix()
+                    for video_file in video_files
+                ]
             ]
 
             output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
@@ -331,36 +336,38 @@ class FacialSignal(dj.Imported):
         )
 
         # MotionSVD
-        entry = []
-        for roi_no in range(len(dataset["rois"])):
-            for i in range(len(dataset["motSv"])):
-                entry.append(
-                    dict(
-                        key,
-                        roi_no=roi_no,
-                        pca_no=i,
-                        singular_value=dataset["motSv"][i],
-                        motmask=dataset["motMask_reshape"][roi_no + 1][:, :, i],
-                        projection=dataset["motSVD"][roi_no + 1][i],
+        if np.any([np.any(x) for x in dataset.get("motSVD", [False])]):
+            entry = []
+            for roi_no in range(len(dataset["rois"])):
+                for i in range(len(dataset["motSv"])):
+                    entry.append(
+                        dict(
+                            key,
+                            roi_no=roi_no,
+                            pca_no=i,
+                            singular_value=dataset["motSv"][i],
+                            motmask=dataset["motMask_reshape"][roi_no + 1][:, :, i],
+                            projection=dataset["motSVD"][roi_no + 1][i],
+                        )
                     )
-                )
-        self.MotionSVD.insert(entry)
+            self.MotionSVD.insert(entry)
 
         # MovieSVD
-        entry = []
-        for roi_no in range(len(dataset["rois"])):
-            for i in range(len(dataset["movSv"])):
-                entry.append(
-                    dict(
-                        key,
-                        roi_no=roi_no,
-                        pca_no=i,
-                        singular_value=dataset["movSv"][i],
-                        movmask=dataset["movMask_reshape"][roi_no + 1][:, :, i],
-                        projection=dataset["movSVD"][roi_no + 1][i],
+        if np.any([np.any(x) for x in dataset.get("movSVD", [False])]):
+            entry = []
+            for roi_no in range(len(dataset["rois"])):
+                for i in range(len(dataset["movSv"])):
+                    entry.append(
+                        dict(
+                            key,
+                            roi_no=roi_no,
+                            pca_no=i,
+                            singular_value=dataset["movSv"][i],
+                            movmask=dataset["movMask_reshape"][roi_no + 1][:, :, i],
+                            projection=dataset["movSVD"][roi_no + 1][i],
+                        )
                     )
-                )
-        self.MovieSVD.insert(entry)
+            self.MovieSVD.insert(entry)
 
         # Summary
         self.Summary.insert1(
