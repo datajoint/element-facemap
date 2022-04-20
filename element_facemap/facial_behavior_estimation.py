@@ -137,12 +137,12 @@ class RecordingInfo(dj.Imported):
     definition = """
     -> VideoRecording
     ---
-    px_height                 : smallint  # height in pixels
-    px_width                  : smallint  # width in pixels
-    nframes                   : smallint  # number of frames
-    fps = NULL                : int       # frames per second in Hz
-    recording_duration = NULL : float     # video duration in seconds
-    recording_time = NULL     : datetime  # time at the beginning of the recording
+    px_height             : smallint  # height in pixels
+    px_width              : smallint  # width in pixels
+    nframes               : smallint  # number of frames
+    fps                   : int       # frames per second in Hz
+    recording_duration    : float     # video duration in seconds
+    recording_time = NULL : datetime  # time at the beginning of the recording
     """
 
     @property
@@ -189,7 +189,7 @@ class FacemapTask(dj.Manual):
     -> VideoRecording
     facemap_task_id             : smallint
     ---
-    facemap_output_dir='': varchar(255)  # output directory - storing the results of Facemap analysis
+    facemap_output_dir=''       : varchar(255)  # output directory - storing the results of Facemap analysis
     task_mode='load'            : enum('load', 'trigger')
     facemap_params              : longblob  # content of facemap's _proc.npy as dict
     do_mot_svd=1                : bool
@@ -344,9 +344,7 @@ class FacialSignal(dj.Imported):
                             key,
                             roi_no=roi_no,
                             pc_no=i,
-                            singular_value=dataset["motSv"][i]
-                            if "motSV" in dataset
-                            else None,
+                            singular_value=dataset["motSv"][i] if "motSv" in dataset else None,
                             motmask=dataset["motMask_reshape"][roi_no + 1][:, :, i],
                             projection=dataset["motSVD"][roi_no + 1][i],
                         )
@@ -363,9 +361,7 @@ class FacialSignal(dj.Imported):
                             key,
                             roi_no=roi_no,
                             pc_no=i,
-                            singular_value=dataset["movSv"][i]
-                            if "motSV" in dataset
-                            else None,
+                            singular_value=dataset["movSv"][i] if "movSV" in dataset else None,
                             movmask=dataset["movMask_reshape"][roi_no + 1][:, :, i],
                             projection=dataset["movSVD"][roi_no + 1][i],
                         )
@@ -394,7 +390,7 @@ def get_loader_result(key, table):
          the loaded results from (e.g. FacemapTask)
         :return: output dictionary in the _proc.npy and the creation date time
     """
-    output_dir = (table & key).fetch1("processing_output_dir")
+    output_dir = (table & key).fetch1("facemap_output_dir")
 
     output_path = find_full_path(get_facemap_root_data_dir(), output_dir)
     output_file = glob(output_path.as_posix() + "/*_proc.npy")[0]
