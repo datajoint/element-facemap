@@ -141,7 +141,7 @@ class RecordingInfo(dj.Imported):
     px_width                  : smallint  # width in pixels
     nframes                   : smallint  # number of frames
     fps = NULL                : int       # frames per second in Hz
-    recording_duration = NULL           : float     # video duration in seconds
+    recording_duration = NULL : float     # video duration in seconds
     recording_time = NULL     : datetime  # time at the beginning of the recording
     """
 
@@ -339,12 +339,12 @@ class FacialSignal(dj.Imported):
         if np.any([np.any(x) for x in dataset.get("motSVD", [False])]):
             entry = []
             for roi_no in range(len(dataset["rois"])):
-                for i in range(len(dataset["motSv"])):
+                for i in range(1, dataset["motSVD"][roi_no + 1].shape[1]):
                     entry.append(
                         dict(
                             key,
                             roi_no=roi_no,
-                            pca_no=i,
+                            pc_no=i,
                             singular_value=dataset["motSv"][i]
                             if "motSV" in dataset.keys()
                             else None,
@@ -358,12 +358,12 @@ class FacialSignal(dj.Imported):
         if np.any([np.any(x) for x in dataset.get("movSVD", [False])]):
             entry = []
             for roi_no in range(len(dataset["rois"])):
-                for i in range(len(dataset["movSv"])):
+                for i in range(1, dataset["movSVD"][roi_no + 1].shape[1]):
                     entry.append(
                         dict(
                             key,
                             roi_no=roi_no,
-                            pca_no=i,
+                            pc_no=i,
                             singular_value=dataset["movSv"][i]
                             if "motSV" in dataset.keys()
                             else None,
