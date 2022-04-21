@@ -353,19 +353,16 @@ class FacialSignal(dj.Imported):
 
         # MovieSVD
         if any(any(x) for x in dataset.get("movSVD", [False])):
-            entry = []
-            for roi_no in range(len(dataset["rois"])):
-                for i in range(1, dataset["movSVD"][roi_no + 1].shape[1]):
-                    entry.append(
-                        dict(
+            entry = [dict(
                             key,
                             roi_no=roi_no,
                             pc_no=i,
                             singular_value=dataset["movSv"][i] if "movSV" in dataset else None,
                             movmask=dataset["movMask_reshape"][roi_no + 1][:, :, i],
                             projection=dataset["movSVD"][roi_no + 1][i],
-                        )
-                    )
+                        ) 
+            for roi_no in range(len(dataset["rois"]))
+            for i in range(1, dataset["movSVD"][roi_no + 1].shape[1])]
             self.MovieSVD.insert(entry)
 
         # Summary
