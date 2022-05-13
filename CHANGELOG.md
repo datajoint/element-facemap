@@ -8,3 +8,8 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 - Support for avi video files
 - Stores left singular vector, right singular vector, and the non-zero elements of the diagonal matrix
 - Output directory inferral, if unspecified.
+
+
+# [0.0.2] - 2022-05-13
+### Bug Fix
+- any -> np.any
