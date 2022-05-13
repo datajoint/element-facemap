@@ -335,7 +335,7 @@ class FacialSignal(dj.Imported):
         )
 
         # MotionSVD
-        if any(any(x) for x in dataset.get("motSVD", [False])):
+        if np.any(np.any(x) for x in dataset.get("motSVD", [False])):
             entry = []
             for roi_no in range(len(dataset["rois"])):
                 for i in range(1, dataset["motSVD"][roi_no + 1].shape[1]):
@@ -352,7 +352,7 @@ class FacialSignal(dj.Imported):
             self.MotionSVD.insert(entry)
 
         # MovieSVD
-        if any(any(x) for x in dataset.get("movSVD", [False])):
+        if np.any(np.any(x) for x in dataset.get("movSVD", [False])):
             entry = [
                 dict(
                     key,
