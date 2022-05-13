@@ -2,6 +2,12 @@
 
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+
+## [0.1.0] - 2022-05-10
+### Added
+- Adopted black formatting into code base
+
+
 ## [0.0.1] - 2022-03-29
 ### Added
 - Multiple file processing
