@@ -13,9 +13,7 @@ schema = dj.schema()
 _linking_module = None
 
 
-def activate(
-    facemap_schema_name, *, create_schema=True, create_tables=True, linking_module=None
-):
+def activate(facemap_schema_name, *, create_schema=True, create_tables=True, linking_module=None):
     """
     activate(schema_name, *, create_schema=True, create_tables=True,
              linking_module=None)
@@ -158,9 +156,7 @@ class RecordingInfo(dj.Imported):
         px_height, px_width, fps = None, None, None
 
         for file_path in file_paths:
-            file_path = (
-                find_full_path(get_facemap_root_data_dir(), file_path)
-            ).as_posix()
+            file_path = (find_full_path(get_facemap_root_data_dir(), file_path)).as_posix()
 
             cap = cv2.VideoCapture(file_path)
             info = (
@@ -208,9 +204,7 @@ class FacemapTask(dj.Manual):
 
         paramset_key = (FacemapTask & key).fetch1("facemap_task_id")
         processed_dir = Path(get_facemap_processed_data_dir())
-        output_dir = (
-            processed_dir / video_dir.relative_to(root_dir) / f"facemap_{paramset_key}"
-        )
+        output_dir = processed_dir / video_dir.relative_to(root_dir) / f"facemap_{paramset_key}"
 
         if mkdir:
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -341,7 +335,7 @@ class FacialSignal(dj.Imported):
         )
 
         # MotionSVD
-        if any(any(x) for x in dataset.get("motSVD", [False])):
+        if np.any(np.any(x) for x in dataset.get("motSVD", [False])):
             entry = []
             for roi_no in range(len(dataset["rois"])):
                 for i in range(1, dataset["motSVD"][roi_no + 1].shape[1]):
@@ -350,9 +344,7 @@ class FacialSignal(dj.Imported):
                             key,
                             roi_no=roi_no,
                             pc_no=i,
-                            singular_value=dataset["motSv"][i]
-                            if "motSv" in dataset
-                            else None,
+                            singular_value=dataset["motSv"][i] if "motSv" in dataset else None,
                             motmask=dataset["motMask_reshape"][roi_no + 1][:, :, i],
                             projection=dataset["motSVD"][roi_no + 1][i],
                         )
@@ -360,7 +352,7 @@ class FacialSignal(dj.Imported):
             self.MotionSVD.insert(entry)
 
         # MovieSVD
-        if any(any(x) for x in dataset.get("movSVD", [False])):
+        if np.any(np.any(x) for x in dataset.get("movSVD", [False])):
             entry = [
                 dict(
                     key,
