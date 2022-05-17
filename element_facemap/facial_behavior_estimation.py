@@ -83,7 +83,7 @@ def get_facemap_root_data_dir() -> list:
         root_directories = [root_directories]
 
     if hasattr(_linking_module, "get_facemap_processed_data_dir"):
-        root_directories.append(_linking_module.get_facemap_processed_data_dir(None))
+        root_directories.append(_linking_module.get_facemap_processed_data_dir())
 
     return root_directories
 
