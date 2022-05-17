@@ -181,7 +181,7 @@ class RecordingInfo(dj.Imported):
                 "px_width": px_width,
                 "nframes": nframes,
                 "fps": fps,  # usually user-defined and wrong
-                "duration": nframes / fps,  # see caution above
+                "recording_duration": nframes / fps,  # see caution above
             }
         )
 
