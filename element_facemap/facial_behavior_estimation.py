@@ -139,9 +139,9 @@ class RecordingInfo(dj.Imported):
     definition = """
     -> VideoRecording
     ---
-    px_height             : smallint  # height in pixels
-    px_width              : smallint  # width in pixels
-    nframes               : smallint  # number of frames
+    px_height             : int       # height in pixels
+    px_width              : int       # width in pixels
+    nframes               : int       # number of frames
     fps                   : int       # frames per second in Hz
     recording_duration    : float     # video duration in seconds
     recording_time = NULL : datetime  # time at the beginning of the recording
