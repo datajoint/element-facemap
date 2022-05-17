@@ -2,6 +2,11 @@
 
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+
+# [0.1.2] - 2022-05-17
+### Bug Fix
+- Recording duration attribute name
+
 # [0.1.1] - 2022-05-13
 ### Bug Fix
 - any -> np.any
