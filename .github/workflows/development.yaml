@@ -47,7 +47,7 @@ jobs:
       - name: Compile image
         run: |
           export PKG_NAME=$(python3 -c "print([p for p in __import__('setuptools').find_packages() if '.' not in p][0])")
-          export PKG_VERSION=$(cat ${PKG_NAME}/version.py | awk -F\' '/__version__ = / {print $2}')
+          export PKG_VERSION=$(cat ${PKG_NAME}/version.py | awk -F\" '/__version__ = / {print $2}')
           export HOST_UID=$(id -u)
           docker-compose -f docker-compose-build.yaml up --exit-code-from element --build
           IMAGE=$(docker images --filter "reference=datajoint/${PKG_NAME}*" \
@@ -86,7 +86,7 @@ jobs:
         run: |
           PKG_NAME=$(python3 -c "print([p for p in __import__('setuptools').find_packages() if '.' not in p][0])")
           SDIST_PKG_NAME=$(echo ${PKG_NAME} | sed 's|_|-|g')
-          PKG_VERSION=$(cat ${PKG_NAME}/version.py | awk -F\' '/__version__ = / {print $2}')
+          PKG_VERSION=$(cat ${PKG_NAME}/version.py | awk -F\" '/__version__ = / {print $2}')
           echo "PKG_NAME=${PKG_NAME}" >> $GITHUB_ENV
           echo "PKG_VERSION=${PKG_VERSION}" >> $GITHUB_ENV
           echo "SDIST_PKG_NAME=${SDIST_PKG_NAME}" >> $GITHUB_ENV
