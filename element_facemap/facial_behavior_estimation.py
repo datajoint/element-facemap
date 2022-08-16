@@ -332,11 +332,16 @@ class FacialSignal(dj.Imported):
                     roi_no=i,
                     xrange=dataset["rois"][i]["xrange"],
                     yrange=dataset["rois"][i]["yrange"],
-                    xrange_bin=dataset["rois"][i]["xrange_bin"],
-                    yrange_bin=dataset["rois"][i]["yrange_bin"],
+                    xrange_bin=dataset["rois"][i]["xrange_bin"]
+                    if "xrange_bin" in dataset["rois"][i]
+                    else None,
+                    yrange_bin=dataset["rois"][i]["yrange_bin"]
+                    if "yrange_bin" in dataset["rois"][i]
+                    else None,
                     motion=dataset["motion"][i],
                 )
                 for i in range(len(dataset["rois"]))
+                if dataset["rois"][i]["rtype"] == "motion SVD"
             ]
         )
 
