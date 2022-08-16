@@ -338,7 +338,7 @@ class FacialSignal(dj.Imported):
                     yrange_bin=dataset["rois"][i]["yrange_bin"]
                     if "yrange_bin" in dataset["rois"][i]
                     else None,
-                    motion=dataset["motion"][i],
+                    motion=dataset["motion"][i + 1],
                 )
                 for i in range(len(dataset["rois"]))
                 if dataset["rois"][i]["rtype"] == "motion SVD"
