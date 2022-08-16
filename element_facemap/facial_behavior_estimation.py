@@ -357,7 +357,7 @@ class FacialSignal(dj.Imported):
                     projection=dataset["motSVD"][roi_no + 1][i],
                 )
                 for roi_no in range(len(dataset["rois"]))
-                for i in range(1, dataset["motSVD"][roi_no + 1].shape[1])
+                for i in range(dataset["motSVD"][roi_no + 1].shape[1])
             ]
             self.MotionSVD.insert(entry)
 
@@ -373,7 +373,7 @@ class FacialSignal(dj.Imported):
                     projection=dataset["movSVD"][roi_no + 1][i],
                 )
                 for roi_no in range(len(dataset["rois"]))
-                for i in range(1, dataset["movSVD"][roi_no + 1].shape[1])
+                for i in range(dataset["movSVD"][roi_no + 1].shape[1])
             ]
             self.MovieSVD.insert(entry)
 
