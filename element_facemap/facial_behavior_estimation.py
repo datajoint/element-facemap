@@ -322,6 +322,8 @@ class FacialSignal(dj.Imported):
 
     def make(self, key):
         dataset, _ = get_loader_result(key, FacemapTask)
+        # Only motion SVD region type is supported.
+        dataset["rois"] = [x for x in dataset["rois"] if x["rtype"] == "motion SVD"]
 
         self.insert1(key)
 
