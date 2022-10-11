@@ -5,12 +5,14 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 ## [0.1.3] - 2022-10-11
 ### Added
 + CICD workflows for PyPI release
+### Bug Fix
+- Fix lagging motion index
 
-# [0.1.2] - 2022-05-17
+## [0.1.2] - 2022-05-17
 ### Bug Fix
 - Recording duration attribute name
 
-# [0.1.1] - 2022-05-13
+## [0.1.1] - 2022-05-13
 ### Bug Fix
 - any -> np.any
 

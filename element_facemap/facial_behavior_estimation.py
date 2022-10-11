@@ -322,6 +322,8 @@ class FacialSignal(dj.Imported):
 
     def make(self, key):
         dataset, _ = get_loader_result(key, FacemapTask)
+        # Only motion SVD region type is supported.
+        dataset["rois"] = [x for x in dataset["rois"] if x["rtype"] == "motion SVD"]
 
         self.insert1(key)
 
@@ -332,11 +334,16 @@ class FacialSignal(dj.Imported):
                     roi_no=i,
                     xrange=dataset["rois"][i]["xrange"],
                     yrange=dataset["rois"][i]["yrange"],
-                    xrange_bin=dataset["rois"][i]["xrange_bin"],
-                    yrange_bin=dataset["rois"][i]["yrange_bin"],
-                    motion=dataset["motion"][i],
+                    xrange_bin=dataset["rois"][i]["xrange_bin"]
+                    if "xrange_bin" in dataset["rois"][i]
+                    else None,
+                    yrange_bin=dataset["rois"][i]["yrange_bin"]
+                    if "yrange_bin" in dataset["rois"][i]
+                    else None,
+                    motion=dataset["motion"][i + 1],
                 )
                 for i in range(len(dataset["rois"]))
+                if dataset["rois"][i]["rtype"] == "motion SVD"
             ]
         )
 
@@ -352,7 +359,7 @@ class FacialSignal(dj.Imported):
                     projection=dataset["motSVD"][roi_no + 1][i],
                 )
                 for roi_no in range(len(dataset["rois"]))
-                for i in range(1, dataset["motSVD"][roi_no + 1].shape[1])
+                for i in range(dataset["motSVD"][roi_no + 1].shape[1])
             ]
             self.MotionSVD.insert(entry)
 
@@ -368,7 +375,7 @@ class FacialSignal(dj.Imported):
                     projection=dataset["movSVD"][roi_no + 1][i],
                 )
                 for roi_no in range(len(dataset["rois"]))
-                for i in range(1, dataset["movSVD"][roi_no + 1].shape[1])
+                for i in range(dataset["movSVD"][roi_no + 1].shape[1])
             ]
             self.MovieSVD.insert(entry)
 
