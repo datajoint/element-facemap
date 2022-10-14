@@ -2,15 +2,17 @@
 
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
-# [0.1.3] - 2022-08-16
+## [0.1.3] - 2022-10-11
+### Added
++ CICD workflows for PyPI release
 ### Bug Fix
 - Fix lagging motion index
 
-# [0.1.2] - 2022-05-17
+## [0.1.2] - 2022-05-17
 ### Bug Fix
 - Recording duration attribute name
 
-# [0.1.1] - 2022-05-13
+## [0.1.1] - 2022-05-13
 ### Bug Fix
 - any -> np.any
 
@@ -25,3 +27,8 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 - Stores left singular vector, right singular vector, and the non-zero elements of the diagonal matrix
 - Output directory inferral, if unspecified.
 
+[0.1.3]: https://github.com/datajoint/element-facemap/releases/tag/0.1.3
+[0.1.2]: https://github.com/datajoint/element-facemap/releases/tag/0.1.2
+[0.1.1]: https://github.com/datajoint/element-facemap/releases/tag/0.1.1
+[0.1.0]: https://github.com/datajoint/element-facemap/releases/tag/0.1.0
+[0.0.1]: https://github.com/datajoint/element-facemap/releases/tag/0.0.1
