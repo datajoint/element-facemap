@@ -1,6 +1,6 @@
 # Concepts
 
-## Description of modality, user population
+## Pose tracking of mouse face and singular value decomposition processing of videos 
 Over the past two decades, in vivo two-photon laser-scanning imaging of calcium signals has evolved into a mainstream modality for neurophysiology experiments to record population activity in intact neural circuits. The tools for signal acquisition and analysis continue to evolve but common patterns and elements of standardization have emerged.
 
 ## Acquisition tools
