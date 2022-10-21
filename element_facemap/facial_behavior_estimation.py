@@ -16,32 +16,29 @@ _linking_module = None
 def activate(
     facemap_schema_name, *, create_schema=True, create_tables=True, linking_module=None
 ):
-    """
-    activate(schema_name, *, create_schema=True, create_tables=True,
-             linking_module=None)
-    :param schema_name: schema name on the database server to activate the
-                        `facemap` element
-    :param create_schema: when True (default), create schema in the database if it
-                            does not yet exist.
-    :param create_tables: when True (default), create schema in the database if it
-                            does not yet exist.
-    :param linking_module: a module (or name) containing the required dependencies
-                            to activate the `session` element:
-        Upstream tables:
-            + Session: parent table to VideoRecording, identifying a recording session
-            + Device: parent table to VideoRecording, identifying video recording device
-        Functions:
-            + get_facemap_root_data_dir() -> list
-                Retrieve the root data director(y/ies) with face
-                recordings for all subject/sessions.
-                :return: a string for full path to the root data directory
-            + get_facemap_processed_data_dir(session_key: dict) -> str
-                Optional function to retrive the desired output directory
-                for Facemap files for a given session. If unspecified,
-                output stored in the session video folder, per Facemap default
-                :return: a string for the absolute path of output directory
-    """
+    """Activate schema.
 
+    Args:
+        schema_name (str): Schema name on the database server to activate the `facemap` element
+        create_schema (bool): When True (default), create schema in the database if it does not yet exist.
+        create_tables (bool): When True (default), create tables in the database if they do not yet exist.
+        linking_module (str): A module name or a module containing the required dependencies to activate
+            the `imaging` module: + all that are required by the `scan` module.
+
+    Dependencies:
+    Upstream tables:
+        + Session: A parent table to VideoRecording, identifying a recording session
+        + Equipment: A parent table to VideoRecording, identifying video recording equipment
+    Functions:
+        + get_facemap_root_data_dir() -> list
+            Retrieves the root data director(y/ies) with face recordings for all subject/sessions.
+            Returns a string for full path to the root data directory
+        + get_facemap_processed_data_dir(session_key: dict) -> str
+            Optional function to retrive the desired output directory
+            for Facemap files for a given session. If unspecified,
+            output stored in the session video folder, per Facemap default.
+            Returns a string for the absolute path of output directory
+    """
     if isinstance(linking_module, str):
         linking_module = importlib.import_module(linking_module)
     assert inspect.ismodule(
@@ -66,17 +63,16 @@ def activate(
 # -------------- Functions required by element-facemap ---------------
 
 
-def get_facemap_root_data_dir() -> list:
-    """
+def get_facemap_root_data_dir():
+    """ "Pulls relevant func from parent namespace to specify root data dir(s).
+
     It is recommended that all paths in DataJoint Elements stored as relative
     paths, with respect to some user-configured "root" director(y/ies). The
-    root(s) may vary between data modalities and user machines
-    get_fm_root_data_dir() -> list
-        This user-provided function retrieves the possible root data
-        director(y/ies) containing continuous face data for all subjects
-        and sessions (e.g. acquired video raw files)
-        :return: a string for full path to the behavioral root data directory,
-         or list of strings for possible root data directories
+    root(s) may vary between data modalities and user machines.
+
+    Returns: Is this True????
+        A PosixPath for full path to the video recording root data directory,
+        or list of PosixPaths for possible root data directories.
     """
     root_directories = _linking_module.get_facemap_root_data_dir()
     if isinstance(root_directories, (str, Path)):
@@ -103,11 +99,14 @@ def get_facemap_processed_data_dir() -> str:
         return get_facemap_root_data_dir()[0]
 
 
-def get_facemap_video_files(video_key: dict) -> str:
-    """
-    Retrieve the list of video files associated with a given video recording
-    :param video_key: key of a video recording
-    :return: list of Video files' full file-paths
+def get_facemap_video_files(video_key: dict) -> list[Path]:
+    """Retrieve the list of video recording files.
+
+    Args:
+        video_key: A primary key set of an entry in the VideoRecording table.
+
+    Returns:
+        A list of video files' full paths in the PosixPaths format.
     """
     return _linking_module.get_facemap_video_files(video_key)
 
@@ -117,6 +116,8 @@ def get_facemap_video_files(video_key: dict) -> str:
 
 @schema
 class VideoRecording(dj.Manual):
+    """ """
+
     definition = """
     -> Session
     recording_id                : int
@@ -394,12 +395,16 @@ class FacialSignal(dj.Imported):
 
 
 def get_loader_result(key, table):
-    """
-    Retrieve the results from the facemap loader
-        :param key: the `key` to one entry of FacemapTask
-        :param table: the class defining the table to retrieve
-         the loaded results from (e.g. FacemapTask)
-        :return: output dictionary in the _proc.npy and the creation date time
+    """Retrieve the facemap analysis results.
+
+    Args:
+        key (dict): A primary key to an entry in FacemapTask.
+        table (dj.Computed): The class defining the table to retrieve
+        the loaded results from (e.g. FacemapTask)
+
+    Returns:
+        loaded_dataset (np.array): The results of the facemap analysis.
+        creation_time (datetimt): Date and time at the loading of the results.
     """
     output_dir = (table & key).fetch1("facemap_output_dir")
 
