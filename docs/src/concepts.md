@@ -1,39 +1,62 @@
 # Concepts
 
-## Pose tracking of mouse face and singular value decomposition processing of videos 
-Over the past two decades, in vivo two-photon laser-scanning imaging of calcium signals has evolved into a mainstream modality for neurophysiology experiments to record population activity in intact neural circuits. The tools for signal acquisition and analysis continue to evolve but common patterns and elements of standardization have emerged.
+## Facial Motion Tracking
+Studying the inner workings of the brain requires understanding the relationship between neural activity and the facial activity. Motions in the facial features (e.g. whisker, eye/pupil, etc) is one type of behavioral activity that can be measured by Facema
 
-## Acquisition tools
+Motions in the face at the whisker or nose Facial motion Pose estimation is a computer vision method to track the position, and thereby behavior, of the subject over the course of an experiment, which can then be paired with neuronal recordings to answer scientific questions about the brain.
 
-### Hardware
-The primary acquisition systems are: + Sutter (we estimate 400 rigs in active use - TBC) + Thorlabs (we estimate 400 rigs in active use - TBC) + Bruker (we estimate 400 rigs in active use - TBC) + Neurolabware (we estimate 400 rigs in active use - TBC)
+Facemap allows running SVD on a region-of-interest either in the movie itself or in the motion movie (difference of frames). The region of interest 
+Movie SVD: Frames itself.
+Motion SVD: Difference of frames.
 
-We do not include Miniscopes in these estimates. In all there are perhaps on the order of 3000 two-photon setups globally but their processing needs may need to be further segmented.
 
-### Software
-- ScanImage
-- ThorImageLS
-- Scanbox
-- Nikon
 
-Vidrio’s [ScanImage](https://docs.scanimage.org/) is the data acquisition software for two types of home-built scanning two-photon systems, either based on Thorlabs and Sutter hardware. ScanImage has a free version and a licensed version. Thorlabs also provides their own acquisition software - ThorImageLS (probably half of the systems).
+ROIs: User can select a rectangular, or ellipsoid shape.
 
-## Preprocessing toolchain: development teams
-The preprocessing workflow for two-photon laser-scanning microscopy includes motion correction (rigid or non-rigid), cell segmentation, and calcium event extraction (sometimes described as "deconvolution" or "spike inference"). Some include raster artifact correction, cropping and stitching operations.
+Returns PCA components that give distinct facial features.
 
-Until recently, most labs have developed custom processing pipelines, sharing them with others as academic open-source projects. Recently, a few leaders have emerged as standardization candidates for the initial preprocessing.
+## Caveats
+The computation time and the memory usage can be pressing for large region of interests.
 
-- [CaImAn](https://github.com/flatironinstitute/CaImAn) (Originally developed by Andrea Giovannucci, current support by FlatIron Institute: Eftychios A. Pnevmatikakis, Johannes Friedrich)
-- [Suite2p](https://github.com/MouseLand/suite2p) (Carsen Stringer and Marius Pachitariu at Janelia), 200+ users, active support
+## Element Development
+Element Facemap was developed for Hui Chen (Lu Lab, Indiana Bloomington University). It has a fairly simple design because the metadata of the input videos and the calculational steps are very much minimal. The Element Facemap is hosted at github repository [https://github.com/datajoint/element-facemap](https://github.com/datajoint/element-facemap).
 
-## Key projects
-Over the past few years, several labs have developed DataJoint-based data management and processing pipelines for two-photon Calcium imaging. Our team collaborated with several of them during their projects. Additionally, we interviewed these teams to understand their experiment workflow, pipeline design, associated tools, and interfaces.
 
-These teams include: + MICrONS (Andreas Tolias Lab, BCM) - https://github.com/cajal + BrainCoGs (Princeton) - https://github.com/BrainCOGS + Moser Group (Kavli Institute/NTNU) - private repository + Anne Churchland Lab (UCLA)
+## Element Architecture
 
-## Pipeline Development
-Through our interviews and direct collaboration on the precursor projects, we identified the common motifs to create the Calcium Imaging Element with the repository hosted at https://github.com/datajoint/element-calcium-imaging.
+Each node in the following diagram represents the analysis code in the workflow and the corresponding tables in the database.  Within the workflow, Element Facemap connects to upstream Elements including Lab, Animal, and Session. For more detailed documentation on each table, see the API docs for the respective schemas.
 
-Major features of the Calcium Imaging Element include: + Pipeline architecture defining: + Calcium-imaging scanning metadata, also compatible with mesoscale imaging and multi-ROI scanning mode + Tables for all processing steps: motion correction, segmentation, cell spatial footprint, fluorescence trace extraction, spike inference and cell classification + Store/track/manage different curations of the segmentation results + Ingestion support for data acquired with ScanImage and Scanbox acquisition systems + Ingestion support for processing outputs from both Suite2p and CaImAn analysis suites + Sample data and complete test suite for quality assurance
+![element-facemap diagram](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/attached_facemap_element.svg)
 
-The processing workflow is typically performed on a per-scan basis, however, depending on the nature of the research questions, different labs may opt to perform processing/segmentation on a concatenated set of data from multiple scans. To this end, we have extended the Calcium Imaging Element and provided a design version capable of supporting a multi-scan processing scheme.
+### `lab` schema ([API docs](./api/workflow_facemap/pipeline/#workflow_facemap.pipeline.Device))
+
+| Table | Description |
+| --- | --- |
+| Device | Camera metadata |
+
+### `subject` schema ([API docs](../element-animal/api/element_animal/subject))
+- Although not required, most choose to connect the `Session` table to a `Subject` table.
+
+| Table | Description |
+| --- | --- |
+| Subject | Basic information of the research subject |
+
+### `session` schema ([API docs](../element-session/api/element_session/session_with_datetime))
+
+| Table | Description |
+| --- | --- |
+| Session | Unique experimental session identifier |
+
+### `facial_behavior_estimation` schema ([API docs](./api/element_facemap/facial_behavior_estimation))
+
+| Table | Description |
+| --- | --- |
+| VideoRecording | Video(s) from one recording session, for Facial Motion Tracking |
+| RecordingInfo | |
+| FacemapTask | A set of tasks specifying ... |
+| FacemapProcessing | |
+| Facial Signal | Parent table for the results of Facemap analysis |
+| Facial Signal.Region | Child table for the results of each region |
+| Facial Signal.Region.MovieSVD | Child table for the SVD components  |
+| Facial Signal.Region.MotionSVD |  |
+| Facial Signal.Summary |  |
