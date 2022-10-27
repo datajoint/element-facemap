@@ -7,8 +7,8 @@ experiments. Each Element is a modular pipeline for data storage and processing 
 corresponding database tables that can be combined with other Elements to assemble a
 fully functional pipeline.
 
-Facemap applies singular value decomposition (SVD) to the face movie to extract the
-principal components (PCs) that explain the distinct movements apparent on the mouse’s
+Facemap applies singular value decomposition (SVD) to face movie to extract the
+principal components (PCs) that explain distinct movements apparent on mouse’s
 face. The Element is composed of a single schema for storing data and running analysis:
 `facial_behavior_estimation`.
 
