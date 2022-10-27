@@ -5,7 +5,7 @@ site_url: http://localhost/docs/element/element-facemap
 repo_url: https://github.com/datajoint/element-facemap
 repo_name: datajoint/element-facemap
 nav:
-  - Element Calcium Imaging: index.md
+  - Element Facemap: index.md
   - Concepts: concepts.md
   - Tutorials: tutorials.md
   - Citation: citation.md
