@@ -64,7 +64,7 @@ def activate(
 
 
 def get_facemap_root_data_dir():
-    """ "Pulls relevant func from parent namespace to specify root data dir(s).
+    """Pull relevant func from parent namespace to specify root data dir(s).
 
     It is recommended that all paths in DataJoint Elements stored as relative
     paths, with respect to some user-configured "root" director(y/ies). The
@@ -116,7 +116,7 @@ def get_facemap_video_files(video_key: dict) -> list[Path]:
 
 @schema
 class VideoRecording(dj.Manual):
-    """ """
+    """Video recoreded in an experiment session for Facemap analysis."""
 
     definition = """
     -> Session
@@ -127,6 +127,8 @@ class VideoRecording(dj.Manual):
 
     # One VideoRecording can be saved in multiple files
     class File(dj.Part):
+        """Relative path of the video file with respect to facemap_root_data_dir directory."""
+
         definition = """
         -> master
         file_id     : smallint
@@ -137,6 +139,8 @@ class VideoRecording(dj.Manual):
 
 @schema
 class RecordingInfo(dj.Imported):
+    """Information extracted from video file."""
+
     definition = """
     -> VideoRecording
     ---
@@ -150,9 +154,12 @@ class RecordingInfo(dj.Imported):
 
     @property
     def key_source(self):
+        """Limits the population of RecordingInfo to video recordings that have file paths ingested."""
         return VideoRecording & VideoRecording.File
 
     def make(self, key):
+        """Populates the RecordingInfo table."""
+
         file_paths = (VideoRecording.File & key).fetch("file_path")
 
         nframes = 0
@@ -189,6 +196,8 @@ class RecordingInfo(dj.Imported):
 
 @schema
 class FacemapTask(dj.Manual):
+    """Staging table for pairing of video recording and Facemap parameters before processing."""
+
     definition = """
     # Configuration for a facemap analysis task on a particular VideoRecording
     -> VideoRecording
@@ -221,6 +230,8 @@ class FacemapTask(dj.Manual):
 
 @schema
 class FacemapProcessing(dj.Computed):
+    """Automated table to execute the Facemap with inputs from FacemapTask."""
+
     definition = """
     # Processing Procedure
     -> FacemapTask
@@ -232,9 +243,12 @@ class FacemapProcessing(dj.Computed):
     # Process only the VideoRecordings that have their Info inserted.
     @property
     def key_source(self):
+        """Limits the population of FacemapProcessing to those that have VideoRecording.File defined."""
         return FacemapTask & VideoRecording.File
 
     def make(self, key):
+        """Runs the Facemap and ingests the FacemapProcessing with the execution time."""
+
         task_mode = (FacemapTask & key).fetch1("task_mode")
 
         output_dir = (FacemapTask & key).fetch1("facemap_output_dir")
@@ -274,12 +288,15 @@ class FacemapProcessing(dj.Computed):
 
 @schema
 class FacialSignal(dj.Imported):
-    definition = """
-    # PCA analysis results obtained with Facemap
+    """Results of the Facemap analysis."""
+
+    definition = """# Facemap results
     -> FacemapProcessing
     """
 
     class Region(dj.Part):
+        """Region's properties."""
+
         definition = """
         -> master
         roi_no        : int         # region no
@@ -293,6 +310,8 @@ class FacialSignal(dj.Imported):
         """
 
     class MotionSVD(dj.Part):
+        """Components of the SVD from motion video."""
+
         definition = """
         -> master.Region
         pc_no               : int         # principle component (PC) no
@@ -303,6 +322,8 @@ class FacialSignal(dj.Imported):
         """
 
     class MovieSVD(dj.Part):
+        """Components of the SVD from movie video."""
+
         definition = """
         -> master.Region
         pc_no               : int         # principle component (PC) no
@@ -313,6 +334,8 @@ class FacialSignal(dj.Imported):
         """
 
     class Summary(dj.Part):
+        """Average frames for movie and motion videos."""
+
         definition = """
         -> master
         ---
@@ -322,6 +345,9 @@ class FacialSignal(dj.Imported):
         """
 
     def make(self, key):
+        """Populates the FacialSignal table by transferring the results from default
+        Facemap outputs to the database."""
+
         dataset, _ = get_loader_result(key, FacemapTask)
         # Only motion SVD region type is supported.
         dataset["rois"] = [x for x in dataset["rois"] if x["rtype"] == "motion SVD"]
