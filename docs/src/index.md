@@ -17,5 +17,3 @@ face. The Element is composed of a single schema for storing data and running an
 Visit the [Concepts page](./concepts.md) for more information on facial motions and
 Element Facemap. To get started with building your data pipeline visit the
 [Tutorials page](./tutorials.md).
-
-![element-facemap diagram](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/attached_facemap_element.svg)
