@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-from setuptools import setup, find_packages
 from os import path
+
+from setuptools import find_packages, setup
 
 pkg_name = next(p for p in find_packages() if "." not in p)
 here = path.abspath(path.dirname(__file__))
@@ -16,7 +17,7 @@ with open(path.join(here, pkg_name, "version.py")) as f:
 
 setup(
     name=pkg_name.replace("_", "-"),
-    version=__version__,
+    version=__version__,  # noqa F821
     description="Facemap DataJoint element",
     long_description=long_description,
     long_description_content_type="text/markdown",

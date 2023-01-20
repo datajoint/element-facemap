@@ -1,11 +1,12 @@
-import datajoint as dj
-import cv2
-import inspect
 import importlib
-import numpy as np
+import inspect
+from datetime import datetime
 from glob import glob
 from pathlib import Path
-from datetime import datetime
+
+import cv2
+import datajoint as dj
+import numpy as np
 from element_interface.utils import find_full_path, find_root_directory
 
 schema = dj.schema()
