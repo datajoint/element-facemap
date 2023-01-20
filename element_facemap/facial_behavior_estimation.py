@@ -89,7 +89,7 @@ def get_facemap_root_data_dir():
 def get_facemap_processed_data_dir() -> str:
     """Facemap output directory
 
-    If specified by the user, this function provides Facemapp with an output
+    If specified by the user, this function provides Facemap with an output
     directory for processed files. If unspecified, output files will be stored
     in the session directory 'videos' folder, per Facemap default
 
@@ -119,7 +119,7 @@ def get_facemap_video_files(video_key: dict) -> list[Path]:
 
 @schema
 class VideoRecording(dj.Manual):
-    """Video recoreded in an experiment session for Facemap analysis.
+    """Video recorded in an experiment session for Facemap analysis.
 
     Attributes:
         Session (foreign key) : Primary key for Session table.
@@ -143,7 +143,6 @@ class VideoRecording(dj.Manual):
             file_id (smallint) : File ID.
             file_path ( varchar(255) ) : Filepath of video, relative to root directory.
         """
-
 
         definition = """
         -> master
@@ -275,7 +274,6 @@ class FacemapProcessing(dj.Computed):
         processing_time (datetime) : Time of generation of the facemap results.
         package_version ( varchar(16),optional) : Package version.
     """
-
 
     definition = """
     # Processing Procedure
@@ -513,7 +511,7 @@ def get_loader_result(key, table):
 
     Returns:
         loaded_dataset (np.array): The results of the facemap analysis.
-        creation_time (datetimt): Date and time at the loading of the results.
+        creation_time (datetime): Date and time at the loading of the results.
     """
     output_dir = (table & key).fetch1("facemap_output_dir")
 

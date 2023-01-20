@@ -1,6 +1,3 @@
 # Tutorials
 
-## Install Instructions
-
-
-## Notebooks
+Coming soon!

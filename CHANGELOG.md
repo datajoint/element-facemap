@@ -1,31 +1,32 @@
 # Changelog
 
-Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
+Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and 
+[Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
 ## [0.1.3] - 2022-10-11
-### Added
-+ CICD workflows for PyPI release
-### Bug Fix
-- Fix lagging motion index
+
++ Add - CICD workflows for PyPI release
++ Fix - lagging motion index
 
 ## [0.1.2] - 2022-05-17
-### Bug Fix
-- Recording duration attribute name
+
++ Fix - Recording duration attribute name
 
 ## [0.1.1] - 2022-05-13
-### Bug Fix
-- any -> np.any
+
++ Fix - any -> np.any
 
 ## [0.1.0] - 2022-05-10
-### Added
-- Adopted black formatting into code base
+
++ Add - Adopt black formatting into code base
 
 ## [0.0.1] - 2022-03-29
-### Added
-- Multiple file processing
-- Support for avi video files
-- Stores left singular vector, right singular vector, and the non-zero elements of the diagonal matrix
-- Output directory inferral, if unspecified.
+
++ Add - Multiple file processing
++ Add - Support for avi video files
++ Add - Stores left singular vector, right singular vector, and the non-zero elements of
+  the diagonal matrix
++ Add - Output directory inferral, if unspecified.
 
 [0.1.3]: https://github.com/datajoint/element-facemap/releases/tag/0.1.3
 [0.1.2]: https://github.com/datajoint/element-facemap/releases/tag/0.1.2
