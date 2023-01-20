@@ -20,8 +20,8 @@ def activate(
     """Activate schema.
 
     Args:
-        schema_name (str): Schema name on the database server to activate the `facemap`
-            element
+        facemap_schema_name (str): Schema name on the database server to activate the
+            `facemap` element
         create_schema (bool): When True (default), create schema in the database if it
             does not yet exist.
         create_tables (bool): When True (default), create tables in the database if
@@ -507,8 +507,8 @@ def get_loader_result(key, table):
 
     Args:
         key (dict): A primary key to an entry in FacemapTask.
-        table (dj.Computed): The class defining the table to retrieve
-        the loaded results from (e.g. FacemapTask)
+        table (dj.Computed): The class defining the table to retrieve the loaded results
+            from (e.g. FacemapTask)
 
     Returns:
         loaded_dataset (np.array): The results of the facemap analysis.

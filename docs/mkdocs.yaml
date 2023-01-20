@@ -85,12 +85,19 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 plugins:
+  - markdownextradata: {}
   - search
   # - redirects: # OPTIONAL REDIRECTS
   #     redirect_maps:
   #       "index.md": "getting_started.md"
   - mkdocstrings:
       default_handler: python
+      handlers:
+        python:
+          options:
+            members_order: source      
+            group_by_category: false
+            line_length: 88
   - gen-files:
       scripts:
       - ./src/api/make_pages.py
@@ -99,6 +106,9 @@ plugins:
   - exclude-search:
       exclude:
         - "*/navigation.md"
+  - mkdocs-jupyter: # For future tutorial notebooks
+      ignore_h1_titles: True
+      ignore: ["*make_pages.py"]
 markdown_extensions:
   - attr_list
   - md_in_html
@@ -125,7 +135,7 @@ markdown_extensions:
 
   
 extra:
-  PATCH_VERSION: !ENV PATCH_VERSION #MISSING!
+  PATCH_VERSION: !ENV PATCH_VERSION 
   generator: false # Disable watermark
   analytics:
     provider: google
