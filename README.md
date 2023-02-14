@@ -1,6 +1,6 @@
 # DataJoint Element - Facemap
 
-DataJoint element for tracking facial movements of mouse with
+DataJoint Element for tracking facial movements of a mouse with
 [Facemap](https://github.com/MouseLand/facemap). DataJoint Elements
 collectively standardize and automate data collection and analysis for neuroscience
 experiments. Each Element is a modular pipeline for data storage and processing with
