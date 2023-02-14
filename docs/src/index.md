@@ -10,6 +10,6 @@ fully functional pipeline.
 ![diagram](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/diagram_flowchart.svg)
 
 
-Visit the [Concepts page](./concepts.md) for more information on facial motions and
+Visit the [Concepts page](./concepts.md) for more information on estimating facial movements and
 Element Facemap. To get started with building your data pipeline visit the
 [Tutorials page](./tutorials.md).

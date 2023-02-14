@@ -19,17 +19,17 @@ ROIs: User can select a rectangular, or ellipsoid shape.
 
 Returns PCA components that give distinct facial features.
 
-## Caveats
 
-The computation time and the memory usage can be pressing for large region of interests.
+## Key Partnerships
 
-## Element Development
+Element Facemap was developed in collaboration with Hui Chen Lu's Lab at Indiana University Bloomington.  Our team also works with the Facemap developers to promote integration and interoperability between Facemap and the DataJoint Element Facemap (see [Sustainability Roadmap](https://datajoint.com/docs/community/partnerships/facemap/)).
 
-Element Facemap was developed for Hui Chen (Lu Lab, Indiana Bloomington University). It
-has a fairly simple design because the metadata of the input videos and the
-calculational steps are very much minimal. The Element Facemap is hosted at github
-repository
-[https://github.com/datajoint/element-facemap](https://github.com/datajoint/element-facemap).
+## Element Features
+
+Through our interviews and direct collaborations, we identified the common motifs to create Element Facemap.
+
+Major features include:
+- Storage of input video metadata
 
 ## Element Architecture
 
@@ -69,8 +69,8 @@ Although not required, most choose to connect the `Session` table to a `Subject`
 | RecordingInfo | |
 | FacemapTask | A set of tasks specifying ... |
 | FacemapProcessing | |
-| Facial Signal | Parent table for the results of Facemap analysis |
-| Facial Signal.Region | Child table for the results of each region |
-| Facial Signal.Region.MovieSVD | Child table for the SVD components  |
-| Facial Signal.Region.MotionSVD |  |
-| Facial Signal.Summary |  |
+| FacialSignal | Parent table for the results of Facemap analysis |
+| FacialSignal.Region | Child table for the results of each region |
+| FacialSignal.Region.MovieSVD | Child table for the SVD components  |
+| FacialSignal.Region.MotionSVD |  |
+| FacialSignal.Summary |  |
