@@ -27,7 +27,7 @@ def activate(
         create_tables (bool): When True (default), create tables in the database if
             they do not yet exist.
         linking_module (str): A module name or a module containing the required
-            dependencies to activate the `facemap` module:
+            dependencies to activate the `facial_behavior_estimation` module:
 
     Dependencies:
     Upstream tables:
