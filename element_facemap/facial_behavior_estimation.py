@@ -35,13 +35,13 @@ def activate(
         + Equipment: A parent table to VideoRecording, identifying video recording equipment
     Functions:
         + get_facemap_root_data_dir() -> list
-            Retrieves the root data director(y/ies) with face recordings for all
-            subject/sessions. Returns a string for full path to the root data directory
+            Retrieves the root data directory(s) with face recordings for all
+            subject/sessions. Returns a string for the full path to the root data directory.
         + get_facemap_processed_data_dir(session_key: dict) -> str
-            Optional function to retrive the desired output directory
+            Optional function to retrieve the desired output directory
             for Facemap files for a given session. If unspecified,
-            output stored in the session video folder, per Facemap default.
-            Returns a string for the absolute path of output directory
+            the output is stored in the video folder for the session, which is the default behavior of Facemap.
+            Returns a string of the absolute path of the output directory.
     """
     if isinstance(linking_module, str):
         linking_module = importlib.import_module(linking_module)
@@ -68,14 +68,14 @@ def activate(
 
 
 def get_facemap_root_data_dir():
-    """Pull relevant func from parent namespace to specify root data dir(s).
+    """Pull the relevant function from the parent namespace to specify the root data directory(s).
 
-    It is recommended that all paths in DataJoint Elements stored as relative
-    paths, with respect to some user-configured "root" director(y/ies). The
+    It is recommended that all paths in DataJoint Elements are stored as relative
+    paths, with respect to some user-configured "root" directory. The
     root(s) may vary between data modalities and user machines.
 
     Returns:
-        paths (list): list of path(s) to root data directory for facemap
+        paths (list): list of path(s) to root data directory(s) for Facemap
     """
     root_directories = _linking_module.get_facemap_root_data_dir()
     if isinstance(root_directories, (str, Path)):
@@ -107,10 +107,10 @@ def get_facemap_video_files(video_key: dict) -> list[Path]:
     """Retrieve the list of video recording files.
 
     Args:
-        video_key: A primary key set of an entry in the VideoRecording table.
+        video_key: Primary key of an entry in the VideoRecording table.
 
     Returns:
-        A list of video files' full paths in the PosixPaths format.
+        List of absolute POSIX paths of the video files.
     """
     return _linking_module.get_facemap_video_files(video_key)
 
