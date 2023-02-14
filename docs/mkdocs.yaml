@@ -128,6 +128,7 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.highlight:
       linenums: true
+  - footnotes
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.arithmatex:

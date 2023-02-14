@@ -2,34 +2,45 @@
 
 ## Facial Motion Tracking
 
-Studying the inner workings of the brain requires understanding the relationship between
-neural activity and the facial activity. Motions in the facial features (e.g. whisker,
-eye/pupil, etc) is one type of behavioral activity that can be measured by Facemap.
+Neuroscience often involves studying relationship between neural activity and the some
+other phenomena. Many mammals, including mice[^1], exhibit facial expressions that
+convey information about emotional and neuronal states. Facemap[^2] is software designed
+to automate the process of noting facial movements, including whisker, eye, and pupil
+movements, using computer vision.
 
-Motions in the face at the whisker or nose Facial motion Pose estimation is a computer
-vision method to track the position, and thereby behavior, of the subject over the
-course of an experiment, which can then be paired with neuronal recordings to answer
-scientific questions about the brain.
+Facemap allows users to designate regions of interest (ROIs) as either rectangles or
+ellipses drawn on top of example frames. The software then runs singular value
+decomposition on these regions on both the raw movie frames and frame-wise difference
+values, which indicate motion. The result of this principle component analysis is a set
+of components, each representing distinct facial features. For best results, researchers
+should use fixed camera recordings, ensuring that all motion within the ROIs reflects
+the subject's facial movement.
 
-Facemap allows running SVD on a region-of-interest either in the movie itself or in the
-motion movie (difference of frames). The region of interest Movie SVD: Frames itself.
-Motion SVD: Difference of frames.
+[^1]: Dolensek, N., Gehrlach, D. A., Klein, A. S., & Gogolla, N. (2020). Facial
+    expressions of emotion states and their neuronal correlates in mice. Science,
+    368(6486), 89-94.
 
-ROIs: User can select a rectangular, or ellipsoid shape.
-
-Returns PCA components that give distinct facial features.
-
+[^2]: Syeda, A., Zhong, L., Tung, R., Long, W., Pachitariu, M., & Stringer, C. (2022).
+    Facemap: a framework for modeling neural activity based on orofacial tracking.
+    bioRxiv, 2022-11
 
 ## Key Partnerships
 
-Element Facemap was developed in collaboration with Hui Chen Lu's Lab at Indiana University Bloomington.  Our team also works with the Facemap developers to promote integration and interoperability between Facemap and the DataJoint Element Facemap (see [Sustainability Roadmap](https://datajoint.com/docs/community/partnerships/facemap/)).
+Element Facemap was developed in collaboration with Hui Chen Lu's Lab at Indiana
+University Bloomington.  Our team also works with the Facemap developers to promote
+integration and interoperability between Facemap and the DataJoint Element Facemap (see
+[Sustainability Roadmap](https://datajoint.com/docs/community/partnerships/facemap/)).
 
 ## Element Features
 
-Through our interviews and direct collaborations, we identified the common motifs to create Element Facemap.
+Through our interviews and direct collaborations, we identified the common motifs to
+create Element Facemap.
 
 Major features include:
-- Storage of input video metadata
+
+- Ingestion and storage of input video metadata.
+- Queueing and triggering of Facemap analysis.
+- Ingestion of analysis outcomes as motion and video principle components.
 
 ## Element Architecture
 
@@ -40,12 +51,6 @@ each table, see the API docs for the respective schemas.
 
 ![element-facemap diagram](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/attached_facemap_element.svg)
 
-### `lab` schema ([API docs](./api/workflow_facemap/pipeline/#workflow_facemap.pipeline.Device))
-
-| Table | Description |
-| --- | --- |
-| Device | Camera metadata |
-
 ### `subject` schema ([API docs](../element-animal/api/element_animal/subject))
 
 Although not required, most choose to connect the `Session` table to a `Subject`
@@ -53,24 +58,24 @@ Although not required, most choose to connect the `Session` table to a `Subject`
 
 | Table | Description |
 | --- | --- |
-| Subject | Basic information of the research subject |
+| Subject | Basic information of the research subject. |
 
 ### `session` schema ([API docs](../element-session/api/element_session/session_with_datetime))
 
 | Table | Description |
 | --- | --- |
-| Session | Unique experimental session identifier |
+| Session | Unique experimental session identifier. |
 
 ### `facial_behavior_estimation` schema ([API docs](./api/element_facemap/facial_behavior_estimation))
 
 | Table | Description |
 | --- | --- |
-| VideoRecording | Video(s) from one recording session, for Facial Motion Tracking |
-| RecordingInfo | |
-| FacemapTask | A set of tasks specifying ... |
-| FacemapProcessing | |
-| FacialSignal | Parent table for the results of Facemap analysis |
-| FacialSignal.Region | Child table for the results of each region |
-| FacialSignal.Region.MovieSVD | Child table for the SVD components  |
-| FacialSignal.Region.MotionSVD |  |
-| FacialSignal.Summary |  |
+| VideoRecording | Video(s) from one recording session, for Facial Motion Tracking. |
+| RecordingInfo | Information extracted from video file. |
+| FacemapTask | Staging table for pairing of recording and Facemap parameters before processing.|
+| FacemapProcessing | Automated table to execute the Facemap with inputs from FacemapTask. |
+| FacialSignal | Results of the Facemap analysis. |
+| FacialSignal.Region | Region properties. |
+| FacialSignal.Region.MotionSVD | Components of the SVD from motion video. |
+| FacialSignal.Region.MovieSVD | Components of the SVD from movie video. |
+| FacialSignal.Summary | Average frames for movie and motion videos. |

@@ -22,9 +22,11 @@
         "Berens",
         "CICD",
         "Conda",
+        "Dolensek",
         "Ecker",
         "elif",
         "Ephys",
+        "Gehrlach",
         "Hoenselaar",
         "IACUC",
         "inferral",
@@ -36,6 +38,8 @@
         "mkdocstrings",
         "movmask",
         "nframes",
+        "orofacial",
+        "Pachitariu",
         "pymdownx",
         "Reimer",
         "Roboto",
@@ -49,9 +53,12 @@
         "Siapas",
         "Sinz",
         "Sitonic",
+        "Syeda",
         "Tolias",
+        "Tung",
         "Yatsenko",
         "yrange",
+        "Zhong",
         "Zuckerman"
     ]
 }
