@@ -91,8 +91,7 @@ def get_facemap_processed_data_dir() -> str:
     """Facemap output directory
 
     If specified by the user, this function provides Facemap with an output
-    directory for processed files. If unspecified, output files will be stored
-    in the session directory 'videos' folder, per Facemap default
+    directory for processed files. If unspecified, the output is stored in the video directory for the session, which is the default behavior of Facemap.
 
     Returns:
         path (str): path to Facemap output directory
