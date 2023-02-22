@@ -3,6 +3,7 @@ import inspect
 from datetime import datetime
 from glob import glob
 from pathlib import Path
+from typing import List, Tuple
 
 import cv2
 import datajoint as dj
@@ -102,7 +103,7 @@ def get_facemap_processed_data_dir() -> str:
         return get_facemap_root_data_dir()[0]
 
 
-def get_facemap_video_files(video_key: dict) -> list[Path]:
+def get_facemap_video_files(video_key: dict) -> List[Path]:
     """Retrieve the list of video recording files.
 
     Args:
@@ -501,13 +502,15 @@ class FacialSignal(dj.Imported):
 # ---------------- HELPER FUNCTIONS ----------------
 
 
-def get_loader_result(key, table):
+def get_loader_result(
+    key: dict, table: dj.user_tables.TableMeta
+) -> Tuple[np.array, datetime]:
     """Retrieve the facemap analysis results.
 
     Args:
-        key (dict): A primary key to an entry in FacemapTask.
-        table (dj.Computed): The class defining the table to retrieve the loaded results
-            from (e.g. FacemapTask)
+        key (dict): A primary key for an entry in the provided table.
+        table (dj.Table): DataJoint user table from which loaded results are retrieved,
+            either FacemapProcessing or FacialSignal.
 
     Returns:
         loaded_dataset (np.array): The results of the facemap analysis.
