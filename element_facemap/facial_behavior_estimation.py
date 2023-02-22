@@ -139,7 +139,7 @@ class VideoRecording(dj.Manual):
         """Relative path of video file with respect to facemap_root_data_dir directory.
 
         Attributes:
-            master (foreign key) : Primary key for master table.
+            master (foreign key) : Primary key for VideoRecording table.
             file_id (smallint) : File ID.
             file_path ( varchar(255) ) : Filepath of video, relative to root directory.
         """
@@ -228,15 +228,15 @@ class FacemapTask(dj.Manual):
         facemap_task_id (smallint) : Facemap task ID
         facemap_output_dir ( varchar(255), optional) : output dir storing the results
             of Facemap analysis.
-        task_mode (enum, optional) : Default load. Or trigger analysis.
+        task_mode (enum) : Default load. Load or trigger analysis.
         facemap_params (longblob) : content of facemap's _proc.npy as dict.
-        do_mot_svd (bool, optional) : Default 1. Do motion singular value decomposition.
-        do_mov_svd (bool, optional) : Default 0. Do movie singular value decomposition.
-        task_description='' ( varchar(128), optional) : Task description.
+        do_mot_svd (bool) : Default 1. Do motion singular value decomposition.
+        do_mov_svd (bool) : Default 0. Do movie singular value decomposition.
+        task_description ( varchar(128), optional) : Task description.
     """
 
     definition = """
-    # Configuration for a facemap analysis task on a particular VideoRecording
+    # Staging table for pairing of recording and Facemap parameters before processing.
     -> VideoRecording
     facemap_task_id             : smallint
     ---
@@ -267,12 +267,12 @@ class FacemapTask(dj.Manual):
 
 @schema
 class FacemapProcessing(dj.Computed):
-    """Automated table to execute the Facemap with inputs from FacemapTask.
+    """Automated table to run Facemap with inputs from FacemapTask.
 
     Attributes:
         FacemapTask (foreign key) : Primary key for FacemapTask table.
         processing_time (datetime) : Time of generation of the facemap results.
-        package_version ( varchar(16),optional) : Package version.
+        package_version ( varchar(16), optional) : Facemap package version.
     """
 
     definition = """
@@ -290,7 +290,7 @@ class FacemapProcessing(dj.Computed):
         return FacemapTask & VideoRecording.File
 
     def make(self, key):
-        """Runs the Facemap and ingests the FacemapProcessing with the execution time."""
+        """Runs Facemap"""
 
         task_mode = (FacemapTask & key).fetch1("task_mode")
 
@@ -345,9 +345,9 @@ class FacialSignal(dj.Imported):
         """Region's properties.
 
         Attributes:
-            master (foreign key) : Primary key for master table.
+            master (foreign key) : Primary key of the FacialSignal table.
             roi_no (int) : Region number.
-            roi_name='' ( varchar(16) ) : User-friendly name of the roi.
+            roi_name ( varchar(16), optional ) : User-friendly name of the roi.
             xrange (longblob) : 1d np.array - x pixel indices.
             yrange (longblob) : 1d np.array - y pixel indices.
             xrange_bin (longblob) : 1d np.array - binned x pixel indices.
@@ -357,7 +357,7 @@ class FacialSignal(dj.Imported):
 
         definition = """
         -> master
-        roi_no        : int         # region no
+        roi_no        : int         # Region number
         ---
         roi_name=''   : varchar(16) # user-friendly name of the roi
         xrange        : longblob    # 1d np.array - x pixel indices
@@ -373,14 +373,14 @@ class FacialSignal(dj.Imported):
         Attributes:
             master (foreign key) : Primary key for master table.Region.
             pc_no (int) : Principle component (PC) number.
-            singular_value=null (float) : singular value corresponding to the PC.
+            singular_value (float, optional) : singular value corresponding to the PC.
             motmask (longblob) : PC (y, x).
             projection (longblob) : projections onto the principle component (nframes).
         """
 
         definition = """
         -> master.Region
-        pc_no               : int         # principle component (PC) no
+        pc_no               : int         # principle component (PC) number
         ---
         singular_value=null : float       # singular value corresponding to the PC
         motmask             : longblob    # PC (y, x)
