@@ -371,7 +371,7 @@ class FacialSignal(dj.Imported):
         """Components of the SVD from motion video.
 
         Attributes:
-            master (foreign key) : Primary key for master table.Region.
+            master.Region (foreign key) : Primary key of the MotionSVD.Region table.
             pc_no (int) : Principle component (PC) number.
             singular_value (float, optional) : singular value corresponding to the PC.
             motmask (longblob) : PC (y, x).
@@ -391,7 +391,7 @@ class FacialSignal(dj.Imported):
         """Components of the SVD from movie video.
 
         Attributes:
-            master (foreign key) : Primary key for master table.Region.
+            master.Region (foreign key) : Primary key of the MotionSVD.Region table.
             pc_no (int) : principle component (PC) number.
             singular_value=null (float) : Singular value corresponding to the PC.
             movmask (longblob) : PC y and x values.
@@ -400,7 +400,7 @@ class FacialSignal(dj.Imported):
 
         definition = """
         -> master.Region
-        pc_no               : int         # principle component (PC) no
+        pc_no               : int         # principle component (PC) number
         ---
         singular_value=null : float       # singular value corresponding to the PC
         movmask             : longblob    # PC (y, x)
