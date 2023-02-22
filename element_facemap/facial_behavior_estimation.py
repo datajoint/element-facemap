@@ -1,11 +1,13 @@
-import datajoint as dj
-import cv2
-import inspect
 import importlib
-import numpy as np
+import inspect
+from datetime import datetime
 from glob import glob
 from pathlib import Path
-from datetime import datetime
+from typing import List, Tuple
+
+import cv2
+import datajoint as dj
+import numpy as np
 from element_interface.utils import find_full_path, find_root_directory
 
 schema = dj.schema()
@@ -16,32 +18,32 @@ _linking_module = None
 def activate(
     facemap_schema_name, *, create_schema=True, create_tables=True, linking_module=None
 ):
-    """
-    activate(schema_name, *, create_schema=True, create_tables=True,
-             linking_module=None)
-    :param schema_name: schema name on the database server to activate the
-                        `facemap` element
-    :param create_schema: when True (default), create schema in the database if it
-                            does not yet exist.
-    :param create_tables: when True (default), create schema in the database if it
-                            does not yet exist.
-    :param linking_module: a module (or name) containing the required dependencies
-                            to activate the `session` element:
-        Upstream tables:
-            + Session: parent table to VideoRecording, identifying a recording session
-            + Device: parent table to VideoRecording, identifying video recording device
-        Functions:
-            + get_facemap_root_data_dir() -> list
-                Retrieve the root data director(y/ies) with face
-                recordings for all subject/sessions.
-                :return: a string for full path to the root data directory
-            + get_facemap_processed_data_dir(session_key: dict) -> str
-                Optional function to retrive the desired output directory
-                for Facemap files for a given session. If unspecified,
-                output stored in the session video folder, per Facemap default
-                :return: a string for the absolute path of output directory
-    """
+    """Activate schema.
 
+    Args:
+        facemap_schema_name (str): Schema name on the database server to activate the
+            `facemap` element
+        create_schema (bool): When True (default), create schema in the database if it
+            does not yet exist.
+        create_tables (bool): When True (default), create tables in the database if
+            they do not yet exist.
+        linking_module (str): A module name or a module containing the required
+            dependencies to activate the `facial_behavior_estimation` module:
+
+    Dependencies:
+    Upstream tables:
+        + Session: A parent table to VideoRecording, identifying a recording session
+        + Equipment: A parent table to VideoRecording, identifying video recording equipment
+    Functions:
+        + get_facemap_root_data_dir() -> list
+            Retrieves the root data directory(s) with face recordings for all
+            subject/sessions. Returns a string for the full path to the root data directory.
+        + get_facemap_processed_data_dir(session_key: dict) -> str
+            Optional function to retrieve the desired output directory
+            for Facemap files for a given session. If unspecified,
+            the output is stored in the video folder for the session, which is the default behavior of Facemap.
+            Returns a string of the absolute path of the output directory.
+    """
     if isinstance(linking_module, str):
         linking_module = importlib.import_module(linking_module)
     assert inspect.ismodule(
@@ -66,17 +68,15 @@ def activate(
 # -------------- Functions required by element-facemap ---------------
 
 
-def get_facemap_root_data_dir() -> list:
-    """
-    It is recommended that all paths in DataJoint Elements stored as relative
-    paths, with respect to some user-configured "root" director(y/ies). The
-    root(s) may vary between data modalities and user machines
-    get_fm_root_data_dir() -> list
-        This user-provided function retrieves the possible root data
-        director(y/ies) containing continuous face data for all subjects
-        and sessions (e.g. acquired video raw files)
-        :return: a string for full path to the behavioral root data directory,
-         or list of strings for possible root data directories
+def get_facemap_root_data_dir():
+    """Pull the relevant function from the parent namespace to specify the root data directory(s).
+
+    It is recommended that all paths in DataJoint Elements are stored as relative
+    paths, with respect to some user-configured "root" directory. The
+    root(s) may vary between data modalities and user machines.
+
+    Returns:
+        paths (list): list of path(s) to root data directory(s) for Facemap
     """
     root_directories = _linking_module.get_facemap_root_data_dir()
     if isinstance(root_directories, (str, Path)):
@@ -89,13 +89,13 @@ def get_facemap_root_data_dir() -> list:
 
 
 def get_facemap_processed_data_dir() -> str:
-    """
-    If specified by the user, this function provides Facemapp with an output
-    directory for processed files. If unspecified, output files will be stored
-    in the session directory 'videos' folder, per Facemap default
-    get_fm_processed_data_dir -> str
-        This user-provided function specifies where Facemap output files
-        will be stored.
+    """Facemap output directory
+
+    If specified by the user, this function provides Facemap with an output
+    directory for processed files. If unspecified, the output is stored in the video directory for the session, which is the default behavior of Facemap.
+
+    Returns:
+        path (str): path to Facemap output directory
     """
     if hasattr(_linking_module, "get_facemap_processed_data_dir"):
         return _linking_module.get_facemap_processed_data_dir()
@@ -103,11 +103,14 @@ def get_facemap_processed_data_dir() -> str:
         return get_facemap_root_data_dir()[0]
 
 
-def get_facemap_video_files(video_key: dict) -> str:
-    """
-    Retrieve the list of video files associated with a given video recording
-    :param video_key: key of a video recording
-    :return: list of Video files' full file-paths
+def get_facemap_video_files(video_key: dict) -> List[Path]:
+    """Retrieve the list of video recording files.
+
+    Args:
+        video_key: Primary key of an entry in the VideoRecording table.
+
+    Returns:
+        List of absolute POSIX paths of the video files.
     """
     return _linking_module.get_facemap_video_files(video_key)
 
@@ -117,6 +120,14 @@ def get_facemap_video_files(video_key: dict) -> str:
 
 @schema
 class VideoRecording(dj.Manual):
+    """Video recorded in an experiment session for Facemap analysis.
+
+    Attributes:
+        Session (foreign key) : Primary key for Session table.
+        recording_id (int) : Recording ID.
+        Device (foreign key) : Primary key for Device table.
+    """
+
     definition = """
     -> Session
     recording_id                : int
@@ -126,6 +137,14 @@ class VideoRecording(dj.Manual):
 
     # One VideoRecording can be saved in multiple files
     class File(dj.Part):
+        """Relative path of video file with respect to facemap_root_data_dir directory.
+
+        Attributes:
+            master (foreign key) : Primary key for VideoRecording table.
+            file_id (smallint) : File ID.
+            file_path ( varchar(255) ) : Filepath of video, relative to root directory.
+        """
+
         definition = """
         -> master
         file_id     : smallint
@@ -136,6 +155,18 @@ class VideoRecording(dj.Manual):
 
 @schema
 class RecordingInfo(dj.Imported):
+    """Information extracted from video file.
+
+    Attributes:
+        VideoRecording (foreign key) : Primary key for VideoRecording table.
+        px_height (int) : Height in pixels.
+        px_width (int) : Width in pixels.
+        nframes (int) : Number of frames.
+        fps (int) : Frames per second in Hz.
+        recording_duration (float) : Video duration in seconds.
+        recording_time (datetime, optional) : Time at the beginning of the recording.
+    """
+
     definition = """
     -> VideoRecording
     ---
@@ -149,9 +180,12 @@ class RecordingInfo(dj.Imported):
 
     @property
     def key_source(self):
+        """Limits the population of RecordingInfo to video recordings that have file paths ingested."""
         return VideoRecording & VideoRecording.File
 
     def make(self, key):
+        """Populates the RecordingInfo table."""
+
         file_paths = (VideoRecording.File & key).fetch("file_path")
 
         nframes = 0
@@ -188,8 +222,22 @@ class RecordingInfo(dj.Imported):
 
 @schema
 class FacemapTask(dj.Manual):
+    """Staging table for pairing of recording and Facemap parameters before processing.
+
+    Attributes:
+        VideoRecording (foreign key) : Primary key for VideoRecording table.
+        facemap_task_id (smallint) : Facemap task ID
+        facemap_output_dir ( varchar(255), optional) : output dir storing the results
+            of Facemap analysis.
+        task_mode (enum) : Default load. Load or trigger analysis.
+        facemap_params (longblob) : content of facemap's _proc.npy as dict.
+        do_mot_svd (bool) : Default 1. Do motion singular value decomposition.
+        do_mov_svd (bool) : Default 0. Do movie singular value decomposition.
+        task_description ( varchar(128), optional) : Task description.
+    """
+
     definition = """
-    # Configuration for a facemap analysis task on a particular VideoRecording
+    # Staging table for pairing of recording and Facemap parameters before processing.
     -> VideoRecording
     facemap_task_id             : smallint
     ---
@@ -220,6 +268,14 @@ class FacemapTask(dj.Manual):
 
 @schema
 class FacemapProcessing(dj.Computed):
+    """Automated table to run Facemap with inputs from FacemapTask.
+
+    Attributes:
+        FacemapTask (foreign key) : Primary key for FacemapTask table.
+        processing_time (datetime) : Time of generation of the facemap results.
+        package_version ( varchar(16), optional) : Facemap package version.
+    """
+
     definition = """
     # Processing Procedure
     -> FacemapTask
@@ -231,9 +287,12 @@ class FacemapProcessing(dj.Computed):
     # Process only the VideoRecordings that have their Info inserted.
     @property
     def key_source(self):
+        """Limits the population of FacemapProcessing to those that have VideoRecording.File defined."""
         return FacemapTask & VideoRecording.File
 
     def make(self, key):
+        """Runs Facemap"""
+
         task_mode = (FacemapTask & key).fetch1("task_mode")
 
         output_dir = (FacemapTask & key).fetch1("facemap_output_dir")
@@ -273,15 +332,33 @@ class FacemapProcessing(dj.Computed):
 
 @schema
 class FacialSignal(dj.Imported):
-    definition = """
-    # PCA analysis results obtained with Facemap
+    """Results of the Facemap analysis.
+
+    Attributes:
+        FacemapProcessing (foreign key) : Primary key for FacemapProcessing table.
+    """
+
+    definition = """# Facemap results
     -> FacemapProcessing
     """
 
     class Region(dj.Part):
+        """Region's properties.
+
+        Attributes:
+            master (foreign key) : Primary key of the FacialSignal table.
+            roi_no (int) : Region number.
+            roi_name ( varchar(16), optional ) : User-friendly name of the roi.
+            xrange (longblob) : 1d np.array - x pixel indices.
+            yrange (longblob) : 1d np.array - y pixel indices.
+            xrange_bin (longblob) : 1d np.array - binned x pixel indices.
+            yrange_bin (longblob) : 1d np.array - binned y pixel indices.
+            motion (longblob) : 1d np.array - absolute motion energies (nframes).
+        """
+
         definition = """
         -> master
-        roi_no        : int         # region no
+        roi_no        : int         # Region number
         ---
         roi_name=''   : varchar(16) # user-friendly name of the roi
         xrange        : longblob    # 1d np.array - x pixel indices
@@ -292,9 +369,19 @@ class FacialSignal(dj.Imported):
         """
 
     class MotionSVD(dj.Part):
+        """Components of the SVD from motion video.
+
+        Attributes:
+            master.Region (foreign key) : Primary key of the FacialSignal.Region table.
+            pc_no (int) : Principle component (PC) number.
+            singular_value (float, optional) : singular value corresponding to the PC.
+            motmask (longblob) : PC (y, x).
+            projection (longblob) : projections onto the principle component (nframes).
+        """
+
         definition = """
         -> master.Region
-        pc_no               : int         # principle component (PC) no
+        pc_no               : int         # principle component (PC) number
         ---
         singular_value=null : float       # singular value corresponding to the PC
         motmask             : longblob    # PC (y, x)
@@ -302,9 +389,19 @@ class FacialSignal(dj.Imported):
         """
 
     class MovieSVD(dj.Part):
+        """Components of the SVD from movie video.
+
+        Attributes:
+            master.Region (foreign key) : Primary key of the FacialSignal.Region table.
+            pc_no (int) : principle component (PC) number.
+            singular_value (float, optional) : Singular value corresponding to the PC.
+            movmask (longblob) : PC (y, x)
+            projection (longblob) : Projections onto the principle component (nframes).
+        """
+
         definition = """
         -> master.Region
-        pc_no               : int         # principle component (PC) no
+        pc_no               : int         # principle component (PC) number
         ---
         singular_value=null : float       # singular value corresponding to the PC
         movmask             : longblob    # PC (y, x)
@@ -312,6 +409,15 @@ class FacialSignal(dj.Imported):
         """
 
     class Summary(dj.Part):
+        """Average frames for movie and motion videos.
+
+        Attributes:
+            master (foreign key) : Primary key of the FacialSignal table.
+            sbin (int) : Spatial bin size.
+            avgframe (longblob) : 2d np.array - average binned frame.
+            avgmotion (longblob) : 2d nd.array - average binned motion frame.
+        """
+
         definition = """
         -> master
         ---
@@ -321,6 +427,9 @@ class FacialSignal(dj.Imported):
         """
 
     def make(self, key):
+        """Populates the FacialSignal table by transferring the results from default
+        Facemap outputs to the database."""
+
         dataset, _ = get_loader_result(key, FacemapTask)
         # Only motion SVD region type is supported.
         dataset["rois"] = [x for x in dataset["rois"] if x["rtype"] == "motion SVD"]
@@ -393,13 +502,18 @@ class FacialSignal(dj.Imported):
 # ---------------- HELPER FUNCTIONS ----------------
 
 
-def get_loader_result(key, table):
-    """
-    Retrieve the results from the facemap loader
-        :param key: the `key` to one entry of FacemapTask
-        :param table: the class defining the table to retrieve
-         the loaded results from (e.g. FacemapTask)
-        :return: output dictionary in the _proc.npy and the creation date time
+def get_loader_result(
+    key: dict, table: dj.user_tables.TableMeta
+) -> Tuple[np.array, datetime]:
+    """Retrieve the facemap analysis results.
+
+    Args:
+        key (dict): A primary key for an entry in the provided table.
+        table (dj.Table): DataJoint user table from which loaded results are retrieved (i.e. FacemapTask).
+
+    Returns:
+        loaded_dataset (np.array): The results of the facemap analysis.
+        creation_time (datetime): Date and time that the results files were created.
     """
     output_dir = (table & key).fetch1("facemap_output_dir")
 
