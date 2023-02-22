@@ -371,7 +371,7 @@ class FacialSignal(dj.Imported):
         """Components of the SVD from motion video.
 
         Attributes:
-            master.Region (foreign key) : Primary key of the MotionSVD.Region table.
+            master.Region (foreign key) : Primary key of the FacialSignal.Region table.
             pc_no (int) : Principle component (PC) number.
             singular_value (float, optional) : singular value corresponding to the PC.
             motmask (longblob) : PC (y, x).
@@ -391,10 +391,10 @@ class FacialSignal(dj.Imported):
         """Components of the SVD from movie video.
 
         Attributes:
-            master.Region (foreign key) : Primary key of the MotionSVD.Region table.
+            master.Region (foreign key) : Primary key of the FacialSignal.Region table.
             pc_no (int) : principle component (PC) number.
-            singular_value=null (float) : Singular value corresponding to the PC.
-            movmask (longblob) : PC y and x values.
+            singular_value (float, optional) : Singular value corresponding to the PC.
+            movmask (longblob) : PC (y, x)
             projection (longblob) : Projections onto the principle component (nframes).
         """
 
@@ -411,7 +411,7 @@ class FacialSignal(dj.Imported):
         """Average frames for movie and motion videos.
 
         Attributes:
-            master (foreign key) : Primary key for master table.
+            master (foreign key) : Primary key of the FacialSignal table.
             sbin (int) : Spatial bin size.
             avgframe (longblob) : 2d np.array - average binned frame.
             avgmotion (longblob) : 2d nd.array - average binned motion frame.
@@ -511,7 +511,7 @@ def get_loader_result(key, table):
 
     Returns:
         loaded_dataset (np.array): The results of the facemap analysis.
-        creation_time (datetime): Date and time at the loading of the results.
+        creation_time (datetime): Date and time that the results files were created.
     """
     output_dir = (table & key).fetch1("facemap_output_dir")
 

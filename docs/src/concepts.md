@@ -2,10 +2,9 @@
 
 ## Facial Motion Tracking
 
-Neuroscience often involves studying relationship between neural activity and the some
-other phenomena. Many mammals, including mice[^1], exhibit facial expressions that
+Neuroscience often involves studying relationships between neural activity and subject behavior. Many mammals, including mice[^1], exhibit facial expressions that
 convey information about emotional and neuronal states. Facemap[^2] is software designed
-to automate the process of noting facial movements, including whisker, eye, and pupil
+to automate the process of quantifying facial movements, including whisker, eye, and pupil
 movements, using computer vision.
 
 Facemap allows users to designate regions of interest (ROIs) as either rectangles or
@@ -73,9 +72,9 @@ Although not required, most choose to connect the `Session` table to a `Subject`
 | VideoRecording | Video(s) from one recording session, for Facial Motion Tracking. |
 | RecordingInfo | Information extracted from video file. |
 | FacemapTask | Staging table for pairing of recording and Facemap parameters before processing.|
-| FacemapProcessing | Automated table to execute the Facemap with inputs from FacemapTask. |
+| FacemapProcessing | Automated table to execute Facemap with inputs from FacemapTask. |
 | FacialSignal | Results of the Facemap analysis. |
 | FacialSignal.Region | Region properties. |
-| FacialSignal.Region.MotionSVD | Components of the SVD from motion video. |
-| FacialSignal.Region.MovieSVD | Components of the SVD from movie video. |
+| FacialSignal.MotionSVD | Components of the SVD from motion video. |
+| FacialSignal.MovieSVD | Components of the SVD from movie video. |
 | FacialSignal.Summary | Average frames for movie and motion videos. |
