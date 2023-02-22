@@ -509,8 +509,7 @@ def get_loader_result(
 
     Args:
         key (dict): A primary key for an entry in the provided table.
-        table (dj.Table): DataJoint user table from which loaded results are retrieved,
-            either FacemapProcessing or FacialSignal.
+        table (dj.Table): DataJoint user table from which loaded results are retrieved (i.e. FacemapTask).
 
     Returns:
         loaded_dataset (np.array): The results of the facemap analysis.
