@@ -3,6 +3,10 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.1.4] - 2023-04-28
+
++ Fix - `.ipynb` output in tutorials is not visible in dark mode.
+
 ## [0.1.3] - 2022-10-11
 
 + Add - CICD workflows for PyPI release
@@ -28,6 +32,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
   the diagonal matrix
 + Add - Output directory inferral, if unspecified.
 
+[0.1.4]: https://github.com/datajoint/element-facemap/releases/tag/0.1.4
 [0.1.3]: https://github.com/datajoint/element-facemap/releases/tag/0.1.3
 [0.1.2]: https://github.com/datajoint/element-facemap/releases/tag/0.1.2
 [0.1.1]: https://github.com/datajoint/element-facemap/releases/tag/0.1.1
