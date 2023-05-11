@@ -2,42 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>http://localhost/docs/element/element-facemap/0.1/</loc>
-         <lastmod>2023-02-22</lastmod>
+         <lastmod>2023-05-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/element/element-facemap/0.1/CHANGELOG/</loc>
-         <lastmod>2023-02-22</lastmod>
+         <lastmod>2023-05-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/element/element-facemap/0.1/citation/</loc>
-         <lastmod>2023-02-22</lastmod>
+         <lastmod>2023-05-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/element/element-facemap/0.1/concepts/</loc>
-         <lastmod>2023-02-22</lastmod>
+         <lastmod>2023-05-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/element/element-facemap/0.1/tutorials/</loc>
-         <lastmod>2023-02-22</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>None</loc>
-         <lastmod>2023-02-22</lastmod>
+         <lastmod>2023-05-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/element/element-facemap/0.1/api/element_facemap/facial_behavior_estimation/</loc>
-         <lastmod>2023-02-22</lastmod>
+         <lastmod>2023-05-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>http://localhost/docs/element/element-facemap/0.1/api/element_facemap/version/</loc>
-         <lastmod>2023-02-22</lastmod>
+         <lastmod>2023-05-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
