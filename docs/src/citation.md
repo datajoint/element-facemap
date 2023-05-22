@@ -9,4 +9,5 @@ Resource Identifier (RRID).
 
 + DataJoint Elements ([RRID:SCR_021894](https://scicrunch.org/resolver/SCR_021894)) -
   Element Facemap (version {{ PATCH_VERSION }})
-  
+
+If your work uses Facemap, please cite the respective [manuscripts](https://github.com/MouseLand/facemap#citation).
