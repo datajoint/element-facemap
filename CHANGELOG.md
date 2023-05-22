@@ -6,6 +6,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 ## [0.1.6] - 2023-05-22
 
 + Add - Facemap citation
++ Update - mkdocs.yaml
 
 ## [0.1.5] - 2023-05-11
 
