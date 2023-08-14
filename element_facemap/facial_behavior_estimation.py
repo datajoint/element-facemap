@@ -141,7 +141,7 @@ class VideoRecording(dj.Manual):
 
         Attributes:
             master (foreign key) : Primary key for VideoRecording table.
-            file_id (smallint) : File ID.
+            file_id (smallint) : File identification number.
             file_path ( varchar(255) ) : Filepath of video, relative to root directory.
         """
 
@@ -313,16 +313,42 @@ class FacemapProcessing(dj.Computed):
                     for video_file in video_files
                 ]
             ]
+            # Processing performed using SVD (original facemap)
+            if params["do_SVD"] == True:
+                output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
+                facemap_run(
+                    video_files,
+                    sbin=params["sbin"],
+                    proc=params,
+                    savepath=output_dir.as_posix(),
+                    motSVD=params["motSVD"],
+                    movSVD=params["movSVD"],
+                )
 
-            output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
-            facemap_run(
-                video_files,
-                sbin=params["sbin"],
-                proc=params,
-                savepath=output_dir.as_posix(),
-                motSVD=params["motSVD"],
-                movSVD=params["movSVD"],
-            )
+            # Processing performed using externally trained deep learning models
+            else:
+                from facemap.pose import facemap_pose
+
+                pose = facemap_pose.Pose(
+                    filenames=video_files,
+                    bbox=params["bbox"],
+                    gui=None,
+                    GUIobject=None,
+                    model_name=str(params["model_name"]),
+                )
+                # Can make upstream train dataset table to fetch custom pretrained models to be used
+                # Or need to insert names of the trained models into the facemap paramset
+
+                # Need to configure downstream tables for interpretation of the outputed hdf5 file
+
+                # Run facial pose inference
+                # pose.pose_prediction_setup()  # Loads model, updates resize/padding
+
+                # Runs pose prediciton setup and predict landmarks for each video file
+                # Save data to hdf5 file format
+
+                pose.run()
+                #
 
         _, creation_time = get_loader_result(key, FacemapTask)
         key = {**key, "processing_time": creation_time}
@@ -338,7 +364,7 @@ class FacialSignal(dj.Imported):
         FacemapProcessing (foreign key) : Primary key for FacemapProcessing table.
     """
 
-    definition = """# Facemap results
+    definition = """     # Facemap results
     -> FacemapProcessing
     """
 
