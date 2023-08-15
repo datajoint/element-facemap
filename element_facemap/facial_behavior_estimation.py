@@ -124,7 +124,7 @@ class VideoRecording(dj.Manual):
 
     Attributes:
         Session (foreign key) : Primary key for Session table.
-        recording_id (int) : Recording ID.
+        recording_id (int) : Recording identification number. 
         Device (foreign key) : Primary key for Device table.
     """
 
@@ -152,6 +152,69 @@ class VideoRecording(dj.Manual):
         file_path   : varchar(255)  # filepath of video, relative to root directory
         """
 
+
+@schema
+class BodyPart(dj.Lookup):
+    """Cumulative list of all body parts tracked by all facemap models
+
+    Attributes:
+        body_part ( varchar(32) ): Body part short name.
+        body_part_description ( varchar(1000),optional ): Full description
+
+    """
+
+    definition = """
+    body_part                : varchar(32)
+    ---
+    body_part_description='' : varchar(1000)
+    """
+
+    @classmethod
+    def extract_new_body_parts(cls, ):
+
+
+@schema
+class FacemapModel(dj.Manual):
+    """Trained Models stored in an experiment session for facial pose inference
+
+    Attributes:
+        Session (foregin key) : Primary key for Session table.
+        model_id(int) : Count of models inserted
+        model_name( varchar(64) ): Name of model, filepath.stem
+    """
+
+    definition = """
+    -> Session
+    model_id   : int
+    model_name : varchar(64)
+    """
+    class BodyPart(dj.Part):
+        """Body parts associated with a given model
+
+        Attributes:
+            body_part ( varchar(32) ): Body part name, (location specfication)
+            body_part_description ( varchar(1000) ): Optional. Longer description."""
+        
+        definition = """
+        -> master
+        -> BodyPart
+        """
+
+    class File(dj.Part):
+        """Relative paths of facemap models with respect to facemap_root_data_dir
+
+        Attributes:
+            FacemapModel (foreign key): Facemap model primary key.
+            file_path ( varchar(255) ): filepath of facemap model, relative to root data dir
+        """
+
+        definition = """
+        -> master
+        file_id: int
+        ---
+        file_path: varchar(255) # model filepath, relative to root data dir
+        """
+        
 
 @schema
 class RecordingInfo(dj.Imported):
@@ -264,6 +327,18 @@ class FacemapTask(dj.Manual):
             output_dir.mkdir(parents=True, exist_ok=True)
 
         return output_dir.relative_to(processed_dir) if relative else output_dir
+
+
+@schema
+class FacemapTraining(dj.Computed):
+    """_summary_
+
+    Args:
+        dj (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
 
 
 @schema
