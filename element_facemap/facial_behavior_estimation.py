@@ -404,19 +404,17 @@ class FacemapProcessing(dj.Computed):
                     net,
                 )
                 facemap_model = (FacemapModel.File & f'model_name like "{params["model_name"]}"').fetch('file')
-
+                facemap_model_path = (FacemapModel.File & f'model_name like "{params["model_name"]}"').fetch('file_path')
                 # Can make upstream train dataset table to fetch custom pretrained models to be used
                 # Or need to insert names of the trained models into the facemap paramset
 
                 # Need to configure downstream tables for interpretation of the outputed hdf5 file
 
+                # Run pose prediction setup 
                 # Run facial pose inference
-                # pose.pose_prediction_setup()  # Loads model, updates resize/padding
 
                 # Runs pose prediciton setup and predict landmarks for each video file
                 # Save data to hdf5 file format
-
-                # pose.run()
                 
 
                 # Set model name to model path, so that torch can load the model
@@ -452,8 +450,54 @@ class FacemapProcessing(dj.Computed):
                             self.resize = True
                     self.bbox_set = True
 
-                # Run model inference
-                
+                # Run model inference, i.e. predict landmarks (xlabels, ylabels, likelihood)
+                for video_id in range(len(self.filenames[0])):
+                    print("\nProcessing video: {}".format(self.filenames[0][video_id]))
+                    pred_data, metadata = self.predict_landmarks(video_id)
+                    
+                    # Save model as hdf5 file
+                    # Create a multi-index dict to store data in HDF5 file. First index is the scorer name, second index is the bodypart names, and third index is the coordinates (x, y, likelihood)
+                    scorer = "Facemap"
+                    bodyparts = self.bodyparts
+                    data_dict = {}
+                    data_dict[scorer] = {}
+                    if selected_frame_ind is None:
+                        indices = np.arange(self.cumframes[-1])
+                    else:
+                        indices = selected_frame_ind
+                    for index, bodypart in enumerate(bodyparts):
+                        data_dict[scorer][bodypart] = {}
+                        data_dict[scorer][bodypart]["x"] = data[:, index, 0][indices]
+                        data_dict[scorer][bodypart]["y"] = data[:, index, 1][indices]
+                        data_dict[scorer][bodypart]["likelihood"] = data[:, index, 2][indices]
+
+                    if self.gui is not None:
+                        basename = self.gui.save_path
+                        _, filename = os.path.split(self.filenames[0][video_id])
+                        videoname, _ = os.path.splitext(filename)
+                    else:
+                        basename, filename = os.path.split(self.filenames[0][video_id])
+                        videoname, _ = os.path.splitext(filename)
+                    hdf5_filepath = os.path.join(basename, videoname + "_FacemapPose.h5")
+                    with h5py.File(hdf5_filepath, "w") as f:
+                        self.save_dict_to_hdf5(f, facemap_model_path.parent, data_dict)
+                    return hdf5_filepath
+
+                    hdf5_filepath = os.path.join(basename, videoname + "_FacemapPose.h5")
+                    with h5py.File(hdf5_filepath, "w") as f:
+                        self.save_dict_to_hdf5(f, "", data_dict)
+                    return hdf5_filepath
+
+
+
+                    # Save the data using h5py
+                    savepath = self.save_data_to_hdf5(pred_data.cpu().numpy(), video_id)
+                    print("Saved keypoints:", savepath)
+                    # Save metadata to a pickle file
+                    metadata_file = os.path.splitext(savepath)[0] + "_metadata.pkl"
+                    with open(metadata_file, "wb") as f:
+                        pickle.dump(metadata, f, pickle.HIGHEST_PROTOCOL)
+                    print("Saved metadata:", metadata_file)
                 
 
         _, creation_time = get_loader_result(key, FacemapTask)
