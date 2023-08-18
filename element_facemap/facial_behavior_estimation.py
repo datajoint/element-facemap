@@ -153,40 +153,38 @@ class VideoRecording(dj.Manual):
         """
 
 
-@schema
-class BodyPart(dj.Lookup):
-    """Cumulative list of all body parts tracked by all facemap models
+# @schema
+# class BodyPart(dj.Lookup):
+#     """Cumulative list of all body parts tracked by all facemap models
 
-    Attributes:
-        body_part ( varchar(32) ): Body part short name.
-        body_part_description ( varchar(1000),optional ): Full description
+#     Attributes:
+#         body_part ( varchar(32) ): Body part short name.
+#         body_part_description ( varchar(1000),optional ): Full description
 
-    """
+#     """
 
-    definition = """
-    body_part                : varchar(32)
-    ---
-    body_part_description='' : varchar(1000)
-    """
+#     definition = """
+#     body_part                : varchar(32)
+#     ---
+#     body_part_description='' : varchar(1000)
+#     """
 
-    @classmethod
-    def extract_new_body_parts(cls, ):
+#     @classmethod
+#     def extract_new_body_parts(cls, ):
 
 
 @schema
 class FacemapModel(dj.Manual):
-    """Trained Models stored in an experiment session for facial pose inference
+    """Trained Models stored for facial pose inference
 
     Attributes:
-        Session (foregin key) : Primary key for Session table.
         model_id(int) : Count of models inserted
         model_name( varchar(64) ): Name of model, filepath.stem
     """
 
     definition = """
-    -> Session
-    model_id   : int
-    model_name : varchar(64)
+    model_id   : int            # model index, if multiple models
+    model_name : varchar(64)    # name of model
     """
     class BodyPart(dj.Part):
         """Body parts associated with a given model
@@ -197,7 +195,8 @@ class FacemapModel(dj.Manual):
         
         definition = """
         -> master
-        -> BodyPart
+        body_part: varchar(32)
+        body_part_description: varchar(255)
         """
 
     class File(dj.Part):
@@ -284,6 +283,10 @@ class RecordingInfo(dj.Imported):
 
 
 @schema
+class FacemapParams(dj.Manual):
+
+
+@schema
 class FacemapTask(dj.Manual):
     """Staging table for pairing of recording and Facemap parameters before processing.
 
@@ -310,6 +313,7 @@ class FacemapTask(dj.Manual):
     do_mot_svd=1                : bool
     do_mov_svd=0                : bool
     task_description=''         : varchar(128)
+    facemap_model_name=
     """
 
     def infer_output_dir(self, key, relative=True, mkdir=True):
@@ -327,19 +331,6 @@ class FacemapTask(dj.Manual):
             output_dir.mkdir(parents=True, exist_ok=True)
 
         return output_dir.relative_to(processed_dir) if relative else output_dir
-
-
-@schema
-class FacemapTraining(dj.Computed):
-    """_summary_
-
-    Args:
-        dj (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
 
 @schema
 class FacemapProcessing(dj.Computed):
@@ -389,7 +380,7 @@ class FacemapProcessing(dj.Computed):
                 ]
             ]
             # Processing performed using SVD (original facemap)
-            if params["do_SVD"] == True:
+            if params["trigger_mode"] == "SVD":
                 output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
                 facemap_run(
                     video_files,
@@ -401,16 +392,19 @@ class FacemapProcessing(dj.Computed):
                 )
 
             # Processing performed using externally trained deep learning models
-            else:
-                from facemap.pose import facemap_pose
-
+            elif params["trigger_mode"] == "POSE":
+                model_file = (FacemapModel)
+                from facemap.pose import facemap_pose, facemap_network
+                import torch
                 pose = facemap_pose.Pose(
                     filenames=video_files,
                     bbox=params["bbox"],
                     gui=None,
                     GUIobject=None,
-                    model_name=str(params["model_name"]),
+                    net,
                 )
+                facemap_model = (FacemapModel.File & f'model_name like "{params["model_name"]}"').fetch('file')
+
                 # Can make upstream train dataset table to fetch custom pretrained models to be used
                 # Or need to insert names of the trained models into the facemap paramset
 
@@ -422,8 +416,45 @@ class FacemapProcessing(dj.Computed):
                 # Runs pose prediciton setup and predict landmarks for each video file
                 # Save data to hdf5 file format
 
-                pose.run()
-                #
+                # pose.run()
+                
+
+                # Set model name to model path, so that torch can load the model
+                pose.model_name = facemap_model
+                print("Loading model state from:", self.model_name)
+                pose.net.load_state_dict(torch.load(self.model_name))
+                pose.net.to(pose.device)
+
+                # Load model
+                model_params = torch.load(facemap_model, map_location=self.device)
+                channels = model_params["params"]["channels"]
+                kernel_size = 3
+                nout = len(self.bodyparts)  # number of outputs from the model
+                self.net = facemap_network.FMnet(
+                    img_ch=1,
+                    output_ch=nout,
+                    labels_id=self.bodyparts,
+                    channels=channels,
+                    kernel=kernel_size,
+                    device=self.device,
+                )
+
+                # Pose prediction setup
+                if not self.bbox_set:
+                    for i in range(len(self.Ly)):
+                        x1, x2, y1, y2 = 0, self.Ly[i], 0, self.Lx[i]
+                        self.bbox.append([x1, x2, y1, y2])
+
+                        # Update resize and add padding flags
+                        if x2 - x1 != y2 - y1:  # if not a square frame view then add padding
+                            self.add_padding = True
+                        if x2 - x1 != 256 or y2 - y1 != 256:  # if not 256x256 then resize
+                            self.resize = True
+                    self.bbox_set = True
+
+                # Run model inference
+                
+                
 
         _, creation_time = get_loader_result(key, FacemapTask)
         key = {**key, "processing_time": creation_time}
