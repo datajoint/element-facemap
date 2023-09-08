@@ -10,12 +10,6 @@ import datajoint as dj
 import numpy as np
 from element_interface.utils import find_full_path, find_root_directory
 
-import torch
-import os
-import h5py
-import pickle
-
-
 schema = dj.schema()
 
 _linking_module = None
@@ -130,7 +124,7 @@ class VideoRecording(dj.Manual):
 
     Attributes:
         Session (foreign key) : Primary key for Session table.
-        recording_id (int) : Recording identification number. 
+        recording_id (int) : Recording ID.
         Device (foreign key) : Primary key for Device table.
     """
 
@@ -147,7 +141,7 @@ class VideoRecording(dj.Manual):
 
         Attributes:
             master (foreign key) : Primary key for VideoRecording table.
-            file_id (smallint) : File identification number.
+            file_id (smallint) : File ID.
             file_path ( varchar(255) ) : Filepath of video, relative to root directory.
         """
 
@@ -158,68 +152,6 @@ class VideoRecording(dj.Manual):
         file_path   : varchar(255)  # filepath of video, relative to root directory
         """
 
-
-@schema
-class BodyPart(dj.Lookup):
-    """Cumulative list of all body parts tracked by all facemap models (is this necessary?)
-
-    Attributes:
-        body_part ( varchar(32) ): Body part short name.
-        body_part_description ( varchar(1000),optional ): Full description
-
-    """
-
-    definition = """
-    body_part                : varchar(32)
-    ---
-    body_part_description='' : varchar(1000)
-    """
-
-    @classmethod
-    def extract_new_body_parts(cls, ):
-        # TODO
-
-@schema
-class FacemapModel(dj.Manual):
-    """Trained Models stored for facial pose inference
-
-    Attributes:
-        model_id(int) : Count of models inserted
-        model_name( varchar(64) ): Name of model, filepath.stem
-    """
-
-    definition = """
-    model_id   : int            # model index, if multiple models
-    model_name : varchar(64)    # name of model
-    """
-    class BodyPart(dj.Part):
-        """Body parts associated with a given model
-
-        Attributes:
-            body_part ( varchar(32) ): Body part name, (location specfication)
-            body_part_description ( varchar(1000) ): Optional. Longer description."""
-        
-        definition = """
-        -> master
-        body_part: varchar(32)
-        body_part_description: varchar(255)
-        """
-
-    class File(dj.Part):
-        """Relative paths of facemap models with respect to facemap_root_data_dir
-
-        Attributes:
-            FacemapModel (foreign key): Facemap model primary key.
-            file_path ( varchar(255) ): filepath of facemap model, relative to root data dir
-        """
-
-        definition = """
-        -> master
-        file_id: int
-        ---
-        file_path: varchar(255) # model filepath, relative to root data dir
-        """
-        
 
 @schema
 class RecordingInfo(dj.Imported):
@@ -288,7 +220,6 @@ class RecordingInfo(dj.Imported):
         )
 
 
-
 @schema
 class FacemapTask(dj.Manual):
     """Staging table for pairing of recording and Facemap parameters before processing.
@@ -316,7 +247,6 @@ class FacemapTask(dj.Manual):
     do_mot_svd=1                : bool
     do_mov_svd=0                : bool
     task_description=''         : varchar(128)
-    facemap_model_name=''       : varchar(32)    
     """
 
     def infer_output_dir(self, key, relative=True, mkdir=True):
@@ -334,6 +264,7 @@ class FacemapTask(dj.Manual):
             output_dir.mkdir(parents=True, exist_ok=True)
 
         return output_dir.relative_to(processed_dir) if relative else output_dir
+
 
 @schema
 class FacemapProcessing(dj.Computed):
@@ -382,101 +313,16 @@ class FacemapProcessing(dj.Computed):
                     for video_file in video_files
                 ]
             ]
-            # Processing performed using SVD (original facemap)
-            if params["trigger_mode"] == "SVD":
-                output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
-                facemap_run(
-                    video_files,
-                    sbin=params["sbin"],
-                    proc=params,
-                    savepath=output_dir.as_posix(),
-                    motSVD=params["motSVD"],
-                    movSVD=params["movSVD"],
-                )
 
-            # Processing performed using externally trained deep learning models
-            elif params["trigger_mode"] == "POSE": 
-                from facemap.pose import facemap_pose, facemap_network
-                
-                facemap_model = (FacemapModel.File & f'model_name like "{params["model_name"]}"').fetch('file')
-                facemap_model_path = (FacemapModel.File & f'model_name like "{params["model_name"]}"').fetch('file_path')
-                
-                # Instantiate Pose object, with filenames specified as video files, and bounding specified in params
-                # Assumes GUI to be none
-                pose = facemap_pose.Pose(
-                    filenames=video_files,
-                    bbox=params["bbox"],
-                    gui=None,
-                    GUIobject=None,
-                )
-
-                # Set model name to model path, so that torch can load the model
-                pose.model_name = facemap_model
-                print("Loading model state from:", self.model_name)
-                pose.net.load_state_dict(torch.load(self.model_name))
-                pose.net.to(pose.device)
-
-                # Load model
-                model_params = torch.load(facemap_model, map_location=self.device)
-                channels = model_params["params"]["channels"]
-                kernel_size = 3
-                nout = len(self.bodyparts)  # number of outputs from the model
-                self.net = facemap_network.FMnet(
-                    img_ch=1,
-                    output_ch=nout,
-                    labels_id=self.bodyparts,
-                    channels=channels,
-                    kernel=kernel_size,
-                    device=self.device,
-                )
-
-                # Pose prediction setup
-                if not self.bbox_set:
-                    for i in range(len(self.Ly)):
-                        x1, x2, y1, y2 = 0, self.Ly[i], 0, self.Lx[i]
-                        self.bbox.append([x1, x2, y1, y2])
-
-                        # Update resize and add padding flags
-                        if x2 - x1 != y2 - y1:  # if not a square frame view then add padding
-                            self.add_padding = True
-                        if x2 - x1 != 256 or y2 - y1 != 256:  # if not 256x256 then resize
-                            self.resize = True
-                    self.bbox_set = True
-
-                # Run model inference, i.e. predict landmarks (xlabels, ylabels, likelihood)
-                for video_id in range(len(self.filenames[0])):
-                    print("\nProcessing video: {}".format(self.filenames[0][video_id]))
-                    pred_data, metadata = self.predict_landmarks(video_id)
-                    
-                    data = pred_data.cpu().numpy()
-                    # Save model as hdf5 file
-                    # Create a multi-index dict to store data in HDF5 file. First index is the scorer name, second index is the bodypart names, and third index is the coordinates (x, y, likelihood)
-                    scorer = "Facemap"
-                    bodyparts = self.bodyparts
-                    data_dict = {}
-                    data_dict[scorer] = {}
-                    if params['selected_frame_ind'] is None:
-                        indices = np.arange(self.cumframes[-1])
-                    else:
-                        indices = params['selected_frame_ind']
-                    for index, bodypart in enumerate(bodyparts):
-                        data_dict[scorer][bodypart] = {}
-                        data_dict[scorer][bodypart]["x"] = data[:, index, 0][indices]
-                        data_dict[scorer][bodypart]["y"] = data[:, index, 1][indices]
-                        data_dict[scorer][bodypart]["likelihood"] = data[:, index, 2][indices]
-
-
-                    basename, filename = os.path.split(self.filenames[0][video_id])
-                    videoname, _ = os.path.splitext(filename)
-                    hdf5_filepath = os.path.join(basename, videoname + "_FacemapPose.h5")
-                    with h5py.File(hdf5_filepath, "w") as f:
-                        self.save_dict_to_hdf5(f, facemap_model_path.parent, data_dict)
-
-                    # Save metadata to a pickle file
-                    metadata_file = os.path.splitext(output_dir)[0] + "_metadata.pkl"
-                    with open(metadata_file, "wb") as f:
-                        pickle.dump(metadata, f, pickle.HIGHEST_PROTOCOL)
-                    print("Saved metadata:", metadata_file)
+            output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
+            facemap_run(
+                video_files,
+                sbin=params["sbin"],
+                proc=params,
+                savepath=output_dir.as_posix(),
+                motSVD=params["motSVD"],
+                movSVD=params["movSVD"],
+            )
 
         _, creation_time = get_loader_result(key, FacemapTask)
         key = {**key, "processing_time": creation_time}
@@ -492,7 +338,7 @@ class FacialSignal(dj.Imported):
         FacemapProcessing (foreign key) : Primary key for FacemapProcessing table.
     """
 
-    definition = """     # Facemap results
+    definition = """# Facemap results
     -> FacemapProcessing
     """
 
