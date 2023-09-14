@@ -264,7 +264,7 @@ class FacemapPoseEstimation(dj.Computed):
             model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
             # Fetches file attachment
             facemap_model_name = (FacemapModel.File & f'model_id="{model_id}"').fetch(
-                "file"
+                "model_file"
             )
             facemap_model_path = Path.cwd() / facemap_model_name
 
