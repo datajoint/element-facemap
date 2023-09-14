@@ -89,7 +89,7 @@ def activate(
 # ----------------------------- Table declarations ----------------------
 @schema
 class BodyPart(dj.Lookup):
-    """Body parts tracked by DeepLabCut models
+    """Body parts tracked by Facemap models
 
     Attributes:
         body_part ( varchar(32) ): Body part short name.
@@ -154,12 +154,10 @@ class FacemapPoseEstimationTask(dj.Manual):
     Attributes:
         fbe.VideoRecording (foreign key) : Primary key for VideoRecording table.
         FacemapModel (foreign key) : Primary key for the facemap model table
-        facemap_task_id (smallint) : Facemap task ID
-        facemap_output_dir ( varchar(255), optional) : output dir storing the results
-            of Facemap analysis.
-        task_mode (enum) : Default load. Load or trigger analysis.
+        pose_estimation_output_dir ( varchar(255), optional) : output dir storing the results
+            of pose estimation analysis.
+        task_mode (enum) : Default trigger. Load or trigger analysis.
         bbox (longblob) : Bounding box for cropping the video [x1, x2, y1, y2]. If not set, entire frame is used.
-        bbox_set (bool) : True if bbox is set, False if not set.
         task_description ( varchar(128), optional) : Task description.
     """
 
@@ -168,10 +166,10 @@ class FacemapPoseEstimationTask(dj.Manual):
     -> fbe.VideoRecording
     -> FacemapModel
     ---
-    facemap_output_dir=''       : varchar(255)  # output directory - storing the results of Facemap analysis
-    task_mode='trigger'         : enum('load', 'trigger')
-    bbox=null                   : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
-    task_description=''         : varchar(128)    
+    pose_estimation_output_dir=''   : varchar(255)  # output dir - stores results of Facemap Pose estimation analysis
+    task_mode='trigger'             : enum('load', 'trigger')
+    bbox=null                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
+    task_description=''             : varchar(128)    
     """
 
     def infer_output_dir(self, key, relative=True, mkdir=True):
