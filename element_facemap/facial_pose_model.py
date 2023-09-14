@@ -253,12 +253,8 @@ class FacemapPoseEstimation(dj.Computed):
             ).fetch("file_path")
 
             video_files = [
-                [
-                    find_full_path(
-                        fbe.get_facemap_root_data_dir(), video_file
-                    ).as_posix()
-                    for video_file in video_files
-                ]
+                find_full_path(fbe.get_facemap_root_data_dir(), video_file).as_posix()
+                for video_file in video_files
             ]
             vid_name = Path(video_files[0]).stem
             # Model Name of interest should be specified by user during facemap task params manual update
