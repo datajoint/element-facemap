@@ -281,12 +281,10 @@ class FacemapPoseEstimation(dj.Computed):
 
             pose = facemap_pose.Pose(
                 filenames=video_files,
-                bbox=bbox,  # should be manually inserted into params via jupyter notebook cell
-                bbox_set=bool(bbox),
                 model_name=facemap_model_path.stem,
             )
             pose.run()
-            video_files[0]
+
             # look into facemap naming function
             facemap_result_path = next(model_output_path.glob(f"*{vid_name}*.h5"))
 
