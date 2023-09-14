@@ -260,6 +260,7 @@ class FacemapPoseEstimation(dj.Computed):
                     for video_file in video_files
                 ]
             ]
+            vid_name = Path(video_files[0]).stem
             # Model Name of interest should be specified by user during facemap task params manual update
             model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
             # Fetches file attachment
@@ -289,13 +290,12 @@ class FacemapPoseEstimation(dj.Computed):
                 model_name=facemap_model_path.stem,
             )
             pose.run()
-
+            video_files[0]
             # look into facemap naming function
-            facemap_output_dir = Path.cwd()
-            facemap_result_path = next(facemap_output_dir.glob("*{}.h5"))
+            facemap_result_path = next(model_output_path.glob(f"*{vid_name}*.h5"))
 
             # only 1 .h5 model output
-            full_metadata_path = next(facemap_output_dir.glob("*.pkl"))
+            full_metadata_path = next(model_output_path.glob(f"*{vid_name}*.pkl"))
 
             # copy local facemap output to output directory
             facemap_result_path.write_bytes(output_dir.read_bytes())
