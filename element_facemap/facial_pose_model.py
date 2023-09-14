@@ -287,16 +287,19 @@ class FacemapPoseEstimation(dj.Computed):
                 bbox=bbox,  # should be manually inserted into params via jupyter notebook cell
                 bbox_set=bool(bbox),
                 model_name=facemap_model_path.stem,
-                output_dir=output_dir,
             )
             pose.run()
 
             # look into facemap naming function
-
-            facemap_result_path = next(output_dir.glob("*{}.h5"))
+            facemap_output_dir = Path.cwd()
+            facemap_result_path = next(facemap_output_dir.glob("*{}.h5"))
 
             # only 1 .h5 model output
-            full_metadata_path = next(output_dir.glob("*.pkl"))
+            full_metadata_path = next(facemap_output_dir.glob("*.pkl"))
+
+            # copy local facemap output to output directory
+            facemap_result_path.write_bytes(output_dir.read_bytes())
+            full_metadata_path.write_bytes(output_dir.read_bytes())
 
             # only 1 metadata.pkl inference output
             with open(full_metadata_path, "rb") as f:
