@@ -263,7 +263,8 @@ class FacemapPoseEstimation(dj.Computed):
             facemap_model_name = (FacemapModel.File & f'model_id="{model_id}"').fetch1(
                 "model_file"
             )
-            facemap_model_path = Path.cwd() / facemap_model_name
+            working_dir = Path.cwd()
+            facemap_model_path = working_dir / facemap_model_name
 
             # move this "facemap_model_path" to the facemap model root directory
             models_root_dir = model_loader.get_models_dir()
@@ -287,12 +288,10 @@ class FacemapPoseEstimation(dj.Computed):
                 model_name=facemap_model_path.stem,
             )
             pose.run()
-
-            # look into facemap naming function
-            facemap_result_path = next(model_output_path.glob(f"*{vid_name}*.h5"))
-
-            # only 1 .h5 model output
-            full_metadata_path = next(model_output_path.glob(f"*{vid_name}*.pkl"))
+            
+            # expect single .h5 model and .pkl metadata output
+            facemap_result_path = next(working_dir.glob(f"*{vid_name}*FacemapPose*.h5"))
+            full_metadata_path = next(working_dir.glob(f"*{vid_name}*FacemapPose*.pkl"))
 
             # copy local facemap output to output directory
             facemap_result_path.write_bytes(output_dir.read_bytes())
@@ -319,6 +318,8 @@ class FacemapPoseEstimation(dj.Computed):
                     "y_pos": pose_y_coord[b_idx],
                     "likelihood": pose_likelihood[b_idx],
                 }
+        elif task_mode == "load":
+            # Load externally processed facemap pose estimation results
 
         creation_time = datetime.fromtimestamp(
             full_metadata_path.stat().st_mtime
