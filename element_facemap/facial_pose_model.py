@@ -278,9 +278,9 @@ class FacemapPoseEstimation(dj.Computed):
 
             # Instantiate Pose object, with filenames specified as video files, and bounding specified in params
             # Assumes GUI to be none as we are running CLI implementation
-
+            test_video_files = list(Path.cwd().glob("*.mp4"))
             pose = facemap_pose.Pose(
-                filenames=video_files,
+                filenames=test_video_files,
                 model_name=facemap_model_path.stem,
             )
             pose.run()
