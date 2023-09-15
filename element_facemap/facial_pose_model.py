@@ -288,7 +288,7 @@ class FacemapPoseEstimation(dj.Computed):
                 model_name=facemap_model_path.stem,
             )
             pose.run()
-            
+
             # expect single .h5 model and .pkl metadata output
             facemap_result_path = next(working_dir.glob(f"*{vid_name}*FacemapPose*.h5"))
             full_metadata_path = next(working_dir.glob(f"*{vid_name}*FacemapPose*.pkl"))
@@ -318,8 +318,6 @@ class FacemapPoseEstimation(dj.Computed):
                     "y_pos": pose_y_coord[b_idx],
                     "likelihood": pose_likelihood[b_idx],
                 }
-        elif task_mode == "load":
-            # Load externally processed facemap pose estimation results
 
         creation_time = datetime.fromtimestamp(
             full_metadata_path.stat().st_mtime
