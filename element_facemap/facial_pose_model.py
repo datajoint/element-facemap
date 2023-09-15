@@ -281,7 +281,7 @@ class FacemapPoseEstimation(dj.Computed):
             test_video_files = list(Path.cwd().glob("*.mp4"))
             vid_files = []
             for vid in test_video_files:
-                vid_files.append(vid.as_posix())
+                vid_files.append(vid.name)
             pose = facemap_pose.Pose(
                 filenames=vid_files,
                 model_name=facemap_model_path.stem,
