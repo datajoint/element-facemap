@@ -246,6 +246,8 @@ class FacemapPoseEstimation(dj.Computed):
             from facemap.pose import pose as facemap_pose, model_loader
             from facemap import utils
 
+            facemap_video_root_data_dir = fbe.get_facemap_root_data_dir()
+
             bbox = (FacemapPoseEstimationTask & key).fetch1("bbox")
 
             video_files = (
@@ -289,9 +291,14 @@ class FacemapPoseEstimation(dj.Computed):
             )
             pose.run()
 
-            # expect single .h5 model and .pkl metadata output
-            facemap_result_path = next(working_dir.glob(f"*{vid_name}*FacemapPose*.h5"))
-            full_metadata_path = next(working_dir.glob(f"*{vid_name}*FacemapPose*.pkl"))
+            # expect single .h5 model and .pkl metadata output in same directory that videos are stored
+
+            facemap_result_path = next(
+                facemap_video_root_data_dir.glob(f"*{vid_name}*FacemapPose*.h5")
+            )
+            full_metadata_path = next(
+                facemap_video_root_data_dir.glob(f"*{vid_name}*FacemapPose*.pkl")
+            )
 
             # copy local facemap output to output directory
             facemap_result_path.write_bytes(output_dir.read_bytes())
