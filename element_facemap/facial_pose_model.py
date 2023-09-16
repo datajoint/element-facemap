@@ -246,8 +246,6 @@ class FacemapPoseEstimation(dj.Computed):
             from facemap.pose import pose as facemap_pose, model_loader
             from facemap import utils
 
-            facemap_video_root_data_dir = fbe.get_facemap_root_data_dir()
-
             bbox = (FacemapPoseEstimationTask & key).fetch1("bbox")
 
             video_files = (
@@ -259,6 +257,7 @@ class FacemapPoseEstimation(dj.Computed):
                 for video_file in video_files
             ]
             vid_name = Path(video_files[0]).stem
+            facemap_video_root_data_dir = Path(video_files[0]).parent
             # Model Name of interest should be specified by user during facemap task params manual update
             model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
             # Fetches file attachment
@@ -277,14 +276,8 @@ class FacemapPoseEstimation(dj.Computed):
             # copy using pathlib (validate that model can still be loaded by pytorch)
             model_output_path.write_bytes(facemap_model_path.read_bytes())
 
-            # Processing performed using externally trained deep learning models
-
             # Instantiate Pose object, with filenames specified as video files, and bounding specified in params
             # Assumes GUI to be none as we are running CLI implementation
-            # test_video_files = list(Path.cwd().glob("*.mp4"))
-            # vid_files = []
-            # for vid in test_video_files:
-            #     vid_files.append(vid.as_posix())
             pose = facemap_pose.Pose(
                 filenames=[video_files],
                 model_name=facemap_model_path.stem,
