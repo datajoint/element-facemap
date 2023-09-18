@@ -2,7 +2,6 @@ import importlib
 import inspect
 from datetime import datetime
 from glob import glob
-import pathlib3x as pathlib
 from pathlib import Path
 from typing import List, Tuple
 import cv2
