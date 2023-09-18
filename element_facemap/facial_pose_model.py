@@ -319,6 +319,14 @@ class FacemapPoseEstimation(dj.Computed):
         creation_time = datetime.fromtimestamp(
             full_metadata_path.stat().st_mtime
         ).strftime("%Y-%m-%d %H:%M:%S")
+        inference_duration = metadata["total_frames"] * metadata["inference_speed"]
 
-        self.insert1({**key, "pose_estimation_time": creation_time})
+        self.insert1(
+            {
+                **key,
+                "pose_estimation_time": creation_time,
+                "pose_estimation_duration": inference_duration,
+                "total_frame_count": metadata["total_frames"],
+            }
+        )
         self.BodyPartPosition.insert(body_part_position_entry)
