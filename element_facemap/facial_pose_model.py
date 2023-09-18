@@ -272,7 +272,7 @@ class FacemapPoseEstimation(dj.Computed):
                         **key,
                         "pose_estimation_time": creation_time,
                         "pose_estimation_duration": inference_duration,
-                        "total_frame_count": metadata["total_frames"],
+                        "total_frame_count": total_frame_count,
                     }
                 )
                 self.BodyPartPosition.insert(body_part_position_entry)
@@ -342,7 +342,7 @@ class FacemapPoseEstimation(dj.Computed):
                 **key,
                 "pose_estimation_time": creation_time,
                 "pose_estimation_duration": inference_duration,
-                "total_frame_count": metadata["total_frames"],
+                "total_frame_count": total_frame_count,
             }
         )
         self.BodyPartPosition.insert(body_part_position_entry)
