@@ -213,7 +213,7 @@ class FacemapPoseEstimation(dj.Computed):
         Attributes:
             PoseEstimation (foreign key): Pose Estimation key.
             FacemapModel.BodyPart (foreign key): Body Part key.
-            frame_index (longblob): Frame index in model.
+            body_part (longblob): Body part for positional likelihood
             x_pos (longblob): X position.
             y_pos (longblob): Y position.
             likelihood (longblob): Model confidence."""
@@ -222,10 +222,10 @@ class FacemapPoseEstimation(dj.Computed):
         -> master
         -> FacemapModel.BodyPart
         ---
-        frame_index : longblob     # frame index in model
-        x_pos       : longblob
-        y_pos       : longblob
-        likelihood  : longblob
+        body_part   : varchar(32)   # body part 
+        x_pos       : longblob      # x position
+        y_pos       : longblob      # y position
+        likelihood  : longblob      # model evaluated likelihood
         """
 
     def make(self, key):
