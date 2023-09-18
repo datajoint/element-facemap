@@ -2,9 +2,9 @@ import importlib
 import inspect
 from datetime import datetime
 from glob import glob
+import pathlib3x as pathlib
 from pathlib import Path
 from typing import List, Tuple
-
 import cv2
 import datajoint as dj
 import numpy as np
@@ -14,6 +14,7 @@ import torch
 import os
 import h5py
 import pickle
+import shutil
 from . import facial_behavior_estimation as fbe
 
 schema = dj.schema()
@@ -177,7 +178,7 @@ class FacemapPoseEstimationTask(dj.Manual):
         video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_file).parent
         root_dir = find_root_directory(fbe.get_facemap_root_data_dir(), video_dir)
 
-        paramset_key = (FacemapPoseEstimationTask & key).fetch1("facemap_task_id")
+        paramset_key = (FacemapPoseEstimationTask & key).fetch1("model_id")
         processed_dir = Path(fbe.get_facemap_processed_data_dir())
         output_dir = (
             processed_dir / video_dir.relative_to(root_dir) / f"facemap_{paramset_key}"
@@ -260,21 +261,19 @@ class FacemapPoseEstimation(dj.Computed):
             facemap_video_root_data_dir = Path(video_files[0]).parent
             # Model Name of interest should be specified by user during facemap task params manual update
             model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
-            # Fetches file attachment
+
+            # Fetches model(.pt) file attachment to present working directory
             facemap_model_name = (FacemapModel.File & f'model_id="{model_id}"').fetch1(
                 "model_file"
             )
             working_dir = Path.cwd()
             facemap_model_path = working_dir / facemap_model_name
 
-            # move this "facemap_model_path" to the facemap model root directory
             models_root_dir = model_loader.get_models_dir()
-            model_output_path = Path(models_root_dir) / facemap_model_name
-            # import shutil
-            # shutil.copy(facemap_model_path, models_root_dir)
+            # model_output_path = Path(models_root_dir) / facemap_model_name
 
-            # copy using pathlib (validate that model can still be loaded by pytorch)
-            model_output_path.write_bytes(facemap_model_path.read_bytes())
+            # copy this model file to the facemap model root directory (~/.facemap/models/)
+            shutil.copy(facemap_model_path, models_root_dir)
 
             # Instantiate Pose object, with filenames specified as video files, and bounding specified in params
             # Assumes GUI to be none as we are running CLI implementation
@@ -285,7 +284,6 @@ class FacemapPoseEstimation(dj.Computed):
             pose.run()
 
             # expect single .h5 model and .pkl metadata output in same directory that videos are stored
-
             facemap_result_path = next(
                 facemap_video_root_data_dir.glob(f"*{vid_name}*FacemapPose*.h5")
             )
@@ -294,8 +292,8 @@ class FacemapPoseEstimation(dj.Computed):
             )
 
             # copy local facemap output to output directory
-            facemap_result_path.write_bytes(output_dir.read_bytes())
-            full_metadata_path.write_bytes(output_dir.read_bytes())
+            shutil.copy(facemap_result_path, output_dir)
+            shutil.copy(full_metadata_path, output_dir)
 
             # only 1 metadata.pkl inference output
             with open(full_metadata_path, "rb") as f:
