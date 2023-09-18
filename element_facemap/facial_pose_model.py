@@ -236,9 +236,9 @@ class FacemapPoseEstimation(dj.Computed):
         )
 
         output_dir = find_full_path(fbe.get_facemap_root_data_dir(), output_dir)
-        video_files = (
-            FacemapPoseEstimationTask * fbe.VideoRecording.File & key
-        ).fetch("file_path")
+        video_files = (FacemapPoseEstimationTask * fbe.VideoRecording.File & key).fetch(
+            "file_path"
+        )
 
         video_files = [
             find_full_path(fbe.get_facemap_root_data_dir(), video_file).as_posix()
@@ -248,26 +248,25 @@ class FacemapPoseEstimation(dj.Computed):
         facemap_result_path = output_dir / f"{vid_name}_FacemapPose.h5"
         full_metadata_path = output_dir / f"{vid_name}_FacemapPose_metadata.pkl"
 
-        # Triger PoseEstimation
+        # Trigger Facemap Pose Estimation Inference
         if task_mode == "trigger":
-            # Triggering facemap for pose estimation required:
+            # Triggering facemap for pose estimation requires:
             # - model_path: full path to the directory containing the trained model
             # - video_filepaths: full paths to the video files for inference
-            # - analyze_video_params: optional parameters to analyze video
+            # - analyze_video_params: optional parameters to analyze video (uses facemap default params)
+
             from facemap.pose import pose as facemap_pose, model_loader
 
-            # check to see if output files have been created, if they have, load the output
-
-            # think about file writing to inbox issue
-
-            bbox = (FacemapPoseEstimationTask & key).fetch1("bbox")
-
-            facemap_video_root_data_dir = Path(video_files[0]).parent
-            # Model Name of interest should be specified by user during facemap task params manual update
-            model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
-            
-            if facemap_result_path.exists() & full_metadata_path.exists(): # Load results and do not rerun processing
-                body_part_position_entry, inference_duration, total_frame_count, creation_time = _load_facemap_results(facemap_result_path, full_metadata_path)
+            # If output files have been created, load the output
+            if (
+                facemap_result_path.exists() & full_metadata_path.exists()
+            ):  # Load results and do not rerun processing
+                (
+                    body_part_position_entry,
+                    inference_duration,
+                    total_frame_count,
+                    creation_time,
+                ) = _load_facemap_results(facemap_result_path, full_metadata_path)
                 self.insert1(
                     {
                         **key,
@@ -279,16 +278,22 @@ class FacemapPoseEstimation(dj.Computed):
                 self.BodyPartPosition.insert(body_part_position_entry)
                 return
 
-            # Fetches model(.pt) file attachment to present working directory
+            # think about file writing to inbox issue
+
+            bbox = (FacemapPoseEstimationTask & key).fetch1("bbox")
+            facemap_video_root_data_dir = Path(video_files[0]).parent
+
+            # Model Name of interest should be specified by user during facemap task params manual update
+            model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
+
+            # Fetch model(.pt) file attachment to present working directory
             facemap_model_name = (FacemapModel.File & f'model_id="{model_id}"').fetch1(
                 "model_file"
             )
 
             working_dir = Path.cwd()
             facemap_model_path = working_dir / facemap_model_name
-
             models_root_dir = model_loader.get_models_dir()
-            # model_output_path = Path(models_root_dir) / facemap_model_name
 
             # copy this model file to the facemap model root directory (~/.facemap/models/)
             shutil.copy(facemap_model_path, models_root_dir)
@@ -306,16 +311,32 @@ class FacemapPoseEstimation(dj.Computed):
                 facemap_video_root_data_dir.glob(f"*{vid_name}_FacemapPose.h5")
             )
             full_metadata_path = next(
-                facemap_video_root_data_dir.glob(f"*{vid_name}_FacemapPose_metadata.pkl")
+                facemap_video_root_data_dir.glob(
+                    f"*{vid_name}_FacemapPose_metadata.pkl"
+                )
             )
 
             # copy local facemap output to output directory
             shutil.copy(facemap_result_path, output_dir)
             shutil.copy(full_metadata_path, output_dir)
 
-            body_part_position_entry, inference_duration, total_frame_count, creation_time = _load_facemap_results(facemap_result_path, full_metadata_path)
+            (
+                body_part_position_entry,
+                inference_duration,
+                total_frame_count,
+                creation_time,
+            ) = _load_facemap_results(facemap_result_path, full_metadata_path)
         elif task_mode == "load":
-            
+            if (
+                facemap_result_path.exists() & full_metadata_path.exists()
+            ):  # Load preprocessed inference results
+                (
+                    body_part_position_entry,
+                    inference_duration,
+                    total_frame_count,
+                    creation_time,
+                ) = _load_facemap_results(facemap_result_path, full_metadata_path)
+
         self.insert1(
             {
                 **key,
@@ -327,14 +348,13 @@ class FacemapPoseEstimation(dj.Computed):
         self.BodyPartPosition.insert(body_part_position_entry)
 
 
-def _load_facemap_results(facemap_result_path, full_metadata_path)
+def _load_facemap_results(facemap_result_path, full_metadata_path):
     from facemap import utils
-    with open(full_metadata_path, "rb") as f:
-            metadata = pickle.load(f)
 
-    keypoints_data = utils.load_keypoints(
-        metadata["bodyparts"], facemap_result_path
-    )
+    with open(full_metadata_path, "rb") as f:
+        metadata = pickle.load(f)
+
+    keypoints_data = utils.load_keypoints(metadata["bodyparts"], facemap_result_path)
     # facemap_result is a 3D nested array with D1 - (x,y likelihood) D2 - bodyparts D3 - frame count
     # body parts are ordered the same way as stored
 
@@ -350,9 +370,14 @@ def _load_facemap_results(facemap_result_path, full_metadata_path)
             "likelihood": pose_likelihood[b_idx],
         }
 
-    creation_time = datetime.fromtimestamp(
-        full_metadata_path.stat().st_mtime
-    ).strftime("%Y-%m-%d %H:%M:%S")
+    creation_time = datetime.fromtimestamp(full_metadata_path.stat().st_mtime).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
     inference_duration = metadata["total_frames"] * metadata["inference_speed"]
 
-    return body_part_position_entry, inference_duration, metadata["total_frames"], creation_time
+    return (
+        body_part_position_entry,
+        inference_duration,
+        metadata["total_frames"],
+        creation_time,
+    )
