@@ -373,7 +373,7 @@ class FacemapPoseEstimation(dj.Computed):
                 cls.BodyPartPosition
                 & {"body_part": body_part}
                 & {"recording_id": key["recording_id"]}
-            ).fetch1("x_pos", "y_pos", "likelihood", as_dict=True)
+            ).fetch("x_pos", "y_pos", "likelihood", as_dict=True)
 
             a = np.vstack((x_pos, y_pos, likelihood))
             a = a.T
