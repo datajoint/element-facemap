@@ -220,9 +220,8 @@ class FacemapPoseEstimation(dj.Computed):
 
         definition = """ # uses facemap h5 output for body part position
         -> master
-        -> FacemapModel.BodyPart
+        -> BodyPart
         ---
-        body_part   : varchar(32)   # body part 
         x_pos       : longblob      # x position
         y_pos       : longblob      # y position
         likelihood  : longblob      # model evaluated likelihood
@@ -363,6 +362,7 @@ def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     pose_likelihood = keypoints_data[2, :, :]  # (bodyparts, frames)
 
     for b_idx, bodypart in enumerate(metadata["bodyparts"]):
+        FacemapModel.BodyPart
         body_part_position_entry = {
             **key,
             "body_part": bodypart,
