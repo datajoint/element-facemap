@@ -344,7 +344,7 @@ class FacemapPoseEstimation(dj.Computed):
                 "total_frame_count": total_frame_count,
             }
         )
-        self.BodyPartPosition.insert(body_part_postion_entry)
+        self.BodyPartPosition.insert(body_part_position_entry)
 
 
 def _load_facemap_results(key, facemap_result_path, full_metadata_path):
