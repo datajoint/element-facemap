@@ -346,6 +346,42 @@ class FacemapPoseEstimation(dj.Computed):
         )
         self.BodyPartPosition.insert(body_part_position_entry)
 
+    @classmethod
+    def get_trajectory(cls, key: dict, body_parts: list = "all") -> pd.DataFrame:
+        """Returns a pandas dataframe of coordinates of the specified body_part(s)
+
+        Args:
+            key (dict): A DataJoint query specifying one FacemapPoseEstimation entry.
+            body_parts (list, optional): Body parts as a list. If "all", all joints
+
+        Returns:
+            df: multi index pandas dataframe with DLC scorer names, body_parts
+                and x/y coordinates of each joint name for a camera_id, similar to
+                output of DLC dataframe. If 2D, z is set of zeros
+        """
+        model_name = (FacemapModel & f'model_id={key["model_id"]}').fetch("model_name")
+
+        if body_parts == "all":
+            body_parts = (cls.BodyPartPosition & key).fetch("body_part")
+        elif not isinstance(body_parts, list):
+            body_parts = list(body_parts)
+
+        df = None
+        for body_part in body_parts:
+            x_pos, y_pos, likelihood = (
+                cls.BodyPartPosition & {"body_part": body_part}
+            ).fetch1("x_pos", "y_pos", "likelihood")
+
+            a = np.vstack((x_pos, y_pos, likelihood))
+            a = a.T
+            pdindex = pd.MultiIndex.from_product(
+                [[model_name], [body_part], ["x", "y", "likelihood"]],
+                names=["model", "bodyparts", "coords"],
+            )
+            frame = pd.DataFrame(a, columns=pdindex, index=range(0, a.shape[0]))
+            df = pd.concat([df, frame], axis=1)
+        return df
+
 
 def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     from facemap import utils
