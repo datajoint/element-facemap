@@ -360,15 +360,17 @@ def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     pose_x_coord = keypoints_data[0, :, :]  # (bodyparts, frames)
     pose_y_coord = keypoints_data[1, :, :]  # (bodyparts, frames)
     pose_likelihood = keypoints_data[2, :, :]  # (bodyparts, frames)
-
+    body_part_position_entries = []
     for b_idx, bodypart in enumerate(metadata["bodyparts"]):
-        body_part_position_entry = {
-            **key,
-            "body_part": bodypart,
-            "x_pos": pose_x_coord[b_idx],
-            "y_pos": pose_y_coord[b_idx],
-            "likelihood": pose_likelihood[b_idx],
-        }
+        body_part_position_entries.append(
+            {
+                **key,
+                "body_part": bodypart,
+                "x_pos": pose_x_coord[b_idx],
+                "y_pos": pose_y_coord[b_idx],
+                "likelihood": pose_likelihood[b_idx],
+            }
+        )
 
     creation_time = datetime.fromtimestamp(full_metadata_path.stat().st_mtime).strftime(
         "%Y-%m-%d %H:%M:%S"
@@ -376,7 +378,7 @@ def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     inference_duration = metadata["total_frames"] * metadata["inference_speed"]
 
     return (
-        body_part_position_entry,
+        body_part_position_entries,
         inference_duration,
         metadata["total_frames"],
         creation_time,
