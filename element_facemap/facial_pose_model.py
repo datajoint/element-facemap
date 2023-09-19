@@ -324,7 +324,7 @@ class FacemapPoseEstimation(dj.Computed):
                 inference_duration,
                 total_frame_count,
                 creation_time,
-            ) = _load_facemap_results(facemap_result_path, full_metadata_path)
+            ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
         elif task_mode == "load":
             if (
                 facemap_result_path.exists() & full_metadata_path.exists()
@@ -360,6 +360,7 @@ def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     pose_x_coord = keypoints_data[0, :, :]  # (bodyparts, frames)
     pose_y_coord = keypoints_data[1, :, :]  # (bodyparts, frames)
     pose_likelihood = keypoints_data[2, :, :]  # (bodyparts, frames)
+
     body_part_position_entries = []
     for b_idx, bodypart in enumerate(metadata["bodyparts"]):
         body_part_position_entries.append(
