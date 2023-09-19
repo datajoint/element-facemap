@@ -7,6 +7,7 @@ from typing import List, Tuple
 import cv2
 import datajoint as dj
 import numpy as np
+import pandas as pd
 from element_interface.utils import find_full_path, find_root_directory
 
 import torch
