@@ -362,10 +362,10 @@ def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     pose_likelihood = keypoints_data[2, :, :]  # (bodyparts, frames)
 
     for b_idx, bodypart in enumerate(metadata["bodyparts"]):
-        FacemapModel.BodyPart
+        body_part_key = (BodyPart & f"body_part={bodypart}").fetch("KEY")
         body_part_position_entry = {
             **key,
-            "body_part": bodypart,
+            **body_part_key,
             "x_pos": pose_x_coord[b_idx],
             "y_pos": pose_y_coord[b_idx],
             "likelihood": pose_likelihood[b_idx],
