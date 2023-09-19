@@ -275,7 +275,7 @@ class FacemapPoseEstimation(dj.Computed):
                         "total_frame_count": total_frame_count,
                     }
                 )
-                self.BodyPartPosition.insert(body_part_position_entry)
+                self.BodyPartPosition.insert(**key, body_part_position_entry)
                 return
 
             # think about file writing to inbox issue
@@ -345,7 +345,7 @@ class FacemapPoseEstimation(dj.Computed):
                 "total_frame_count": total_frame_count,
             }
         )
-        self.BodyPartPosition.insert(body_part_position_entry)
+        self.BodyPartPosition.insert(**key, body_part_position_entry)
 
 
 def _load_facemap_results(facemap_result_path, full_metadata_path):
