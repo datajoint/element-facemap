@@ -266,7 +266,7 @@ class FacemapPoseEstimation(dj.Computed):
                     inference_duration,
                     total_frame_count,
                     creation_time,
-                ) = _load_facemap_results(facemap_result_path, full_metadata_path)
+                ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
                 self.insert1(
                     {
                         **key,
@@ -275,7 +275,7 @@ class FacemapPoseEstimation(dj.Computed):
                         "total_frame_count": total_frame_count,
                     }
                 )
-                self.BodyPartPosition.insert({**key, body_part_position_entry})
+                self.BodyPartPosition.insert(body_part_position_entry)
                 return
 
             # think about file writing to inbox issue
@@ -335,7 +335,7 @@ class FacemapPoseEstimation(dj.Computed):
                     inference_duration,
                     total_frame_count,
                     creation_time,
-                ) = _load_facemap_results(facemap_result_path, full_metadata_path)
+                ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
 
         self.insert1(
             {
@@ -345,10 +345,10 @@ class FacemapPoseEstimation(dj.Computed):
                 "total_frame_count": total_frame_count,
             }
         )
-        self.BodyPartPosition.insert({**key, body_part_position_entry})
+        self.BodyPartPosition.insert(body_part_postion_entry)
 
 
-def _load_facemap_results(facemap_result_path, full_metadata_path):
+def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     from facemap import utils
 
     with open(full_metadata_path, "rb") as f:
@@ -364,6 +364,7 @@ def _load_facemap_results(facemap_result_path, full_metadata_path):
 
     for b_idx, bodypart in enumerate(metadata["bodyparts"]):
         body_part_position_entry = {
+            **key,
             "body_part": bodypart,
             "x_pos": pose_x_coord[b_idx],
             "y_pos": pose_y_coord[b_idx],
