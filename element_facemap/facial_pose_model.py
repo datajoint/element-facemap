@@ -360,7 +360,7 @@ class FacemapPoseEstimation(dj.Computed):
                 and x/y coordinates of each joint name for a camera_id, similar to
                 output of DLC dataframe. If 2D, z is set of zeros
         """
-        model_name = (FacemapModel & f'model_id={key["model_id"]}').fetch("model_name")
+        model_name = (FacemapModel & f'model_id={key["model_id"]}').fetch1("model_name")
 
         if body_parts == "all":
             body_parts = (cls.BodyPartPosition & key).fetch("body_part")
