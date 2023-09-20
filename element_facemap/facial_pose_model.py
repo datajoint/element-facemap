@@ -23,7 +23,7 @@ _linking_module = None
 
 
 def activate(
-    facemap_model_schema_name,
+    facemap_model_schema_name: str,
     fbe_schema_name=None,
     *,
     create_schema=True,
