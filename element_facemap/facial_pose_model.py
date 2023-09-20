@@ -278,8 +278,6 @@ class FacemapPoseEstimation(dj.Computed):
                 self.BodyPartPosition.insert(body_part_position_entry)
                 return
 
-            # think about file writing to inbox issue
-
             bbox = (FacemapPoseEstimationTask & key).fetch1("bbox")
             facemap_video_root_data_dir = Path(video_files[0]).parent
 
@@ -303,6 +301,8 @@ class FacemapPoseEstimation(dj.Computed):
             pose = facemap_pose.Pose(
                 filenames=[video_files],
                 model_name=facemap_model_path.stem,
+                bbox=bbox,
+                bbox_set=bool(bbox),
             )
             pose.run()
 
@@ -326,6 +326,7 @@ class FacemapPoseEstimation(dj.Computed):
                 total_frame_count,
                 creation_time,
             ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
+
         elif task_mode == "load":
             if (
                 facemap_result_path.exists() & full_metadata_path.exists()
@@ -356,9 +357,9 @@ class FacemapPoseEstimation(dj.Computed):
             body_parts (list, optional): Body parts as a list. If "all", all joints
 
         Returns:
-            df: multi index pandas dataframe with DLC scorer names, body_parts
-                and x/y coordinates of each joint name for a camera_id, similar to
-                output of DLC dataframe. If 2D, z is set of zeros
+            df: multi index pandas dataframe with Facemap model name, body_parts
+                and x/y coordinates of each body part for a camera_id, similar to
+                output of facemap inference data.
         """
         model_name = (FacemapModel & f'model_id={key["model_id"]}').fetch1("model_name")
 
@@ -396,7 +397,7 @@ def _load_facemap_results(key, facemap_result_path, full_metadata_path):
         metadata = pickle.load(f)
 
     keypoints_data = utils.load_keypoints(metadata["bodyparts"], facemap_result_path)
-    # facemap_result is a 3D nested array with D1 - (x,y likelihood) D2 - bodyparts D3 - frame count
+    # facemap inferene result is a 3D nested array with D1 - (x,y likelihood), D2 - bodyparts, D3 - frame count
     # body parts are ordered the same way as stored
 
     pose_x_coord = keypoints_data[0, :, :]  # (bodyparts, frames)
