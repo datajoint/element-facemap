@@ -47,7 +47,7 @@ def activate(
     Upstream tables:
         + Session: A parent table to VideoRecording, identifying a recording session
         + Equipment: A parent table to VideoRecording, identifying video recording equipment
-        + VideoRecording: A parent table to FacemapInferenceTask, identifying videos to be used in inference
+        + VideoRecording: A parent table to FacemapPoseEstimationTask, identifying videos to be used in inference
     Functions:
         + get_facemap_root_data_dir() -> list
             Retrieves the root data directory(s) with face recordings for all
@@ -150,7 +150,7 @@ class FacemapModel(dj.Manual):
 
 @schema
 class FacemapPoseEstimationTask(dj.Manual):
-    """Staging table for pairing of recording and Facemap parameters before processing.
+    """Staging table for pairing of video recordings and Facemap parameters before processing.
 
     Attributes:
         fbe.VideoRecording (foreign key) : Primary key for VideoRecording table.
@@ -169,7 +169,7 @@ class FacemapPoseEstimationTask(dj.Manual):
     ---
     pose_estimation_output_dir=''   : varchar(255)  # output dir - stores results of Facemap Pose estimation analysis
     task_mode='trigger'             : enum('load', 'trigger')
-    bbox=null                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
+    bbox=[]                         : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     task_description=''             : varchar(128)    
     """
 
@@ -289,8 +289,7 @@ class FacemapPoseEstimation(dj.Computed):
                 "model_file"
             )
 
-            working_dir = Path.cwd()
-            facemap_model_path = working_dir / facemap_model_name
+            facemap_model_path = Path.cwd() / facemap_model_name
             models_root_dir = model_loader.get_models_dir()
 
             # copy this model file to the facemap model root directory (~/.facemap/models/)
