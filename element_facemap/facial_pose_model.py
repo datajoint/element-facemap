@@ -369,12 +369,15 @@ class FacemapPoseEstimation(dj.Computed):
 
         df = None
         for body_part in body_parts:
-            x_pos, y_pos, likelihood = (
+            result_dict = (
                 cls.BodyPartPosition
                 & {"body_part": body_part}
                 & {"recording_id": key["recording_id"]}
-            ).fetch("x_pos", "y_pos", "likelihood", as_dict=True)
-
+                & {"session_id": key["session_id"]}
+            ).fetch("x_pos", "y_pos", "likelihood", as_dict=True)[0]
+            x_pos = result_dict["x_pos"]
+            y_pos = result_dict["y_pos"]
+            likelihood = result_dict["likelihood"]
             a = np.vstack((x_pos, y_pos, likelihood))
             a = a.T
             pdindex = pd.MultiIndex.from_product(
