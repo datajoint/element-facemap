@@ -375,9 +375,9 @@ class FacemapPoseEstimation(dj.Computed):
                 & {"recording_id": key["recording_id"]}
                 & {"session_id": key["session_id"]}
             ).fetch("x_pos", "y_pos", "likelihood", as_dict=True)[0]
-            x_pos = result_dict["x_pos"]
-            y_pos = result_dict["y_pos"]
-            likelihood = result_dict["likelihood"]
+            x_pos = result_dict["x_pos"].to_list()
+            y_pos = result_dict["y_pos"].to_list()
+            likelihood = result_dict["likelihood"].to_list()
             a = np.vstack((x_pos, y_pos, likelihood))
             a = a.T
             pdindex = pd.MultiIndex.from_product(
