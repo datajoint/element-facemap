@@ -4,15 +4,12 @@ from datetime import datetime
 from glob import glob
 from pathlib import Path
 from typing import List, Tuple
-import cv2
 import datajoint as dj
 import numpy as np
 import pandas as pd
 from element_interface.utils import find_full_path, find_root_directory
 
-import torch
 import os
-import h5py
 import pickle
 import shutil
 from . import facial_behavior_estimation as fbe
