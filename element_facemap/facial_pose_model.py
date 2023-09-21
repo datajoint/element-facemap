@@ -24,11 +24,11 @@ _linking_module = None
 
 def activate(
     facemap_model_schema_name: str,
-    fbe_schema_name=None,
+    fbe_schema_name: str = None,
     *,
-    create_schema=True,
-    create_tables=True,
-    linking_module=None,
+    create_schema: bool = True,
+    create_tables: bool = True,
+    linking_module: str = None,
 ):
     """Activate schema.
 
