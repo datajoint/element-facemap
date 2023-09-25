@@ -100,14 +100,31 @@ class BodyPart(dj.Lookup):
     ---
     body_part_description='' : varchar(1000)
     """
-
-
+    
+    contents = [ # Facemap Default BodyPart list
+        "eye(back)",
+        "eye(bottom)",
+        "eye(front)",
+        "eye(top)",
+        "lowerlip",
+        "mouth",
+        "nose(bottom)",
+        "nose(r)",
+        "nose(tip)",
+        "nose(top)",
+        "nosebridge",
+        "paw",
+        "whisker(I)",
+        "whisker(III)",
+        "whisker(II)",
+    ]
+    
 @schema
 class FacemapModel(dj.Manual):
     """Trained Models stored for facial pose inference
 
     Attributes:
-        model_id(int) : File identification number, located in filename
+        model_id(int) : User specified ID associated with a unique model 
         model_name( varchar(64) ): Name of model, filepath.stem
     """
 
@@ -143,7 +160,40 @@ class FacemapModel(dj.Manual):
         ---
         model_file: attach            # model file attachment
         """
+    @classmethod
+    def insert_new_model(cls, model_id: int, model_name: str, model_description: str, full_model_path: str):
+        facemap_model_insert = dict(
+            model_id=model_id, model_name=model_name, model_description=model_description
+        )
+        FacemapModel.insert1(facemap_model_insert)
 
+        body_part_insert = []
+        body_parts = [
+            "eye(back)",
+            "eye(bottom)",
+            "eye(front)",
+            "eye(top)",
+            "lowerlip",
+            "mouth",
+            "nose(bottom)",
+            "nose(r)",
+            "nose(tip)",
+            "nose(top)",
+            "nosebridge",
+            "paw",
+            "whisker(I)",
+            "whisker(III)",
+            "whisker(II)",
+        ]
+        for bp in body_parts:
+            body_part_insert.append(dict(model_id=model_id, body_part=bp))
+        # Insert into parent BodyPart table if no entries are present
+        if len(cls.BodyPart()) == 0:
+            cls.BodyPart.insert(body_part_insert)
+        file_insert = dict(model_id=model_id, model_file=full_model_path)
+
+        cls.BodyPart.insert(body_part_insert)
+        cls.File.insert1(file_insert)
 
 @schema
 class FacemapPoseEstimationTask(dj.Manual):
@@ -169,7 +219,8 @@ class FacemapPoseEstimationTask(dj.Manual):
     bbox=[]                         : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     task_description=''             : varchar(128)    
     """
-
+    
+    @classmethod
     def infer_output_dir(self, key, relative=True, mkdir=True):
         video_file = (fbe.VideoRecording.File & key).fetch("file_path", limit=1)[0]
         video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_file).parent
@@ -244,6 +295,10 @@ class FacemapPoseEstimation(dj.Computed):
         vid_name = Path(video_files[0]).stem
         facemap_result_path = output_dir / f"{vid_name}_FacemapPose.h5"
         full_metadata_path = output_dir / f"{vid_name}_FacemapPose_metadata.pkl"
+
+        # Create Symbolic Link to raw video data files from outbox location
+        for video_file in video_files:
+            video_symlink = (video_file)
 
         # Trigger Facemap Pose Estimation Inference
         if task_mode == "trigger":
