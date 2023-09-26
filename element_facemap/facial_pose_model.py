@@ -225,7 +225,7 @@ class FacemapPoseEstimationTask(dj.Manual):
     
     @classmethod
     def generate(cls, key, model_id: int, relative_video_paths: list, task_mode: str = "trigger", bbox: list = []):
-        """Insert video/videos into fbe.VideoRecording table and generate a unique pose estimation task for each of the relative_video_paths
+        """Generate a unique pose estimation task for each of the relative_video_paths
 
         Args:
             model_id (int): User Specified model identification number 
