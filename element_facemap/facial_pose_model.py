@@ -101,7 +101,8 @@ class BodyPart(dj.Lookup):
     body_part_description='' : varchar(1000)
     """
     
-    contents = [ # Facemap Default BodyPart list
+    # Facemap Default BodyPart list
+    contents = [ 
         "eye(back)",
         "eye(bottom)",
         "eye(front)",
@@ -168,25 +169,9 @@ class FacemapModel(dj.Manual):
         FacemapModel.insert1(facemap_model_insert)
 
         body_part_insert = []
-        body_parts = [
-            "eye(back)",
-            "eye(bottom)",
-            "eye(front)",
-            "eye(top)",
-            "lowerlip",
-            "mouth",
-            "nose(bottom)",
-            "nose(r)",
-            "nose(tip)",
-            "nose(top)",
-            "nosebridge",
-            "paw",
-            "whisker(I)",
-            "whisker(III)",
-            "whisker(II)",
-        ]
-        for bp in body_parts:
+        for bp in BodyPart.contents:
             body_part_insert.append(dict(model_id=model_id, body_part=bp))
+        
         # Insert into parent BodyPart table if no entries are present
         if len(cls.BodyPart()) == 0:
             cls.BodyPart.insert(body_part_insert)
@@ -219,7 +204,7 @@ class FacemapPoseEstimationTask(dj.Manual):
     bbox=[]                         : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     task_description=''             : varchar(128)    
     """
-    
+
     @classmethod
     def infer_output_dir(self, key, relative=True, mkdir=True):
         video_file = (fbe.VideoRecording.File & key).fetch("file_path", limit=1)[0]
@@ -297,9 +282,13 @@ class FacemapPoseEstimation(dj.Computed):
         full_metadata_path = output_dir / f"{vid_name}_FacemapPose_metadata.pkl"
 
         # Create Symbolic Link to raw video data files from outbox location
+        video_symlinks = []
         for video_file in video_files:
-            video_symlink = (video_file)
-
+            video_symlink = output_dir / video_file.name
+            if video_symlink.exists():
+                video_symlink.unlink()
+            video_symlink.symlink_to(video_file)
+            video_symlinks.append(video_symlink)    
         # Trigger Facemap Pose Estimation Inference
         if task_mode == "trigger":
             # Triggering facemap for pose estimation requires:
@@ -350,7 +339,7 @@ class FacemapPoseEstimation(dj.Computed):
             # Instantiate Pose object, with filenames specified as video files, and bounding specified in params
             # Assumes GUI to be none as we are running CLI implementation
             pose = facemap_pose.Pose(
-                filenames=[video_files],
+                filenames=[video_symlinks],
                 model_name=facemap_model_path.stem,
                 bbox=bbox,
                 bbox_set=bool(bbox),
