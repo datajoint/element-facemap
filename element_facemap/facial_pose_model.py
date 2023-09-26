@@ -206,7 +206,7 @@ class FacemapPoseEstimationTask(dj.Manual):
     """
 
     @classmethod
-    def infer_output_dir(self, key, relative=True, mkdir=True):
+    def infer_output_dir(cls, key, relative=True, mkdir=True):
         video_file = (fbe.VideoRecording.File & key).fetch("file_path", limit=1)[0]
         video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_file).parent
         root_dir = find_root_directory(fbe.get_facemap_root_data_dir(), video_dir)
@@ -222,7 +222,38 @@ class FacemapPoseEstimationTask(dj.Manual):
 
         return output_dir.relative_to(processed_dir) if relative else output_dir
 
+    
+    @classmethod
+    def generate(cls, key, model_id: int, relative_video_paths: list, task_mode: str = "trigger", bbox: list = []):
+        """Insert video/videos into fbe.VideoRecording table and generate a unique pose estimation task for each of the relative_video_paths
 
+        Args:
+            model_id (int): User Specified model identification number 
+            session_key (dict):  
+            relative_video_paths (list): _description_
+            task_mode (str, optional): _description_. Defaults to "trigger".
+            bbox (list, optional): _description_. Defaults to [].
+        """
+        video_paths = [find_full_path(fbe.get_facemap_root_data_dir(), rpath) for rpath in relative_video_paths]
+        for vid_path in video_paths:
+            device_id = (fbe.VideoRecording & key).fetch('device_id')
+            vrec_key = (fbe.VideoRecording & key).fetch('key')
+
+            model_key = (FacemapModel & f"model_id={model_id}").fetch1("KEY")
+            pose_estimation_output_dir = cls.infer_output_dir(vrec_key)
+
+            facemap_pose_estimation_task_insert = {
+                **vrec_key,
+                **model_key,
+                "pose_estimation_output_dir": pose_estimation_output_dir,
+                "task_mode": task_mode,
+                "bbox": bbox,
+            }
+            cls.insert1(
+                facemap_pose_estimation_task_insert
+            )
+    insert_pose_estimation_task = generate
+    
 @schema
 class FacemapPoseEstimation(dj.Computed):
     """Results of facemap pose estimation
@@ -417,7 +448,7 @@ class FacemapPoseEstimation(dj.Computed):
 
 def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     from facemap import utils
-    
+
     with open(full_metadata_path, "rb") as f:
         metadata = pickle.load(f)
     keypoints_data = utils.load_keypoints(metadata["bodyparts"], facemap_result_path)
