@@ -201,7 +201,7 @@ class FacemapPoseEstimationTask(dj.Manual):
     ---
     pose_estimation_output_dir=''   : varchar(255)  # output dir - stores results of Facemap Pose estimation analysis
     task_mode='trigger'             : enum('load', 'trigger')
-    bbox=[]                         : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
+    bbox=None                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     task_description=''             : varchar(128)    
     """
 
@@ -281,14 +281,15 @@ class FacemapPoseEstimation(dj.Computed):
         facemap_result_path = output_dir / f"{vid_name}_FacemapPose.h5"
         full_metadata_path = output_dir / f"{vid_name}_FacemapPose_metadata.pkl"
 
-        # Create Symbolic Link to raw video data files from outbox location
+        # Create Symbolic Links to raw video data files from outbox directory
         video_symlinks = []
         for video_file in video_files:
             video_symlink = output_dir / video_file.name
             if video_symlink.exists():
                 video_symlink.unlink()
             video_symlink.symlink_to(video_file)
-            video_symlinks.append(video_symlink)    
+            video_symlinks.append(video_symlink)
+
         # Trigger Facemap Pose Estimation Inference
         if task_mode == "trigger":
             # Triggering facemap for pose estimation requires:
@@ -320,8 +321,6 @@ class FacemapPoseEstimation(dj.Computed):
                 return
 
             bbox = (FacemapPoseEstimationTask & key).fetch1("bbox")
-            facemap_video_root_data_dir = Path(video_files[0]).parent
-
             # Model Name of interest should be specified by user during facemap task params manual update
             model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
 
@@ -345,20 +344,6 @@ class FacemapPoseEstimation(dj.Computed):
                 bbox_set=bool(bbox),
             )
             pose.run()
-
-            # expect single .h5 model and .pkl metadata output in same directory that videos are stored
-            facemap_result_path = next(
-                facemap_video_root_data_dir.glob(f"*{vid_name}_FacemapPose.h5")
-            )
-            full_metadata_path = next(
-                facemap_video_root_data_dir.glob(
-                    f"*{vid_name}_FacemapPose_metadata.pkl"
-                )
-            )
-
-            # copy local facemap output to output directory
-            shutil.copy(facemap_result_path, output_dir)
-            shutil.copy(full_metadata_path, output_dir)
 
             (
                 body_part_position_entry,
@@ -432,14 +417,13 @@ class FacemapPoseEstimation(dj.Computed):
 
 def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     from facemap import utils
-
+    
     with open(full_metadata_path, "rb") as f:
         metadata = pickle.load(f)
-
     keypoints_data = utils.load_keypoints(metadata["bodyparts"], facemap_result_path)
-    # facemap inferene result is a 3D nested array with D1 - (x,y likelihood), D2 - bodyparts, D3 - frame count
+    
+    # Facemap inference result is a 3D nested array with D1 - (x,y likelihood), D2 - bodyparts, D3 - frame count
     # body parts are ordered the same way as stored
-
     pose_x_coord = keypoints_data[0, :, :]  # (bodyparts, frames)
     pose_y_coord = keypoints_data[1, :, :]  # (bodyparts, frames)
     pose_likelihood = keypoints_data[2, :, :]  # (bodyparts, frames)
