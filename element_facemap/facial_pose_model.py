@@ -351,7 +351,8 @@ class FacemapPoseEstimation(dj.Computed):
                 self.BodyPartPosition.insert(body_part_position_entry)
                 return
 
-            bbox = (FacemapPoseEstimationTask & key).fetch1("bbox")
+            bbox = (FacemapPoseEstimationTask & key).fetch1("bbox") or []
+                
             # Model Name of interest should be specified by user during facemap task params manual update
             model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
 
