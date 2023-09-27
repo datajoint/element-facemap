@@ -305,7 +305,7 @@ class FacemapPoseEstimation(dj.Computed):
         )
 
         video_files = [
-            find_full_path(fbe.get_facemap_root_data_dir(), video_file).as_posix()
+            find_full_path(fbe.get_facemap_root_data_dir(), video_file)
             for video_file in video_files
         ]
         vid_name = Path(video_files[0]).stem
@@ -319,7 +319,7 @@ class FacemapPoseEstimation(dj.Computed):
             if video_symlink.exists():
                 video_symlink.unlink()
             video_symlink.symlink_to(video_file)
-            video_symlinks.append(video_symlink)
+            video_symlinks.append(video_symlink.as_posix())
 
         # Trigger Facemap Pose Estimation Inference
         if task_mode == "trigger":
