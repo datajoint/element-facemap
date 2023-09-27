@@ -141,7 +141,7 @@ class VideoRecording(dj.Manual):
 
         Attributes:
             master (foreign key) : Primary key for VideoRecording table.
-            file_id (smallint) : File ID. 
+            file_id (smallint) : File ID.
             file_path ( varchar(255) ) : Filepath of video, relative to root directory.
         """
 
@@ -152,9 +152,6 @@ class VideoRecording(dj.Manual):
         file_path   : varchar(255)  # filepath of video, relative to root directory
         """
 
-        @classmethod 
-        def insert_video_recording(cls, key, relative_video_paths, recording_id, device_id): 
-              video_recording_insert = {**key, 'recording_id': recording_id, 'device_id': device_id}
 
 @schema
 class RecordingInfo(dj.Imported):
