@@ -96,8 +96,8 @@ def activate(
 
 
 @schema
-class FacemapTrainVideoSet(dj.Manual):
-    """Collection of videos included in a given training set.
+class FacemapTrainFileSet(dj.Manual):
+    """Collection of files associated with a given training set.
 
     Attributes:
         video_set_id (int): Unique ID for each collection of videos."""
@@ -113,7 +113,7 @@ class FacemapTrainVideoSet(dj.Manual):
             VideoSet (foreign key): VideoSet key.
             file_path ( varchar(255) ): Path to file on disk relative to root."""
 
-        definition = """ # Paths of training files (e.g., .avi, .mp4, .npy video/ param files)
+        definition = """ # Paths of training files (e.g., .avi, .mp4 video files, .h5 keypoints data file)
         -> master
         file_id: int
         ---
@@ -136,7 +136,6 @@ class FacemapTrainParamSet(dj.Lookup):
     # Parameters to specify a facemap model training instance
     paramset_idx                  : smallint
     ---
-    keypoints_filename            : varchar(255) # 
     paramset_desc                 : varchar(128) # Description of parameterset used for 
     param_set_hash                : uuid      # hash identifying this paramset
                                                 unique index (param_set_hash)
@@ -203,6 +202,7 @@ class FacemapModelTrainingTask(dj.Manual):
     train_output_dir                        : varchar(255)  # Trained model output directory
     refined_model_name='refined_model'      : varchar(32)
     model_id                                : smallint      # Model index for insertion into FacemapModel table
+    retrain_model_id                        : smallint      # Model index for loading of 
     model_description                       : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     selected_frame_ind=None                 : smallblob     # Array of frames to run training on
     """
@@ -246,9 +246,15 @@ class FacemapModelTraining(dj.Computed):
         import cv2
         import torch
         output_dir = find_full_path(fbe.get_facemap_root_data_dir(), output_dir)
-        video_files = [find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix() for fp in (FacemapTrainVideoSet.File & {'video_set_id': key['video_set_id']}).fetch("file_path")]
+
+        train_fileset = [find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix() 
+                         for fp in (FacemapTrainFileSet.File & 
+                                    {'video_set_id': key['video_set_id']}).fetch("file_path")]
         paramset_idx = (FacemapModelTrainingTask & key).fetch('paramset_idx')
 
+        video_suffixes = ['.mp4','.avi']
+        h5_filepaths = [f for f in train_fileset if f.endswith('.h5')] 
+        video_files = [f for f in train_fileset if any(f.endswith(s) for s in video_suffixes)]
 
         # Create a pose model object, specifying the video files
         train_model = facemap_pose.Pose(filenames=[video_files])
@@ -258,42 +264,53 @@ class FacemapModelTraining(dj.Computed):
 
 
         # Convert videos to images for train input
-        
-
         pre_selected_frame_ind = (FacemapModelTrainingTask & key).fetch1('selected_frame_ind')
-        image_data = []
-        for video_file in video_files:
-            if len(pre_selected_frame_ind) == 0: # set selected frames to all frames
 
-                cap = cv2.VideoCapture(video_file)
-                selected_frame_ind = np.arange(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))   
-            else:
-                selected_frame_ind = pre_selected_frame_ind
+        
+        # Only support single video training 
+        assert len(video_files) == 1
 
-            image_data.append(utils.load_images_from_video(video_file, selected_frame_ind))
+        video_file = video_files[0]
+        if len(pre_selected_frame_ind) == 0: # set selected frames to all frames
 
+            cap = cv2.VideoCapture(video_file)
+            selected_frame_ind = np.arange(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))   
+        else:
+            selected_frame_ind = pre_selected_frame_ind
+        image_data = utils.load_images_from_video(video_file, selected_frame_ind)
+
+        # MULTIVIDEO TODO
+        # image_data = []
+        # for video_file in video_files:
+        #     if len(pre_selected_frame_ind) == 0: # set selected frames to all frames
+
+        #         cap = cv2.VideoCapture(video_file)
+        #         selected_frame_ind = np.arange(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))   
+        #     else:
+        #         selected_frame_ind = pre_selected_frame_ind
+
+        #     image_data.append(utils.load_images_from_video(video_file, selected_frame_ind))
+
+        # -- For multivideo image data reshaping
         # cumframes, Ly, Lx, containers = utils.get_frame_details(video_files)
-
         # LY, LX, sy, sx = utils.video_placement(Ly, Lx)
-        
         # reshaped_videos = utils.multivideo_reshape(image_data, LY, LX, Ly, Lx, sy, sx)  
-        
-        # LIMIT TO SINGLE VIDEO TRAIN for now, can implement multi video later
-        single_video_data = image_data[0][:,:,:,0]
         
         
         # Can use existing keypoints data stored facemap_pose schema
-        keypoints_data = (facemap_pose.FacemapPoseEstimation.BodyPartPosition).fetch(as_dict=True)
+        # keypoints_data = (facemap_pose.FacemapPoseEstimation.BodyPartPosition).fetch(as_dict=True)
+        
+        keypoints_file = (FacemapModelTrainingTask & key).fetch('keypoints_filename')
 
         # This works, but we would need to store Files in the facial pose model as well, 
-        keypoints_data = utils.load_keypoints(facemap_pose.BodyPart.contents, h5_file)   
+        keypoints_data = utils.load_keypoints(facemap_pose.BodyPart.contents, keypoints_file)   
 
         # Model Parameters (fetch from TrainingParamSet as dict)
         training_params = (FacemapTrainParamSet & f'paramset_idx={paramset_idx}').fetch1('params')
         refined_model_name = (FacemapModelTrainingTask & key).fetch1('refined_model_name') # default = "refined_model"
 
-        # Train model
-        train_model.net = train_model.train(image_data[0][:,:,:,0], 
+        # Train model using train function defined in Pose class
+        train_model.net = train_model.train(image_data[:,:,:,0], 
                                             keypoints_data.T, # needs to be transposed 
                                             int(training_params['epochs']), 
                                             int(training_params['batch_size']), 
@@ -301,6 +318,30 @@ class FacemapModelTraining(dj.Computed):
                                             int(training_params['weight_decay']),
                                             bbox=training_params['bbox'])
         
+
+        # Alternate (requires more imports, but allows for access to training object that can be used for cross validation)
+        from facemap.pose import model_training, datasets
+
+        dataset = datasets.FacemapDataset(
+            image_data=image_data,
+            keypoints_data=keypoints_data.T,
+            bbox=training_params['bbox'],
+        )
+        # Create a dataloader object for training
+        dataloader = torch.utils.data.DataLoader(
+            dataset, batch_size=int(training_params['batch_size']), shuffle=True
+        )
+        # Use preprocessed data to train the model
+        train_model.net = model_training.train(
+            dataloader,
+            train_model.net,
+            int(training_params['epochs']),
+            int(training_params['weight_decay']),
+        )
+        print("Model training complete!")
+        return self.net
+        
+
 
         # Save Refined Model
         model_output_path = output_dir / f'{refined_model_name}.pth'
@@ -312,10 +353,10 @@ class FacemapModelTraining(dj.Computed):
         # Insert newly trained model results into FacemapModel table
         try:
             model_ids = facemap_pose.FacemapModel.fetch("model_id")
+            if len(model_id) == 0 or model_id in model_ids:
+                model_id = max(model_ids) + 1
         except ValueError:  # case that nothing has been inserted
             model_id = 0
-        if len(model_id) == 0 or model_id in model_ids:
-            model_id = max(model_ids) + 1
 
         model_insert = dict(model_id=model_id, 
                             model_name=refined_model_name, 
