@@ -236,8 +236,8 @@ class FacemapModelTraining(dj.Computed):
     definition = """
     -> FacemapModelTrainingTask
     ---
-    train_model_time: datetime
-
+    train_model_time        : datetime      # Time of creation of train model file
+    train_model             : longblob      # Dictionary containing model.net state   
     """
 
     def make(self, key):
@@ -319,29 +319,28 @@ class FacemapModelTraining(dj.Computed):
                                             bbox=training_params['bbox'])
         
 
-        # Alternate (requires more imports, but allows for access to training object that can be used for cross validation)
-        from facemap.pose import model_training, datasets
+        # Alternate (requires more imports, but allows for access to model_training object that can be used for cross validation)
+        # from facemap.pose import model_training, datasets
 
-        dataset = datasets.FacemapDataset(
-            image_data=image_data,
-            keypoints_data=keypoints_data.T,
-            bbox=training_params['bbox'],
-        )
-        # Create a dataloader object for training
-        dataloader = torch.utils.data.DataLoader(
-            dataset, batch_size=int(training_params['batch_size']), shuffle=True
-        )
-        # Use preprocessed data to train the model
-        train_model.net = model_training.train(
-            dataloader,
-            train_model.net,
-            int(training_params['epochs']),
-            int(training_params['weight_decay']),
-        )
-        print("Model training complete!")
-        return self.net
+        # dataset = datasets.FacemapDataset(
+        #     image_data=image_data,
+        #     keypoints_data=keypoints_data.T,
+        #     bbox=training_params['bbox'],
+        # )
+        # # Create a dataloader object for training
+        # dataloader = torch.utils.data.DataLoader(
+        #     dataset, batch_size=int(training_params['batch_size']), shuffle=True
+        # )
+        # # Use preprocessed data to train the model
+        # train_model.net = model_training.train(
+        #     dataloader,
+        #     train_model.net,
+        #     int(training_params['epochs']),
+        #     int(training_params['weight_decay']),
+        # )
+
+        # pred_keypoints, keypoints = model_training.get_test_predictions(train_model.net, test_dataset)
         
-
 
         # Save Refined Model
         model_output_path = output_dir / f'{refined_model_name}.pth'
@@ -371,5 +370,5 @@ class FacemapModelTraining(dj.Computed):
         )
 
         self.insert1(
-            {**key, 'train_model_time': train_model_time}
+            {**key, 'train_model_time': train_model_time, 'train_model': train_model.net.state_dict()}
         )
