@@ -204,7 +204,7 @@ class FacemapModelTrainingTask(dj.Manual):
     model_id                                : smallint      # Model index for insertion into FacemapModel table
     retrain_model_id                        : smallint      # Model index for loading of 
     model_description                       : varchar(255)  # Optional, model desc for insertion into FacemapModel     
-    selected_frame_ind                      : smallblob     # Array of frames to run training on
+    selected_frame_ind                      : tinyblob     # Array of frames to run training on
     """
     def infer_output_dir(self, key, relative=True, mkdir=True):
         video_file = (fbe.VideoRecording.File & key).fetch("file_path", limit=1)[0]
