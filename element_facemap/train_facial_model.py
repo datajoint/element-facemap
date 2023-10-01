@@ -186,7 +186,7 @@ class FacemapModelTrainingTask(dj.Manual):
 
     Attributes:
         FacemapTrainFileSet (foreign key): FacemapTrainFileSet Key.
-        FacemapTrainingParamSet (foreign key): TrainingParamSet key.
+        FacemapTrainParamSet (foreign key): TrainingParamSet key.
         training_task_id (int): Unique ID for training task.
         train_output_dir( varchar(255) ): Relative output directory for trained model 
         refined_model_name ( varchar(32) ): Name for retrained model
@@ -196,7 +196,7 @@ class FacemapModelTrainingTask(dj.Manual):
 
     definition = """      # Specification for a facemap model training instance
     -> FacemapTrainFileSet                      # video(s) and files for training
-    -> FacemapTrainingParamSet                  # Initially specified ROIs
+    -> FacemapTrainParamSet                  # Initially specified ROIs
     training_task_id                        : smallint
     ---
     train_output_dir                        : varchar(255)  # Trained model output directory
