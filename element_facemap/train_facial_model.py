@@ -107,10 +107,10 @@ class FacemapTrainFileSet(dj.Manual):
     """
 
     class File(dj.Part):
-        """File IDs and paths in a given TrainVideoSet
+        """File IDs and paths in a given FacemapTrainFileSet
 
         Attributes:
-            VideoSet (foreign key): VideoSet key.
+            FacemapTrainFileSet (foreign key): FacemapTrainFileSet key.
             file_path ( varchar(255) ): Path to file on disk relative to root."""
 
         definition = """ # Paths of training files (e.g., .avi, .mp4 video files, .h5 keypoints data file)
