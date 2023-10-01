@@ -80,7 +80,7 @@ def activate(
         facemap_model_schema_name,
         create_schema=create_schema,
         create_tables=create_tables,
-        add_objects=_linking_module.__dict__,
+        linking_module=linking_module,
     )
 
     # activate facemap train schema
