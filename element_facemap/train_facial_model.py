@@ -166,8 +166,8 @@ class FacemapTrainParamSet(dj.Lookup):
         param_dict = {
             "paramset_idx": paramset_idx,
             "paramset_desc": paramset_desc,
-            "params": params,
             "param_set_hash": dict_to_uuid(params),
+            "params": params,
         }
         param_query = cls & {"param_set_hash": param_dict["param_set_hash"]}
         # If the specified param-set already exists
