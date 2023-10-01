@@ -61,7 +61,7 @@ def activate(
         linking_module
     ), "The argument 'dependency' must be a module's name or a module"
     assert hasattr(
-        linking_module, "get_dlc_root_data_dir"
+        linking_module, "get_facemap_root_data_dir"
     ), "The linking module must specify a lookup function for a root data directory"
 
     global _linking_module
@@ -185,7 +185,7 @@ class FacemapModelTrainingTask(dj.Manual):
     """Staging table for pairing videosets and training parameter sets
 
     Attributes:
-        FacemapTrainVideoSet (foreign key): FacemapTrainVideoSet Key.
+        FacemapTrainFileSet (foreign key): FacemapTrainFileSet Key.
         FacemapTrainingParamSet (foreign key): TrainingParamSet key.
         training_task_id (int): Unique ID for training task.
         train_output_dir( varchar(255) ): Relative output directory for trained model 
@@ -195,7 +195,7 @@ class FacemapModelTrainingTask(dj.Manual):
     """
 
     definition = """      # Specification for a facemap model training instance
-    -> FacemapTrainVideoSet                     # video(s) for training
+    -> FacemapTrainFileSet                      # video(s) and files for training
     -> FacemapTrainingParamSet                  # Initially specified ROIs
     training_task_id                        : smallint
     ---
