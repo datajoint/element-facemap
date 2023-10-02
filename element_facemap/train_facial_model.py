@@ -202,9 +202,9 @@ class FacemapModelTrainingTask(dj.Manual):
     train_output_dir                        : varchar(255)  # Trained model output directory
     refined_model_name='refined_model'      : varchar(32)
     model_id                                : smallint      # Model index for insertion into FacemapModel table
-    retrain_model_id                        : smallint      # Model index for loading of 
+    retrain_model_id                        : smallint      # Model index of model to be loaded for retraining
     model_description                       : varchar(255)  # Optional, model desc for insertion into FacemapModel     
-    selected_frame_ind                      : tinyblob     # Array of frames to run training on
+    selected_frame_ind                      : blob     # Array of frames to run training on
     """
     def infer_output_dir(self, key, relative=True, mkdir=True):
         video_files = (FacemapTrainFileSet.File & key).fetch("file_path", limit=1)[0]
@@ -228,7 +228,7 @@ class FacemapModelTrainingTask(dj.Manual):
         vrec_key = (fbe.VideoRecording & key).fetch('key')
         facemap_training_task_insert = dict(**key,
                                             training_task_id=training_task_id,
-                                            train_output_dir=train_output_dir,
+                                            train_output_dir=train_output_dir.relative_to(fbe.get_facemap_root_data_dir()),
                                             refined_model_name=refined_model_name,
                                             selected_frame_ind=selected_frame_ind,
                                             model_description=model_description,
@@ -258,7 +258,9 @@ class FacemapModelTraining(dj.Computed):
         from facemap import utils
         import cv2
         import torch
-        output_dir = find_full_path(fbe.get_facemap_root_data_dir(), output_dir)
+
+        train_output_dir = (FacemapModelTrainingTask & key).fetch1('train_output_dir')
+        output_dir = find_full_path(fbe.get_facemap_root_data_dir(), train_output_dir)
 
         train_fileset = [find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix() 
                          for fp in (FacemapTrainFileSet.File & 
@@ -280,7 +282,7 @@ class FacemapModelTraining(dj.Computed):
         pre_selected_frame_ind = (FacemapModelTrainingTask & key).fetch1('selected_frame_ind')
 
         
-        # Only support single video training 
+        # Currently, only support single video training 
         assert len(video_files) == 1
 
         video_file = video_files[0]
@@ -316,7 +318,7 @@ class FacemapModelTraining(dj.Computed):
         keypoints_file = (FacemapModelTrainingTask & key).fetch('keypoints_filename')
 
         # This works, but we would need to store Files in the facial pose model as well, 
-        keypoints_data = utils.load_keypoints('pafacemap_pose.BodyPart.contents, keypoints_file)   
+        keypoints_data = utils.load_keypoints(facemap_pose.BodyPart.contents, keypoints_file)   
 
         # Model Parameters (fetch from TrainingParamSet as dict)
         training_params = (FacemapTrainParamSet & f'paramset_idx={paramset_idx}').fetch1('params')
