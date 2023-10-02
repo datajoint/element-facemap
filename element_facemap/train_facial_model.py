@@ -207,8 +207,8 @@ class FacemapModelTrainingTask(dj.Manual):
     selected_frame_ind                      : tinyblob     # Array of frames to run training on
     """
     def infer_output_dir(self, key, relative=True, mkdir=True):
-        video_file = (fbe.VideoRecording.File & key).fetch("file_path", limit=1)[0]
-        video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_file).parent
+        video_files = (FacemapTrainFileSet.File & key).fetch("file_path", limit=1)[0]
+        video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_files[0]).parent
         root_dir = find_root_directory(fbe.get_facemap_root_data_dir(), video_dir)
 
         paramset_idx = (FacemapModelTrainingTask & key).fetch1("paramset_idx")
@@ -222,7 +222,20 @@ class FacemapModelTrainingTask(dj.Manual):
 
         return output_dir.relative_to(processed_dir) if relative else output_dir
 
+    @classmethod
+    def insert_facemap_training_task(cls, key, training_task_id, refined_model_name, model_description, selected_frame_ind, train_output_dir, model_id=None):
 
+        vrec_key = (fbe.VideoRecording & key).fetch('key')
+        facemap_training_task_insert = dict(**key,
+                                            training_task_id=training_task_id,
+                                            train_output_dir=train_output_dir,
+                                            refined_model_name=refined_model_name,
+                                            selected_frame_ind=selected_frame_ind,
+                                            model_description=model_description,
+                                            model_id=model_id)
+        cls.infer_output_dir(vrec_key)
+
+        
 @schema
 class FacemapModelTraining(dj.Computed):
     """Automated Model training information.
@@ -303,7 +316,7 @@ class FacemapModelTraining(dj.Computed):
         keypoints_file = (FacemapModelTrainingTask & key).fetch('keypoints_filename')
 
         # This works, but we would need to store Files in the facial pose model as well, 
-        keypoints_data = utils.load_keypoints(facemap_pose.BodyPart.contents, keypoints_file)   
+        keypoints_data = utils.load_keypoints('pafacemap_pose.BodyPart.contents, keypoints_file)   
 
         # Model Parameters (fetch from TrainingParamSet as dict)
         training_params = (FacemapTrainParamSet & f'paramset_idx={paramset_idx}').fetch1('params')
