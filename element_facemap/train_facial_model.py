@@ -240,7 +240,7 @@ class FacemapModelTrainingTask(dj.Manual):
 
     @classmethod
     def insert_facemap_training_task(cls, 
-                                     file_set_key, 
+                                     file_set_id, 
                                      training_task_id,
                                      paramset_idx, 
                                      refined_model_name='refined_model', 
@@ -249,7 +249,7 @@ class FacemapModelTrainingTask(dj.Manual):
                                      keypoints_filename="", 
                                      model_id=None,
                                      retrain_model_id=None):
-        key = {**file_set_key, "paramset_idx": paramset_idx}
+        key = {"file_set_id": file_set_id, "paramset_idx": paramset_idx}
         inferred_output_dir = cls.infer_output_dir(key, relative=True, mkdir=True)
         facemap_training_task_insert = dict(**key,
                                             training_task_id=training_task_id,
