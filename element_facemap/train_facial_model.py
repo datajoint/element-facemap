@@ -296,13 +296,13 @@ class FacemapModelTraining(dj.Computed):
                                     {'file_set_id': key['file_set_id']}).fetch("video_file_path")]
         
         # manually specified .h5 keypoints file 
-        train_fileset = [find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix() 
-                         for fp in (FacemapTrainFileSet.File & 
+        keypoints_fileset = [find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix() 
+                         for fp in (FacemapTrainFileSet.KeypointsFile & 
                                     {'file_set_id': key['file_set_id']}).fetch("file_path")]
         
         keypoints_file_name = (FacemapModelTrainingTask & key).fetch1("keypoints_filename")
 
-        keypoints_file = [f for f in train_fileset if keypoints_file_name in f]
+        keypoints_file = [f for f in keypoints_fileset if keypoints_file_name in f]
         if len(keypoints_file) > 0:
             keypoints_file = keypoints_file[0] # if multiple keypoints files are specified, select first file
 
