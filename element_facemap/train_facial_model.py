@@ -122,7 +122,7 @@ class FacemapTrainFileSet(dj.Manual):
         """
     
     class KeypointsFile(dj.Part):
-        """Non video File IDs and paths in a given FacemapTrainFileSet
+        """Keypoints File containing labels and paths in a given FacemapTrainFileSet
 
         Attributes:
             FacemapTrainFileSet (foreign key)   : FacemapTrainFileSet key.
@@ -282,7 +282,6 @@ class FacemapModelTraining(dj.Computed):
     def make(self, key):
         from facemap.pose import pose as facemap_pose
         from facemap import utils
-        import cv2
         import torch
 
         train_output_dir = (FacemapModelTrainingTask & key).fetch1('train_output_dir')
@@ -301,18 +300,15 @@ class FacemapModelTraining(dj.Computed):
 
         keypoints_file = [f for f in train_fileset if keypoints_file_name in f]
         if len(keypoints_file) > 0:
-            keypoints_file = keypoints_file[0] # if multiple keypoints files are specified select first file
+            keypoints_file = keypoints_file[0] # if multiple keypoints files are specified, select first file
 
-        h5_filepaths = [f for f in train_fileset if f.endswith('.h5')] 
-
-        retrain_model_id = key['retrain_model_id']
         # Create a pose model object, specifying the video files
         train_model = facemap_pose.Pose(filename=[video_files])
         train_model.pose_prediction_setup() # Sets default facemap model as train_model.net, handles empty bbox
 
-        if len(retrain_model_id) > 0: # Retrain an existing model from the facemap_pose.FacemapModel table
+        if len(key['retrain_model_id']) > 0: # Retrain an existing model from the facemap_pose.FacemapModel table
             # Fetch model file attachment so that model_file (.pth) is availible in Path.cwd()
-            model_file = (facemap_pose.FacemapModel.File & {'model_id': retrain_model_id}).fetch1("model_file")
+            model_file = (facemap_pose.FacemapModel.File & {'model_id': key['retrain_model_id']}).fetch1("model_file")
             
             # Set train_model object to load preexisting model
             train_model.model_name = model_file
@@ -329,7 +325,7 @@ class FacemapModelTraining(dj.Computed):
 
         video_file = video_files[0]
         if len(pre_selected_frame_ind) == 0: # set selected frames to all frames
-
+            import cv2
             cap = cv2.VideoCapture(video_file)
             selected_frame_ind = np.arange(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))   
         else:
@@ -338,28 +334,23 @@ class FacemapModelTraining(dj.Computed):
         # Load image frames from video 
         image_data = utils.load_images_from_video(video_file, selected_frame_ind)
 
-        # MULTIVIDEO TODO
-        # image_data = []
-        # for video_file in video_files:
-        #     if len(pre_selected_frame_ind) == 0: # set selected frames to all frames
+            # MULTIVIDEO TODO
+            # image_data = []
+            # for video_file in video_files:
+            #     if len(pre_selected_frame_ind) == 0: # set selected frames to all frames
 
-        #         cap = cv2.VideoCapture(video_file)
-        #         selected_frame_ind = np.arange(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))   
-        #     else:
-        #         selected_frame_ind = pre_selected_frame_ind
+            #         cap = cv2.VideoCapture(video_file)
+            #         selected_frame_ind = np.arange(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))   
+            #     else:
+            #         selected_frame_ind = pre_selected_frame_ind
 
-        #     image_data.append(utils.load_images_from_video(video_file, selected_frame_ind))
+            #     image_data.append(utils.load_images_from_video(video_file, selected_frame_ind))
 
-        # -- For multivideo image data reshaping
-        # cumframes, Ly, Lx, containers = utils.get_frame_details(video_files)
-        # LY, LX, sy, sx = utils.video_placement(Ly, Lx)
-        # reshaped_videos = utils.multivideo_reshape(image_data, LY, LX, Ly, Lx, sy, sx)  
-        
-        
-        # Can use existing keypoints data stored facemap_pose schema
-        keypoints_file = 
+            # -- For multivideo image data reshaping
+            # cumframes, Ly, Lx, containers = utils.get_frame_details(video_files)
+            # LY, LX, sy, sx = utils.video_placement(Ly, Lx)
+            # reshaped_videos = utils.multivideo_reshape(image_data, LY, LX, Ly, Lx, sy, sx)  
 
-        # This works, but we would need to store Files in the facial pose model as well, 
         keypoints_data = utils.load_keypoints(facemap_pose.BodyPart.contents, keypoints_file)   
 
         # Model Parameters (fetch from TrainingParamSet as dict)
