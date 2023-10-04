@@ -220,10 +220,10 @@ class FacemapModelTrainingTask(dj.Manual):
     training_task_id                        : smallint
     ---
     train_output_dir                        : varchar(255)  # Trained model output directory
-    selected_frame_ind                      : blob          # Array of frames to run training on
     refined_model_name='refined_model'      : varchar(32)   # Specify name of finetuned/trained model filepath
-    model_id=None                           : smallint      # Model index for insertion into FacemapModel table
-    retrain_model_id=None                   : smallint      # Model index of model to be loaded for retraining
+    model_id=null                           : smallint      # Model index for insertion into FacemapModel table
+    retrain_model_id=null                   : smallint      # Model index of model to be loaded for retraining
+    selected_frame_ind=null                 : blob          # Array of frames to run training on
     model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     keypoints_filename=None                 : varchar(64)   # Specify keypoints filename if multiple keypoints files are stored
     """
