@@ -100,20 +100,36 @@ class FacemapTrainFileSet(dj.Manual):
     """Collection of files associated with a given training set.
 
     Attributes:
-        video_set_id (int): Unique ID for each collection of videos."""
+        file_set_id (int): Unique ID for each collection of training files."""
 
     definition = """ # Set of vids in training set
-    video_set_id: int
+    file_set_id: int
     """
 
-    class File(dj.Part):
-        """File IDs and paths in a given FacemapTrainFileSet
+    class VideoFile(dj.Part):
+        """Video File IDs and paths in a given FacemapTrainFileSet
 
         Attributes:
-            FacemapTrainFileSet (foreign key): FacemapTrainFileSet key.
-            file_path ( varchar(255) ): Path to file on disk relative to root."""
+            FacemapTrainFileSet (foreign key)   : FacemapTrainFileSet key.
+            video_file_id (int)                 : Video File index
+            video_file_path ( varchar(255) )    : Path to file on disk relative to root."""
 
-        definition = """ # Paths of training files (e.g., .avi, .mp4 video files, .h5 keypoints data file)
+        definition = """ # Paths of training files (e.g., .avi, .mp4 video files)
+        -> master
+        video_file_id: int
+        ---
+        video_file_path: varchar(255)
+        """
+    
+    class KeypointsFile(dj.Part):
+        """Non video File IDs and paths in a given FacemapTrainFileSet
+
+        Attributes:
+            FacemapTrainFileSet (foreign key)   : FacemapTrainFileSet key.
+            file_id                             : Keypoint File index.  
+            file_path ( varchar(255) )          : Path to file on disk relative to root."""
+
+        definition = """ # Paths of training files (e.g.: .h5 keypoints data file)
         -> master
         file_id: int
         ---
@@ -204,17 +220,17 @@ class FacemapModelTrainingTask(dj.Manual):
     model_id                                : smallint      # Model index for insertion into FacemapModel table
     retrain_model_id                        : smallint      # Model index of model to be loaded for retraining
     model_description                       : varchar(255)  # Optional, model desc for insertion into FacemapModel     
-    selected_frame_ind                      : blob     # Array of frames to run training on
+    selected_frame_ind                      : blob          # Array of frames to run training on
+    keypoints_filename                      : varchar(64)   # Specify keypoints filename if multiple keypoints files are stored
     """
     def infer_output_dir(self, key, relative=True, mkdir=True):
-        video_files = (FacemapTrainFileSet.File & key).fetch("file_path", limit=1)[0]
-        video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_files[0]).parent
+        video_file = (FacemapTrainFileSet.File & key).fetch("file_path", limit=1)[0]
+        video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_file).parent
         root_dir = find_root_directory(fbe.get_facemap_root_data_dir(), video_dir)
 
-        paramset_idx = (FacemapModelTrainingTask & key).fetch1("paramset_idx")
         processed_dir = Path(fbe.get_facemap_processed_data_dir())
         output_dir = (
-            processed_dir / video_dir.relative_to(root_dir) / f"facemap_train_{paramset_idx}"
+            processed_dir / video_dir.relative_to(root_dir) / f"facemap_train_{key['paramset_idx']}"
         )
 
         if mkdir:
@@ -223,18 +239,28 @@ class FacemapModelTrainingTask(dj.Manual):
         return output_dir.relative_to(processed_dir) if relative else output_dir
 
     @classmethod
-    def insert_facemap_training_task(cls, key, training_task_id, refined_model_name, model_description, selected_frame_ind, train_output_dir, model_id=None):
-
-        vrec_key = (fbe.VideoRecording & key).fetch('key')
+    def insert_facemap_training_task(cls, 
+                                     file_set_key, 
+                                     training_task_id,
+                                     paramset_idx, 
+                                     refined_model_name, 
+                                     model_description, 
+                                     selected_frame_ind,  
+                                     model_id=None,
+                                     retrain_model_id=None):
+        key = {**file_set_key, "paramset_idx": paramset_idx}
+        inferred_output_dir = cls.infer_output_dir(key, relative=True, mkdir=True)
         facemap_training_task_insert = dict(**key,
                                             training_task_id=training_task_id,
-                                            train_output_dir=train_output_dir.relative_to(fbe.get_facemap_root_data_dir()),
+                                            train_output_dir=inferred_output_dir,
                                             refined_model_name=refined_model_name,
                                             selected_frame_ind=selected_frame_ind,
                                             model_description=model_description,
-                                            model_id=model_id)
-        cls.infer_output_dir(vrec_key)
-
+                                            model_id=model_id,
+                                            retrain_model_id=retrain_model_id)
+        
+        facemap_training_task_insert.update({'train_output_dir': inferred_output_dir.as_posix()})
+        cls.insert1(facemap_training_task_insert)
         
 @schema
 class FacemapModelTraining(dj.Computed):
@@ -262,25 +288,41 @@ class FacemapModelTraining(dj.Computed):
         train_output_dir = (FacemapModelTrainingTask & key).fetch1('train_output_dir')
         output_dir = find_full_path(fbe.get_facemap_root_data_dir(), train_output_dir)
 
+        video_files = [find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix() 
+                         for fp in (FacemapTrainFileSet.VideoFile & 
+                                    {'video_set_id': key['video_set_id']}).fetch("file_path")]
+        
+        # manually specified .h5 keypoints file 
         train_fileset = [find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix() 
                          for fp in (FacemapTrainFileSet.File & 
-                                    {'video_set_id': key['video_set_id']}).fetch("file_path")]
-        paramset_idx = (FacemapModelTrainingTask & key).fetch('paramset_idx')
+                                    {'file_set_id': key['video_set_id']}).fetch("file_path")]
+        
+        keypoints_file_name = (FacemapModelTrainingTask & key).fetch1("keypoints_filename")
 
-        video_suffixes = ['.mp4','.avi']
+        keypoints_file = [f for f in train_fileset if keypoints_file_name in f]
+        if len(keypoints_file) > 0:
+            keypoints_file = keypoints_file[0] # if multiple keypoints files are specified select first file
+
         h5_filepaths = [f for f in train_fileset if f.endswith('.h5')] 
-        video_files = [f for f in train_fileset if any(f.endswith(s) for s in video_suffixes)]
 
+        retrain_model_id = key['retrain_model_id']
         # Create a pose model object, specifying the video files
-        train_model = facemap_pose.Pose(filenames=[video_files])
+        train_model = facemap_pose.Pose(filename=[video_files])
+        train_model.pose_prediction_setup() # Sets default facemap model as train_model.net, handles empty bbox
 
-        # Run pose prediction setup to set facemap default model to train_model.net
-        train_model.pose_prediction_setup()
-
+        if len(retrain_model_id) > 0: # Retrain an existing model from the facemap_pose.FacemapModel table
+            # Fetch model file attachment so that model_file (.pth) is availible in Path.cwd()
+            model_file = (facemap_pose.FacemapModel.File & {'model_id': retrain_model_id}).fetch1("model_file")
+            
+            # Set train_model object to load preexisting model
+            train_model.model_name = model_file
+            # Overwrite default train_model.net
+            train_model.net.load_state_dict(torch.load(model_file, map_location=train_model.device))
+            # link model to torch device
+            train_model.net.to(train_model.device)
 
         # Convert videos to images for train input
         pre_selected_frame_ind = (FacemapModelTrainingTask & key).fetch1('selected_frame_ind')
-
         
         # Currently, only support single video training 
         assert len(video_files) == 1
@@ -292,6 +334,8 @@ class FacemapModelTraining(dj.Computed):
             selected_frame_ind = np.arange(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))   
         else:
             selected_frame_ind = pre_selected_frame_ind
+
+        # Load image frames from video 
         image_data = utils.load_images_from_video(video_file, selected_frame_ind)
 
         # MULTIVIDEO TODO
@@ -313,19 +357,17 @@ class FacemapModelTraining(dj.Computed):
         
         
         # Can use existing keypoints data stored facemap_pose schema
-        # keypoints_data = (facemap_pose.FacemapPoseEstimation.BodyPartPosition).fetch(as_dict=True)
-        
-        keypoints_file = (FacemapModelTrainingTask & key).fetch('keypoints_filename')
+        keypoints_file = 
 
         # This works, but we would need to store Files in the facial pose model as well, 
         keypoints_data = utils.load_keypoints(facemap_pose.BodyPart.contents, keypoints_file)   
 
         # Model Parameters (fetch from TrainingParamSet as dict)
-        training_params = (FacemapTrainParamSet & f'paramset_idx={paramset_idx}').fetch1('params')
+        training_params = (FacemapTrainParamSet & f'paramset_idx={key["paramset_idx"]}').fetch1('params')
         refined_model_name = (FacemapModelTrainingTask & key).fetch1('refined_model_name') # default = "refined_model"
 
         # Train model using train function defined in Pose class
-        train_model.net = train_model.train(image_data[:,:,:,0], 
+        train_model.net = train_model.train(image_data[:,:,:,0], # note: using 0 index for now (could average across this dimension) 
                                             keypoints_data.T, # needs to be transposed 
                                             int(training_params['epochs']), 
                                             int(training_params['batch_size']), 
@@ -361,7 +403,7 @@ class FacemapModelTraining(dj.Computed):
         model_output_path = output_dir / f'{refined_model_name}.pth'
         torch.save(train_model.net.state_dict(), model_output_path)
 
-        model_id = (FacemapModelTrainingTask & key).fetch1('model_id')
+        model_id = key['model_id']
         model_description = (FacemapModelTrainingTask & key).fetch1('model_description')
 
         # Insert newly trained model results into FacemapModel table
@@ -372,13 +414,10 @@ class FacemapModelTraining(dj.Computed):
         except ValueError:  # case that nothing has been inserted
             model_id = 0
 
-        model_insert = dict(model_id=model_id, 
-                            model_name=refined_model_name, 
-                            model_description=model_description)
-        model_file_insert = dict(model_id=model_id, model_file=model_output_path)
-
-        facemap_pose.FacemapModel.insert_new_model(model_insert)
-        facemap_pose.FacemapModel.File
+        facemap_pose.FacemapModel().insert_new_model(model_id, 
+                                                     refined_model_name, 
+                                                     model_description, 
+                                                     model_output_path)
 
         train_model_time = datetime.fromtimestamp(model_output_path.stat().st_mtime).strftime(
             "%Y-%m-%d %H:%M:%S"
