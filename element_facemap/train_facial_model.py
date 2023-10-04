@@ -257,6 +257,7 @@ class FacemapModelTrainingTask(dj.Manual):
                                             refined_model_name=refined_model_name,
                                             selected_frame_ind=selected_frame_ind,
                                             model_description=model_description,
+                                            keypoints_filename=keypoints_filename,
                                             model_id=model_id,
                                             retrain_model_id=retrain_model_id)
         cls.insert1(facemap_training_task_insert)
