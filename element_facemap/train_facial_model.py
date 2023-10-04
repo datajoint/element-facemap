@@ -224,7 +224,7 @@ class FacemapModelTrainingTask(dj.Manual):
     keypoints_filename                      : varchar(64)   # Specify keypoints filename if multiple keypoints files are stored
     """
     def infer_output_dir(self, key, relative=True, mkdir=True):
-        video_file = (FacemapTrainFileSet.File & key).fetch("file_path", limit=1)[0]
+        video_file = (FacemapTrainFileSet.VideoFile & key).fetch("file_path", limit=1)[0]
         video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_file).parent
         root_dir = find_root_directory(fbe.get_facemap_root_data_dir(), video_dir)
 
