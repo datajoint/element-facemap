@@ -243,23 +243,22 @@ class FacemapModelTrainingTask(dj.Manual):
                                      file_set_key, 
                                      training_task_id,
                                      paramset_idx, 
-                                     refined_model_name, 
-                                     model_description, 
-                                     selected_frame_ind,  
+                                     refined_model_name='refined_model', 
+                                     model_description=None, 
+                                     selected_frame_ind=None,
+                                     keypoints_filename="", 
                                      model_id=None,
                                      retrain_model_id=None):
         key = {**file_set_key, "paramset_idx": paramset_idx}
         inferred_output_dir = cls.infer_output_dir(key, relative=True, mkdir=True)
         facemap_training_task_insert = dict(**key,
                                             training_task_id=training_task_id,
-                                            train_output_dir=inferred_output_dir,
+                                            train_output_dir=inferred_output_dir.as_posix(),
                                             refined_model_name=refined_model_name,
                                             selected_frame_ind=selected_frame_ind,
                                             model_description=model_description,
                                             model_id=model_id,
                                             retrain_model_id=retrain_model_id)
-        
-        facemap_training_task_insert.update({'train_output_dir': inferred_output_dir.as_posix()})
         cls.insert1(facemap_training_task_insert)
         
 @schema
