@@ -207,6 +207,10 @@ class FacemapModelTrainingTask(dj.Manual):
         train_output_dir( varchar(255) ): Relative output directory for trained model 
         refined_model_name ( varchar(32) ): Name for retrained model
         model_id (smallint): Unique Model index to be inserted into FacemapModel table
+        retrain_model_id (smallint): Model index to query FacemapModel table to link model.net
+        model_description ( varchar(255) ): Optional. Model Description for insertion into FacemapModel 
+        selected_frame_ind (blob) : Array of frames to run training on, if not specified all frames used. 
+        keypoints_filename ( varchar(64) ): Optional. Name of specific keypoints file if multiple
 
     """
 
@@ -310,10 +314,13 @@ class FacemapModelTraining(dj.Computed):
             
             # Fetch model file attachment so that model_file (.pth) is availible in Path.cwd()
             model_file = (facemap_pose.FacemapModel.File & {'model_id': key['retrain_model_id']}).fetch1("model_file")
+
             # Set train_model object to load preexisting model
             train_model.model_name = model_file
+            
             # Overwrite default train_model.net
             train_model.net.load_state_dict(torch.load(model_file, map_location=train_model.device))
+
             # link model to torch device
             train_model.net.to(train_model.device)
 
