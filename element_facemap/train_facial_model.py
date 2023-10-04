@@ -250,7 +250,7 @@ class FacemapModelTrainingTask(dj.Manual):
                                      model_id=None,
                                      retrain_model_id=None):
         key = {"file_set_id": file_set_id, "paramset_idx": paramset_idx}
-        inferred_output_dir = cls.infer_output_dir(key, relative=True, mkdir=True)
+        inferred_output_dir = cls().infer_output_dir(key, relative=True, mkdir=True)
         facemap_training_task_insert = dict(**key,
                                             training_task_id=training_task_id,
                                             train_output_dir=inferred_output_dir.as_posix(),
