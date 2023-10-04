@@ -307,7 +307,7 @@ class FacemapModelTraining(dj.Computed):
             keypoints_file = keypoints_file[0] # if multiple keypoints files are specified, select first file
 
         # Create a pose model object, specifying the video files
-        train_model = pose.Pose(filename=[video_files])
+        train_model = pose.Pose(filenames=[video_files])
         train_model.pose_prediction_setup() # Sets default facemap model as train_model.net, handles empty bbox
 
         if len((FacemapModelTrainingTask & key).fetch1('refined_model_id')) > 0: # Retrain an existing model from the facemap_pose.FacemapModel table
