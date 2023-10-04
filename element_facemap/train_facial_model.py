@@ -216,12 +216,12 @@ class FacemapModelTrainingTask(dj.Manual):
     training_task_id                        : smallint
     ---
     train_output_dir                        : varchar(255)  # Trained model output directory
-    refined_model_name='refined_model'      : varchar(32)
-    model_id                                : smallint      # Model index for insertion into FacemapModel table
-    retrain_model_id                        : smallint      # Model index of model to be loaded for retraining
-    model_description                       : varchar(255)  # Optional, model desc for insertion into FacemapModel     
-    selected_frame_ind                      : blob          # Array of frames to run training on
-    keypoints_filename                      : varchar(64)   # Specify keypoints filename if multiple keypoints files are stored
+    refined_model_name='refined_model'      : varchar(32)   # Specify name of finetuned/trained model filepath
+    model_id=None                           : smallint      # Model index for insertion into FacemapModel table
+    retrain_model_id=None                   : smallint      # Model index of model to be loaded for retraining
+    model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
+    selected_frame_ind=None                 : blob          # Array of frames to run training on
+    keypoints_filename=None                 : varchar(64)   # Specify keypoints filename if multiple keypoints files are stored
     """
     def infer_output_dir(self, key, relative=True, mkdir=True):
         video_file = (FacemapTrainFileSet.VideoFile & key).fetch("video_file_path", limit=1)[0]
@@ -306,10 +306,10 @@ class FacemapModelTraining(dj.Computed):
         train_model = facemap_pose.Pose(filename=[video_files])
         train_model.pose_prediction_setup() # Sets default facemap model as train_model.net, handles empty bbox
 
-        if len(key['retrain_model_id']) > 0: # Retrain an existing model from the facemap_pose.FacemapModel table
+        if len((FacemapModelTrainingTask & key).fetch1('refined_model_id')) > 0: # Retrain an existing model from the facemap_pose.FacemapModel table
+            
             # Fetch model file attachment so that model_file (.pth) is availible in Path.cwd()
             model_file = (facemap_pose.FacemapModel.File & {'model_id': key['retrain_model_id']}).fetch1("model_file")
-            
             # Set train_model object to load preexisting model
             train_model.model_name = model_file
             # Overwrite default train_model.net
