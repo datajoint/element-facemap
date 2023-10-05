@@ -402,7 +402,7 @@ class FacemapModelTraining(dj.Computed):
         model_output_path = output_dir / f'{refined_model_name}.pth'
         torch.save(train_model.net.state_dict(), model_output_path)
 
-        model_id = key['model_id']
+        model_id = (FacemapModelTrainingTask & key).fetch1('model_id')
         model_description = (FacemapModelTrainingTask & key).fetch1('model_description')
 
         # Insert newly trained model results into FacemapModel table
