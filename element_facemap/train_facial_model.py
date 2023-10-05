@@ -408,7 +408,7 @@ class FacemapModelTraining(dj.Computed):
         # Insert newly trained model results into FacemapModel table
         try:
             model_ids = facemap_pose.FacemapModel.fetch("model_id")
-            if len(model_id) == 0 or model_id in model_ids:
+            if model_id is None or model_id in model_ids:
                 model_id = max(model_ids) + 1
         except ValueError:  # case that nothing has been inserted
             model_id = 0
