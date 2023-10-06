@@ -268,7 +268,7 @@ class FacemapModelTrainingTask(dj.Manual):
         
 @schema
 class FacemapModelTraining(dj.Computed):
-    """Automated Model training information.
+    """Automated Model training 
 
     Attributes:
         FacemapModelTrainingTask (foreign key): FacemapModelTrainingTask key.
@@ -280,7 +280,7 @@ class FacemapModelTraining(dj.Computed):
     -> FacemapModelTrainingTask
     ---
     train_model_time        : datetime      # Time of creation of train model file
-    train_model             : longblob      # Dictionary containing model.net state   
+    facemap_model_reference : smallint      # Reference to index facemap_pose.FacemapModel table
     """
 
     def make(self, key):
@@ -365,7 +365,7 @@ class FacemapModelTraining(dj.Computed):
         training_params = (FacemapTrainParamSet & f'paramset_idx={key["paramset_idx"]}').fetch1('params')
         refined_model_name = (FacemapModelTrainingTask & key).fetch1('refined_model_name') # default = "refined_model"
 
-        # Train model using train function defined in Pose class
+        # # Train model using train function defined in Pose class
         train_model.net = train_model.train(image_data[:,:,:,0], # note: using 0 index for now (could average across this dimension) 
                                             keypoints_data.T, # needs to be transposed 
                                             int(training_params['epochs']), 
@@ -376,7 +376,27 @@ class FacemapModelTraining(dj.Computed):
         
 
         # Alternate (requires more imports, but allows for access to model_training object that can be used for cross validation)
-        # from facemap.pose import model_training, datasets
+        from facemap.pose import model_training, datasets
+
+
+        # Split dataset into train and test splits 
+        
+        # # Splitting keypoints data
+        # dsplits = utils.split_data(X,Y,tcam,tneural)
+        # (
+        #     X_train,
+        #     X_test,
+        #     Y_train,
+        #     Y_test,
+        #     itrain_sample_b,
+        #     itest_sample_b,
+        #     itrain_sample,
+        #     itest_sample,
+        #     itrain,
+        #     itest,
+        # ) = dsplits
+
+        # # Splitting frames image data
 
         # dataset = datasets.FacemapDataset(
         #     image_data=image_data,
@@ -423,5 +443,6 @@ class FacemapModelTraining(dj.Computed):
         )
 
         self.insert1(
-            {**key, 'train_model_time': train_model_time, 'train_model': train_model.net.state_dict()}
+            {**key, 'train_model_time': train_model_time, 'facemap_model_reference': model_id}
+
         )
