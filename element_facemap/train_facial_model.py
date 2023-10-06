@@ -314,7 +314,7 @@ class FacemapModelTraining(dj.Computed):
         if retrain_model_id is not None: # Retrain an existing model from the facemap_pose.FacemapModel table
             
             # Fetch model file attachment so that model_file (.pth) is availible in Path.cwd()
-            model_file = (facemap_pose.FacemapModel.File & {'model_id': key['retrain_model_id']}).fetch1("model_file")
+            model_file = (facemap_pose.FacemapModel.File & {'model_id': retrain_model_id}).fetch1("model_file")
 
             # Set train_model object to load preexisting model
             train_model.model_name = model_file
@@ -381,39 +381,39 @@ class FacemapModelTraining(dj.Computed):
 
         # Split dataset into train and test splits 
         
-        # # Splitting keypoints data
-        # dsplits = utils.split_data(X,Y,tcam,tneural)
-        # (
-        #     X_train,
-        #     X_test,
-        #     Y_train,
-        #     Y_test,
-        #     itrain_sample_b,
-        #     itest_sample_b,
-        #     itrain_sample,
-        #     itest_sample,
-        #     itrain,
-        #     itest,
-        # ) = dsplits
+        # Splitting keypoints data
+        dsplits = utils.split_data(X,Y,tcam,tneural)
+        (
+            X_train,
+            X_test,
+            Y_train,
+            Y_test,
+            itrain_sample_b,
+            itest_sample_b,
+            itrain_sample,
+            itest_sample,
+            itrain,
+            itest,
+        ) = dsplits
 
-        # # Splitting frames image data
+        # Splitting frames image data
 
-        # dataset = datasets.FacemapDataset(
-        #     image_data=image_data,
-        #     keypoints_data=keypoints_data.T,
-        #     bbox=training_params['bbox'],
-        # )
-        # # Create a dataloader object for training
-        # dataloader = torch.utils.data.DataLoader(
-        #     dataset, batch_size=int(training_params['batch_size']), shuffle=True
-        # )
-        # # Use preprocessed data to train the model
-        # train_model.net = model_training.train(
-        #     dataloader,
-        #     train_model.net,
-        #     int(training_params['epochs']),
-        #     int(training_params['weight_decay']),
-        # )
+        dataset = datasets.FacemapDataset(
+            image_data=image_data,
+            keypoints_data=keypoints_data.T,
+            bbox=training_params['bbox'],
+        )
+        # Create a dataloader object for training
+        dataloader = torch.utils.data.DataLoader(
+            dataset, batch_size=int(training_params['batch_size']), shuffle=True
+        )
+        # Use preprocessed data to train the model
+        train_model.net = model_training.train(
+            dataloader,
+            train_model.net,
+            int(training_params['epochs']),
+            int(training_params['weight_decay']),
+        )
 
         # pred_keypoints, keypoints = model_training.get_test_predictions(train_model.net, test_dataset)
         
