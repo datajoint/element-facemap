@@ -222,7 +222,6 @@ class FacemapModelTrainingTask(dj.Manual):
     train_output_dir                        : varchar(255)  # Trained model output directory
     refined_model_name='refined_model'      : varchar(32)   # Specify name of finetuned/trained model filepath
     model_id=null                           : smallint      # Model index for insertion into FacemapModel table
-    
     retrain_model_id=null                   : smallint      # Model index of model to be loaded for retraining
     selected_frame_ind=null                 : blob          # Array of frames to run training on
     model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
@@ -374,14 +373,9 @@ class FacemapModelTraining(dj.Computed):
                                             float(training_params['learning_rate']), 
                                             int(training_params['weight_decay']),
                                             bbox=training_params['bbox'])
-        testing_video_id = 
-        if testing_video_id is not None:
-            train_model.predict_landmarks(testing_video_id, frame_ind=selected_frame_ind)    
-        
-        
         
         # Model Training with Cross Validation
-        from facemap.pose import model_training, datasets
+        # from facemap.pose import model_training, datasets
 
 
         # Split dataset into train and test splits 
@@ -403,24 +397,24 @@ class FacemapModelTraining(dj.Computed):
 
         # # Splitting frames image data
 
-        dataset = datasets.FacemapDataset(
-            image_data=image_data,
-            keypoints_data=keypoints_data.T,
-            bbox=training_params['bbox'],
-        )
-        # Create a dataloader object for training
-        dataloader = torch.utils.data.DataLoader(
-            dataset, batch_size=int(training_params['batch_size']), shuffle=True
-        )
-        # Use preprocessed data to train the model
-        train_model.net = model_training.train(
-            dataloader,
-            train_model.net,
-            int(training_params['epochs']),
-            int(training_params['weight_decay']),
-        )
+        # dataset = datasets.FacemapDataset(
+        #     image_data=image_data,
+        #     keypoints_data=keypoints_data.T,
+        #     bbox=training_params['bbox'],
+        # )
+        # # Create a dataloader object for training
+        # dataloader = torch.utils.data.DataLoader(
+        #     dataset, batch_size=int(training_params['batch_size']), shuffle=True
+        # )
+        # # Use preprocessed data to train the model
+        # train_model.net = model_training.train(
+        #     dataloader,
+        #     train_model.net,
+        #     int(training_params['epochs']),
+        #     int(training_params['weight_decay']),
+        # )
 
-        pred_keypoints, keypoints = model_training.get_test_predictions(train_model.net, dataset)
+        # pred_keypoints, keypoints = model_training.get_test_predictions(train_model.net, dataset)
         
 
         # Save Refined Model
