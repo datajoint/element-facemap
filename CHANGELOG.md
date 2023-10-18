@@ -3,6 +3,10 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.1.7] - 2023-10-18
+
++ Fix - Index `mot_Sv` and `movSv` by `roi_no` in `FacialSignal` 
+
 ## [0.1.6] - 2023-05-22
 
 + Add - Facemap citation
