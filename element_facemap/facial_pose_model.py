@@ -380,15 +380,13 @@ class FacemapPoseEstimation(dj.Computed):
             ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
 
         elif task_mode == "load":
-            if (
-                facemap_result_path.exists() & full_metadata_path.exists()
-            ):  # Load preprocessed inference results
-                (
-                    body_part_position_entry,
-                    inference_duration,
-                    total_frame_count,
-                    creation_time,
-                ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
+        # Load preprocessed inference results
+            (
+                body_part_position_entry,
+                inference_duration,
+                total_frame_count,
+                creation_time,
+            ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
 
         self.insert1(
             {
