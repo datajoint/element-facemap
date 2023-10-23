@@ -273,8 +273,9 @@ class FacemapModelTraining(dj.Computed):
     Attributes:
         FacemapModelTrainingTask (foreign key): FacemapModelTrainingTask key.
         train_model_time (datetime): Time of creation of newly trained model
-        latest_snapshot (int unsigned): Latest exact snapshot index (i.e., never -1).
-        config_template (longblob): Stored full config file."""
+        facemap_model_reference (smallint): Reference to index of facemap_pose.FacemapModel
+        
+    """
 
     definition = """
     -> FacemapModelTrainingTask
