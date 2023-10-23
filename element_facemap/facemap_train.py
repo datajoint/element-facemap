@@ -8,7 +8,7 @@ import numpy as np
 from element_interface.utils import find_full_path, dict_to_uuid, find_root_directory
 
 from . import facial_behavior_estimation as fbe
-from . import facial_pose_model as facemap_pose
+from . import facemap_inference
 
 
 schema = dj.schema()
@@ -31,7 +31,7 @@ def activate(
             the `facemap_train` schema of element-facemap
         fbe_schema_name (str):  Schema name on the database server to activate the 'facial_behavioral_estimation
         facemap_model_schema_name (str): Schema name on the database server to activate the
-            `facemap_pose_model` schema of element-facemap
+            `facemap_inference` schema of element-facemap
         create_schema (bool): when True (default), create schema in the database if it
                             does not yet exist.
         create_tables (bool): when True (default), create schema tables in the database
@@ -76,7 +76,7 @@ def activate(
     )
 
     # activate facial pose model schema
-    facemap_pose.activate(
+    facemap_inference.activate(
         facemap_model_schema_name,
         create_schema=create_schema,
         create_tables=create_tables,
@@ -273,7 +273,7 @@ class FacemapModelTraining(dj.Computed):
     Attributes:
         FacemapModelTrainingTask (foreign key): FacemapModelTrainingTask key.
         train_model_time (datetime): Time of creation of newly trained model
-        facemap_model_reference (smallint): Reference to index of facemap_pose.FacemapModel
+        facemap_model_reference (smallint): Reference to index of facemap_inference.FacemapModel
         
     """
 
@@ -310,10 +310,10 @@ class FacemapModelTraining(dj.Computed):
         train_model.pose_prediction_setup() # Sets default facemap model as train_model.net, handles empty bbox
         retrain_model_id = (FacemapModelTrainingTask & key).fetch1('retrain_model_id')
 
-        if retrain_model_id is not None: # Retrain an existing model from the facemap_pose.FacemapModel table
+        if retrain_model_id is not None: # Retrain an existing model from the facemap_inference.FacemapModel table
             
             # Fetch model file attachment so that model_file (.pth) is availible in Path.cwd()
-            model_file = (facemap_pose.FacemapModel.File & {'model_id': retrain_model_id}).fetch1("model_file")
+            model_file = (facemap_inference.FacemapModel.File & {'model_id': retrain_model_id}).fetch1("model_file")
 
             # Set train_model object to load preexisting model
             train_model.model_name = model_file
@@ -358,7 +358,7 @@ class FacemapModelTraining(dj.Computed):
             # LY, LX, sy, sx = utils.video_placement(Ly, Lx)
             # reshaped_videos = utils.multivideo_reshape(image_data, LY, LX, Ly, Lx, sy, sx)  
 
-        keypoints_data = utils.load_keypoints(list(zip(*facemap_pose.BodyPart.contents))[0], keypoints_file)   
+        keypoints_data = utils.load_keypoints(list(zip(*facemap_inference.BodyPart.contents))[0], keypoints_file)   
 
         # Model Parameters (fetch from TrainingParamSet as dict)
         training_params = (FacemapTrainParamSet & f'paramset_idx={key["paramset_idx"]}').fetch1('params')
@@ -382,13 +382,13 @@ class FacemapModelTraining(dj.Computed):
 
         # Insert newly trained model results into FacemapModel table
         try:
-            model_ids = facemap_pose.FacemapModel.fetch("model_id")
+            model_ids = facemap_inference.FacemapModel.fetch("model_id")
             if model_id is None or model_id in model_ids:
                 model_id = max(model_ids) + 1
         except ValueError:  # case that nothing has been inserted
             model_id = 0
 
-        facemap_pose.FacemapModel().insert_new_model(model_id, 
+        facemap_inference.FacemapModel().insert_new_model(model_id, 
                                                      refined_model_name, 
                                                      model_description, 
                                                      model_output_path)
