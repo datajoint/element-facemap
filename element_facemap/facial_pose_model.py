@@ -186,7 +186,7 @@ class FacemapPoseEstimationTask(dj.Manual):
         FacemapModel (foreign key) : Primary key for the facemap model table
         pose_estimation_output_dir ( varchar(255), optional) : output dir storing the results
             of pose estimation analysis.
-        task_mode (enum) : Default trigger. Load or trigger analysis.
+        task_mode (enum) : Default trigger. 'load' or 'trigger' analysis.
         bbox (longblob) : Bounding box for cropping the video [x1, x2, y1, y2]. If not set, entire frame is used.
         task_description ( varchar(128), optional) : Task description.
     """
@@ -228,7 +228,7 @@ class FacemapPoseEstimationTask(dj.Manual):
             model_id (int): User Specified model identification number 
             session_key (dict):  
             relative_video_paths (list): list of relative videos in VideoRecording.File table
-            task_mode (str, optional): Load or Trigger. Defaults to "trigger".
+            task_mode (str, optional): 'load' or 'trigger. Defaults to 'trigger'.
             bbox (list, optional): Bounding box for processing. Defaults to [].
         """
         video_paths = [find_full_path(fbe.get_facemap_root_data_dir(), rpath) for rpath in relative_video_paths]
