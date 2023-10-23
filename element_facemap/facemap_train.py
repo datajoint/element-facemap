@@ -205,11 +205,8 @@ class FacemapModelTrainingTask(dj.Manual):
         training_task_id (int): Unique ID for training task.
         train_output_dir( varchar(255) ): Relative output directory for trained model 
         refined_model_name ( varchar(32) ): Name for retrained model
-        model_id (smallint): Unique Model index to be inserted into FacemapModel table
-        retrain_model_id (smallint): Model index to query FacemapModel table to link model.net
+        retrain_model_id (smallint): Model index, of FacemapModel table, to be used for retraining
         model_description ( varchar(255) ): Optional. Model Description for insertion into FacemapModel 
-        selected_frame_ind (blob) : Array of frames to run training on, if not specified all frames used. 
-        keypoints_filename ( varchar(64) ): Optional. Name of specific keypoints file if multiple
 
     """
 
@@ -220,11 +217,8 @@ class FacemapModelTrainingTask(dj.Manual):
     ---
     train_output_dir                        : varchar(255)  # Trained model output directory
     refined_model_name='refined_model'      : varchar(32)   # Specify name of finetuned/trained model filepath
-    model_id=null                           : smallint      # Model index for insertion into FacemapModel table
-    retrain_model_id=null                   : smallint      # Model index of model to be loaded for retraining
-    selected_frame_ind=null                 : blob          # Array of frames to run training on
+    -> facemap_inference.FacemapModel.proj(retrain_model_id='model_id')
     model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
-    keypoints_filename=None                 : varchar(64)   # Specify keypoints filename if multiple keypoints files are stored
     """
     def infer_output_dir(self, key, relative=True, mkdir=True):
         video_file = (FacemapTrainFileSet.VideoFile & key).fetch("video_file_path", limit=1)[0]
@@ -248,9 +242,6 @@ class FacemapModelTrainingTask(dj.Manual):
                                      paramset_idx, 
                                      refined_model_name='refined_model', 
                                      model_description=None, 
-                                     selected_frame_ind=[],
-                                     keypoints_filename="", 
-                                     model_id=None,
                                      retrain_model_id=None):
         key = {"file_set_id": file_set_id, "paramset_idx": paramset_idx}
         inferred_output_dir = cls().infer_output_dir(key, relative=True, mkdir=True)
@@ -258,10 +249,7 @@ class FacemapModelTrainingTask(dj.Manual):
                                             training_task_id=training_task_id,
                                             train_output_dir=inferred_output_dir.as_posix(),
                                             refined_model_name=refined_model_name,
-                                            selected_frame_ind=selected_frame_ind,
                                             model_description=model_description,
-                                            keypoints_filename=keypoints_filename,
-                                            model_id=model_id,
                                             retrain_model_id=retrain_model_id)
         cls.insert1(facemap_training_task_insert)
         
@@ -295,17 +283,14 @@ class FacemapModelTraining(dj.Computed):
                          for fp in (FacemapTrainFileSet.VideoFile & key).fetch("video_file_path")]
         
         # manually specified .h5 keypoints file 
-        keypoints_fileset = [find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix() 
+        keypoints_file = [find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix() 
                          for fp in (FacemapTrainFileSet.KeypointsFile & key).fetch("file_path")]
         
-        keypoints_file_name = (FacemapModelTrainingTask & key).fetch1("keypoints_filename")
-
-        keypoints_file = [f for f in keypoints_fileset if keypoints_file_name in f]
         if len(keypoints_file) > 0:
             keypoints_file = keypoints_file[0] # if multiple keypoints files are specified, select first file
 
         # Create a pose model object, specifying the video files
-        train_model = pose.Pose(filenames=[video_files])
+        train_model = pose.Pose(filenames=[video_files]) # facemap expects list of list!  
         train_model.pose_prediction_setup() # Sets default facemap model as train_model.net, handles empty bbox
         retrain_model_id = (FacemapModelTrainingTask & key).fetch1('retrain_model_id')
 
