@@ -281,7 +281,7 @@ class FacemapModelTraining(dj.Computed):
     -> FacemapModelTrainingTask
     ---
     train_model_time        : datetime      # Time of creation of train model file
-    facemap_model_reference : smallint      # Reference to index facemap_pose.FacemapModel table
+    facemap_model_reference : smallint      # Reference to index FacemapModel table
     """
 
     def make(self, key):
@@ -358,7 +358,7 @@ class FacemapModelTraining(dj.Computed):
             # LY, LX, sy, sx = utils.video_placement(Ly, Lx)
             # reshaped_videos = utils.multivideo_reshape(image_data, LY, LX, Ly, Lx, sy, sx)  
 
-        keypoints_data = utils.load_keypoints(facemap_pose.BodyPart.contents, keypoints_file)   
+        keypoints_data = utils.load_keypoints(list(zip(*facemap_pose.BodyPart.contents))[0], keypoints_file)   
 
         # Model Parameters (fetch from TrainingParamSet as dict)
         training_params = (FacemapTrainParamSet & f'paramset_idx={key["paramset_idx"]}').fetch1('params')
