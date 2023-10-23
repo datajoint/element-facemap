@@ -103,21 +103,21 @@ class BodyPart(dj.Lookup):
     
     # Facemap Default BodyPart list
     contents = [ 
-        "eye(back)",
-        "eye(bottom)",
-        "eye(front)",
-        "eye(top)",
-        "lowerlip",
-        "mouth",
-        "nose(bottom)",
-        "nose(r)",
-        "nose(tip)",
-        "nose(top)",
-        "nosebridge",
-        "paw",
-        "whisker(I)",
-        "whisker(III)",
-        "whisker(II)",
+        ("eye(back)", ''),
+        ("eye(bottom)", ''),
+        ("eye(front)", ''),
+        ("eye(top)", ''),
+        ("lowerlip", ''),
+        ("mouth", ''),
+        ("nose(bottom)", ''),
+        ("nose(r)", ''),
+        ("nose(tip)", ''),
+        ("nose(top)", ''),
+        ("nosebridge", ''),
+        ("paw", ''),
+        ("whisker(I)", ''),
+        ("whisker(III)", ''),
+        ("whisker(II)", ''),
     ]
     
 @schema
