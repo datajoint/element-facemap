@@ -138,7 +138,7 @@ class FacemapTrainFileSet(dj.Manual):
 
 @schema
 class FacemapTrainParamSet(dj.Lookup):
-    """Parameters used to train a model, initial ROIs from (_proc.npy)
+    """Parameters used to train a model
 
     Attributes:
         paramset_idx (smallint): Index uniqely identifying each paramset.
