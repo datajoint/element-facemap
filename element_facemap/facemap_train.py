@@ -131,7 +131,6 @@ class FacemapTrainFileSet(dj.Manual):
 
         definition = """ # Paths of training files (e.g.: .h5 keypoints data file)
         -> master
-        file_id: int
         ---
         file_path: varchar(255)
         """
