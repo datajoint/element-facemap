@@ -163,22 +163,19 @@ class FacemapModel(dj.Manual):
         """
     @classmethod
     def insert_new_model(cls, model_id: int, model_name: str, model_description: str, full_model_path: str):
-        facemap_model_insert = dict(
+        facemap_model_entry = dict(
             model_id=model_id, model_name=model_name, model_description=model_description
         )
-        FacemapModel.insert1(facemap_model_insert)
+        FacemapModel.insert1(facemap_model_entry)
 
-        body_part_insert = []
-        for bp in BodyPart.contents:
-            body_part_insert.append(dict(model_id=model_id, body_part=bp))
+        body_part_entry = []
+        for bp in BodyPart.fetch('body_part'):
+            body_part_entry.append(dict(model_id=model_id, body_part=bp))
         
-        # Insert into parent BodyPart table if no entries are present
-        if len(cls.BodyPart()) == 0:
-            cls.BodyPart.insert(body_part_insert)
-        file_insert = dict(model_id=model_id, model_file=full_model_path)
+        file_entry = dict(model_id=model_id, model_file=full_model_path)
 
-        cls.BodyPart.insert(body_part_insert)
-        cls.File.insert1(file_insert)
+        cls.BodyPart.insert(body_part_entry)
+        cls.File.insert1(file_entry)
 
 @schema
 class FacemapPoseEstimationTask(dj.Manual):
