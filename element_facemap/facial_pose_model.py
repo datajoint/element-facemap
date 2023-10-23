@@ -230,9 +230,9 @@ class FacemapPoseEstimationTask(dj.Manual):
         Args:
             model_id (int): User Specified model identification number 
             session_key (dict):  
-            relative_video_paths (list): _description_
-            task_mode (str, optional): _description_. Defaults to "trigger".
-            bbox (list, optional): _description_. Defaults to [].
+            relative_video_paths (list): list of relative videos in VideoRecording.File table
+            task_mode (str, optional): Load or Trigger. Defaults to "trigger".
+            bbox (list, optional): Bounding box for processing. Defaults to [].
         """
         video_paths = [find_full_path(fbe.get_facemap_root_data_dir(), rpath) for rpath in relative_video_paths]
         for vid_path in video_paths:
