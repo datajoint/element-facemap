@@ -221,7 +221,7 @@ class FacemapPoseEstimationTask(dj.Manual):
 
     
     @classmethod
-    def generate(cls, key, model_id: int, relative_video_paths: list, task_mode: str = "trigger", bbox: list = []):
+    def generate(cls, key, model_id: int, task_mode: str = "trigger", bbox: list = []):
         """Generate a unique pose estimation task for each of the relative_video_paths
 
         Args:
@@ -231,24 +231,22 @@ class FacemapPoseEstimationTask(dj.Manual):
             task_mode (str, optional): 'load' or 'trigger. Defaults to 'trigger'.
             bbox (list, optional): Bounding box for processing. Defaults to [].
         """
-        video_paths = [find_full_path(fbe.get_facemap_root_data_dir(), rpath) for rpath in relative_video_paths]
-        for vid_path in video_paths:
-            device_id = (fbe.VideoRecording & key).fetch('device_id')
-            vrec_key = (fbe.VideoRecording & key).fetch('key')
+        device_id = (fbe.VideoRecording & key).fetch('device_id')
+        vrec_key = (fbe.VideoRecording & key).fetch('key')
 
-            model_key = (FacemapModel & f"model_id={model_id}").fetch1("KEY")
-            pose_estimation_output_dir = cls.infer_output_dir(vrec_key)
+        model_key = (FacemapModel & f"model_id={model_id}").fetch1("KEY")
+        pose_estimation_output_dir = cls.infer_output_dir(vrec_key)
 
-            facemap_pose_estimation_task_insert = {
-                **vrec_key,
-                **model_key,
-                "pose_estimation_output_dir": pose_estimation_output_dir,
-                "task_mode": task_mode,
-                "bbox": bbox,
-            }
-            cls.insert1(
-                facemap_pose_estimation_task_insert
-            )
+        facemap_pose_estimation_task_insert = {
+            **vrec_key,
+            **model_key,
+            "pose_estimation_output_dir": pose_estimation_output_dir,
+            "task_mode": task_mode,
+            "bbox": bbox,
+        }
+        cls.insert1(
+            facemap_pose_estimation_task_insert
+        )
     insert_pose_estimation_task = generate
     
 @schema
