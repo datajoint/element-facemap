@@ -188,8 +188,6 @@ class FacemapModel(dj.Manual):
             ),
         )
 
-        cls.BodyPart.insert(body_part_entry)
-        cls.File.insert1(file_entry)
 
 @schema
 class FacemapPoseEstimationTask(dj.Manual):
