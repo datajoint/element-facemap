@@ -221,7 +221,7 @@ class FacemapPoseEstimationTask(dj.Manual):
         root_dir = find_root_directory(get_facemap_root_data_dir(), video_dir)
 
         model_id = (FacemapPoseEstimationTask & key).fetch1("model_id")
-        processed_dir = Path(fbe.get_facemap_processed_data_dir())
+        processed_dir = Path(get_facemap_processed_data_dir())
         output_dir = (
             processed_dir / video_dir.relative_to(root_dir) / f"facemap_{model_id}"
         )
