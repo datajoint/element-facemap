@@ -172,9 +172,14 @@ class FacemapModel(dj.Manual):
             )
         )
 
-        body_part_entry = []
-        for bp in BodyPart.fetch('body_part'):
-            body_part_entry.append(dict(model_id=model_id, body_part=bp))
+        cls.BodyPart.insert(
+            [
+                dict(
+                    model_id=model_id,
+                    body_part=part,
+                ) for part in BodyPart.fetch("body_part")
+            ]
+        )
         
         file_entry = dict(model_id=model_id, model_file=full_model_path)
 
