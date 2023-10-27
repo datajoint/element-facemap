@@ -366,23 +366,6 @@ class FacemapModelTraining(dj.Computed):
         # Load image frames from video
         image_data = utils.load_images_from_video(video_file, selected_frame_ind)
 
-        # MULTIVIDEO TODO
-        # image_data = []
-        # for video_file in video_files:
-        #     if len(pre_selected_frame_ind) == 0: # set selected frames to all frames
-
-        #         cap = cv2.VideoCapture(video_file)
-        #         selected_frame_ind = np.arange(int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))
-        #     else:
-        #         selected_frame_ind = pre_selected_frame_ind
-
-        #     image_data.append(utils.load_images_from_video(video_file, selected_frame_ind))
-
-        # -- For multivideo image data reshaping
-        # cumframes, Ly, Lx, containers = utils.get_frame_details(video_files)
-        # LY, LX, sy, sx = utils.video_placement(Ly, Lx)
-        # reshaped_videos = utils.multivideo_reshape(image_data, LY, LX, Ly, Lx, sy, sx)
-
         keypoints_data = utils.load_keypoints(
             list(zip(*facemap_inference.BodyPart.contents))[0], keypoints_file
         )
