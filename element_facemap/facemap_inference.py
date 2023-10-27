@@ -100,32 +100,33 @@ class BodyPart(dj.Lookup):
     ---
     body_part_description='' : varchar(1000)
     """
-    
+
     # Facemap Default BodyPart list
-    contents = [ 
-        ("eye(back)", ''),
-        ("eye(bottom)", ''),
-        ("eye(front)", ''),
-        ("eye(top)", ''),
-        ("lowerlip", ''),
-        ("mouth", ''),
-        ("nose(bottom)", ''),
-        ("nose(r)", ''),
-        ("nose(tip)", ''),
-        ("nose(top)", ''),
-        ("nosebridge", ''),
-        ("paw", ''),
-        ("whisker(I)", ''),
-        ("whisker(III)", ''),
-        ("whisker(II)", ''),
+    contents = [
+        ("eye(back)", ""),
+        ("eye(bottom)", ""),
+        ("eye(front)", ""),
+        ("eye(top)", ""),
+        ("lowerlip", ""),
+        ("mouth", ""),
+        ("nose(bottom)", ""),
+        ("nose(r)", ""),
+        ("nose(tip)", ""),
+        ("nose(top)", ""),
+        ("nosebridge", ""),
+        ("paw", ""),
+        ("whisker(I)", ""),
+        ("whisker(III)", ""),
+        ("whisker(II)", ""),
     ]
-    
+
+
 @schema
 class FacemapModel(dj.Manual):
     """Trained Models stored for facial pose inference
 
     Attributes:
-        model_id(int) : User specified ID associated with a unique model 
+        model_id(int) : User specified ID associated with a unique model
         model_name( varchar(64) ): Name of model, filepath.stem
     """
 
@@ -161,21 +162,31 @@ class FacemapModel(dj.Manual):
         ---
         model_file: attach            # model file attachment
         """
+
     @classmethod
-    def insert_new_model(cls, model_id: int, model_name: str, model_description: str, full_model_path: str):
+    def insert_new_model(
+        cls,
+        model_id: int,
+        model_name: str,
+        model_description: str,
+        full_model_path: str,
+    ):
         facemap_model_entry = dict(
-            model_id=model_id, model_name=model_name, model_description=model_description
+            model_id=model_id,
+            model_name=model_name,
+            model_description=model_description,
         )
         FacemapModel.insert1(facemap_model_entry)
 
         body_part_entry = []
-        for bp in BodyPart.fetch('body_part'):
+        for bp in BodyPart.fetch("body_part"):
             body_part_entry.append(dict(model_id=model_id, body_part=bp))
-        
+
         file_entry = dict(model_id=model_id, model_file=full_model_path)
 
         cls.BodyPart.insert(body_part_entry)
         cls.File.insert1(file_entry)
+
 
 @schema
 class FacemapPoseEstimationTask(dj.Manual):
@@ -219,20 +230,19 @@ class FacemapPoseEstimationTask(dj.Manual):
 
         return output_dir.relative_to(processed_dir) if relative else output_dir
 
-    
     @classmethod
     def generate(cls, key, model_id: int, task_mode: str = "trigger", bbox: list = []):
         """Generate a unique pose estimation task for each of the relative_video_paths
 
         Args:
-            model_id (int): User Specified model identification number 
-            session_key (dict):  
+            model_id (int): User Specified model identification number
+            session_key (dict):
             relative_video_paths (list): list of relative videos in VideoRecording.File table
             task_mode (str, optional): 'load' or 'trigger. Defaults to 'trigger'.
             bbox (list, optional): Bounding box for processing. Defaults to [].
         """
-        device_id = (fbe.VideoRecording & key).fetch('device_id')
-        vrec_key = (fbe.VideoRecording & key).fetch('key')
+        device_id = (fbe.VideoRecording & key).fetch("device_id")
+        vrec_key = (fbe.VideoRecording & key).fetch("key")
 
         model_key = (FacemapModel & f"model_id={model_id}").fetch1("KEY")
         pose_estimation_output_dir = cls.infer_output_dir(vrec_key)
@@ -244,11 +254,11 @@ class FacemapPoseEstimationTask(dj.Manual):
             "task_mode": task_mode,
             "bbox": bbox,
         }
-        cls.insert1(
-            facemap_pose_estimation_task_insert
-        )
+        cls.insert1(facemap_pose_estimation_task_insert)
+
     insert_pose_estimation_task = generate
-    
+
+
 @schema
 class FacemapPoseEstimation(dj.Computed):
     """Results of facemap pose estimation
@@ -317,37 +327,31 @@ class FacemapPoseEstimation(dj.Computed):
             video_symlinks.append(video_symlink.as_posix())
 
         # Trigger Facemap Pose Estimation Inference
-        if task_mode == "trigger":
-            # Triggering facemap for pose estimation requires:
-            # - model_path: full path to the directory containing the trained model
-            # - video_filepaths: full paths to the video files for inference
-            # - analyze_video_params: optional parameters to analyze video (uses facemap default params)
+        if (
+            facemap_result_path.exists() & full_metadata_path.exists()
+        ) or task_mode == "load":  # Load results and do not rerun processing
+            (
+                body_part_position_entry,
+                inference_duration,
+                total_frame_count,
+                creation_time,
+            ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
+            self.insert1(
+                {
+                    **key,
+                    "pose_estimation_time": creation_time,
+                    "pose_estimation_duration": inference_duration,
+                    "total_frame_count": total_frame_count,
+                }
+            )
+            self.BodyPartPosition.insert(body_part_position_entry)
+            return
 
+        elif task_mode == "trigger":
             from facemap.pose import pose as facemap_pose, model_loader
 
-            # If output files have been created, load the output
-            if (
-                facemap_result_path.exists() & full_metadata_path.exists()
-            ):  # Load results and do not rerun processing
-                (
-                    body_part_position_entry,
-                    inference_duration,
-                    total_frame_count,
-                    creation_time,
-                ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
-                self.insert1(
-                    {
-                        **key,
-                        "pose_estimation_time": creation_time,
-                        "pose_estimation_duration": inference_duration,
-                        "total_frame_count": total_frame_count,
-                    }
-                )
-                self.BodyPartPosition.insert(body_part_position_entry)
-                return
-
             bbox = (FacemapPoseEstimationTask & key).fetch1("bbox") or []
-                
+
             # Model Name of interest should be specified by user during facemap task params manual update
             model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
 
@@ -378,25 +382,7 @@ class FacemapPoseEstimation(dj.Computed):
                 total_frame_count,
                 creation_time,
             ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
-
-        elif task_mode == "load":
-        # Load preprocessed inference results
-            (
-                body_part_position_entry,
-                inference_duration,
-                total_frame_count,
-                creation_time,
-            ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
-
-        self.insert1(
-            {
-                **key,
-                "pose_estimation_time": creation_time,
-                "pose_estimation_duration": inference_duration,
-                "total_frame_count": total_frame_count,
-            }
-        )
-        self.BodyPartPosition.insert(body_part_position_entry)
+            self.BodyPartPosition.insert(body_part_position_entry)
 
     @classmethod
     def get_trajectory(cls, key: dict, body_parts: list = "all") -> pd.DataFrame:
@@ -446,7 +432,7 @@ def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     with open(full_metadata_path, "rb") as f:
         metadata = pickle.load(f)
     keypoints_data = utils.load_keypoints(metadata["bodyparts"], facemap_result_path)
-    
+
     # Facemap inference result is a 3D nested array with D1 - (x,y likelihood), D2 - bodyparts, D3 - frame count
     # body parts are ordered the same way as stored
     pose_x_coord = keypoints_data[0, :, :]  # (bodyparts, frames)
