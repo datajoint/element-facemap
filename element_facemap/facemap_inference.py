@@ -175,7 +175,7 @@ class FacemapModel(dj.Manual):
         model_description: str,
         full_model_path: str,
     ):
-        self.insert1(
+        cls.insert1(
             dict(
                 model_id=model_id,
                 model_name=model_name,
