@@ -217,8 +217,8 @@ class FacemapPoseEstimationTask(dj.Manual):
     @classmethod
     def infer_output_dir(cls, key, relative=True, mkdir=True):
         video_file = (fbe.VideoRecording.File & key).fetch("file_path", limit=1)[0]
-        video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_file).parent
-        root_dir = find_root_directory(fbe.get_facemap_root_data_dir(), video_dir)
+        video_dir = find_full_path(get_facemap_root_data_dir(), video_file).parent
+        root_dir = find_root_directory(get_facemap_root_data_dir(), video_dir)
 
         model_id = (FacemapPoseEstimationTask & key).fetch1("model_id")
         processed_dir = Path(fbe.get_facemap_processed_data_dir())
