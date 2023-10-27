@@ -9,7 +9,10 @@ from element_interface.utils import find_full_path, dict_to_uuid, find_root_dire
 
 from . import facial_behavior_estimation as fbe
 from . import facemap_inference
-
+from .facial_behavior_estimation import (
+    get_facemap_root_data_dir,
+    get_facemap_processed_data_dir,
+)
 
 schema = dj.schema()
 _linking_module = None
@@ -225,10 +228,10 @@ class FacemapModelTrainingTask(dj.Manual):
         video_file = (FacemapTrainFileSet.VideoFile & key).fetch(
             "video_file_path", limit=1
         )[0]
-        video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_file).parent
-        root_dir = find_root_directory(fbe.get_facemap_root_data_dir(), video_dir)
+        video_dir = find_full_path(get_facemap_root_data_dir(), video_file).parent
+        root_dir = find_root_directory(get_facemap_root_data_dir(), video_dir)
 
-        processed_dir = Path(fbe.get_facemap_processed_data_dir())
+        processed_dir = Path(get_facemap_processed_data_dir())
         output_dir = (
             processed_dir
             / video_dir.relative_to(root_dir)
@@ -287,16 +290,16 @@ class FacemapModelTraining(dj.Computed):
         import torch
 
         train_output_dir = (FacemapModelTrainingTask & key).fetch1("train_output_dir")
-        output_dir = find_full_path(fbe.get_facemap_root_data_dir(), train_output_dir)
+        output_dir = find_full_path(get_facemap_root_data_dir(), train_output_dir)
 
         video_files = [
-            find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix()
+            find_full_path(get_facemap_root_data_dir(), fp).as_posix()
             for fp in (FacemapTrainFileSet.VideoFile & key).fetch("video_file_path")
         ]
 
         # manually specified .h5 keypoints file
         keypoints_file = [
-            find_full_path(fbe.get_facemap_root_data_dir(), fp).as_posix()
+            find_full_path(get_facemap_root_data_dir(), fp).as_posix()
             for fp in (FacemapTrainFileSet.KeypointsFile & key).fetch("file_path")
         ]
 
