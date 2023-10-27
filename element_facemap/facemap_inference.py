@@ -164,10 +164,13 @@ class FacemapModel(dj.Manual):
         """
     @classmethod
     def insert_new_model(cls, model_id: int, model_name: str, model_description: str, full_model_path: str):
-        facemap_model_entry = dict(
-            model_id=model_id, model_name=model_name, model_description=model_description
+        self.insert1(
+            dict(
+                model_id=model_id, 
+                model_name=model_name, 
+                model_description=model_description,
+            )
         )
-        FacemapModel.insert1(facemap_model_entry)
 
         body_part_entry = []
         for bp in BodyPart.fetch('body_part'):
