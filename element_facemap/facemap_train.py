@@ -155,11 +155,19 @@ class FacemapTrainParamSet(dj.Lookup):
     # Parameters to specify a facemap model training instance
     paramset_idx                  : smallint
     ---
-    paramset_desc                 : varchar(128) # Description of parameterset used for 
-    param_set_hash                : uuid      # hash identifying this paramset
+    paramset_desc                 : varchar(128) # Optional description of parameterset  
+    param_set_hash                : uuid         # hash identifying this paramset
                                                 unique index (param_set_hash)
-    params                        : longblob  # numpy array of initially selected ROIs
+    params                        : longblob     # required model training parameters
     """
+
+    required_parameters = (
+        "weight_decay",
+        "bbox",
+        "learning_rate",
+        "epochs",
+        "batch_size",
+    )
 
     @classmethod
     def insert_new_params(
@@ -171,31 +179,36 @@ class FacemapTrainParamSet(dj.Lookup):
         Args:
             paramset_desc (str): Description of parameter set to be inserted
             params (dict): Dictionary including all settings to specify model training.
-                        Must include shuffle & trainingsetindex b/c not in config.yaml.
-                        project_path and video_sets will be overwritten by config.yaml.
-                        Note that trainingsetindex is 0-indexed
             paramset_idx (int): optional, integer to represent parameters.
         """
+
+        for required_param in cls.required_parameters:
+            assert required_param in params, (
+                "Missing required parameter: " + required_param
+            )
 
         if paramset_idx is None:
             paramset_idx = (
                 dj.U().aggr(cls, n="max(paramset_idx)").fetch1("n") or 0
             ) + 1
 
-        param_dict = {
-            "paramset_idx": paramset_idx,
-            "paramset_desc": paramset_desc,
-            "param_set_hash": dict_to_uuid(params),
-            "params": params,
-        }
-        param_query = cls & {"param_set_hash": param_dict["param_set_hash"]}
+        paramset_hash = dict_to_uuid(params)  # store to avoid recompute
+        param_query = cls & {"param_set_hash": paramset_hash}
+
         # If the specified param-set already exists
         if param_query:
             existing_paramset_idx = param_query.fetch1("paramset_idx")
             if existing_paramset_idx == int(paramset_idx):  # If existing_idx same:
                 return  # job done
         else:
-            cls.insert1(param_dict)  # if duplicate, will raise duplicate error
+            cls.insert1(
+                dict(
+                    paramset_idx=paramset_idx,
+                    paramset_desc=paramset_desc,
+                    param_set_hash=paramset_hash,
+                    params=params,
+                ),
+            )  # if duplicate, will raise duplicate error
 
 
 @schema
@@ -255,15 +268,16 @@ class FacemapModelTrainingTask(dj.Manual):
     ):
         key = {"file_set_id": file_set_id, "paramset_idx": paramset_idx}
         inferred_output_dir = cls().infer_output_dir(key, relative=True, mkdir=True)
-        facemap_training_task_insert = dict(
-            **key,
-            training_task_id=training_task_id,
-            train_output_dir=inferred_output_dir.as_posix(),
-            refined_model_name=refined_model_name,
-            model_description=model_description,
-            retrain_model_id=retrain_model_id,
+        cls.insert1(
+            dict(
+                **key,
+                training_task_id=training_task_id,
+                train_output_dir=inferred_output_dir.as_posix(),
+                refined_model_name=refined_model_name,
+                model_description=model_description,
+                retrain_model_id=retrain_model_id,
+            ),
         )
-        cls.insert1(facemap_training_task_insert)
 
 
 @schema
