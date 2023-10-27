@@ -13,6 +13,10 @@ import os
 import pickle
 import shutil
 from . import facial_behavior_estimation as fbe
+from .facial_behavior_estimation import (
+    get_facemap_root_data_dir,
+    get_facemap_processed_data_dir,
+)
 
 schema = dj.schema()
 
@@ -171,21 +175,30 @@ class FacemapModel(dj.Manual):
         model_description: str,
         full_model_path: str,
     ):
-        facemap_model_entry = dict(
-            model_id=model_id,
-            model_name=model_name,
-            model_description=model_description,
+        self.insert1(
+            dict(
+                model_id=model_id,
+                model_name=model_name,
+                model_description=model_description,
+            )
         )
-        FacemapModel.insert1(facemap_model_entry)
 
-        body_part_entry = []
-        for bp in BodyPart.fetch("body_part"):
-            body_part_entry.append(dict(model_id=model_id, body_part=bp))
+        cls.BodyPart.insert(
+            [
+                dict(
+                    model_id=model_id,
+                    body_part=part,
+                )
+                for part in BodyPart.fetch("body_part")
+            ]
+        )
 
-        file_entry = dict(model_id=model_id, model_file=full_model_path)
-
-        cls.BodyPart.insert(body_part_entry)
-        cls.File.insert1(file_entry)
+        cls.File.insert1(
+            dict(
+                model_id=model_id,
+                model_file=full_model_path,
+            ),
+        )
 
 
 @schema
@@ -207,7 +220,7 @@ class FacemapPoseEstimationTask(dj.Manual):
     -> fbe.VideoRecording
     -> FacemapModel
     ---
-    pose_estimation_output_dir=''   : varchar(255)  # output dir - stores results of Facemap Pose estimation analysis
+    pose_estimation_output_dir   : varchar(255)  # output dir - stores results of Facemap Pose estimation analysis
     task_mode='trigger'             : enum('load', 'trigger')
     bbox=null                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     task_description=''             : varchar(128)    
@@ -216,11 +229,11 @@ class FacemapPoseEstimationTask(dj.Manual):
     @classmethod
     def infer_output_dir(cls, key, relative=True, mkdir=True):
         video_file = (fbe.VideoRecording.File & key).fetch("file_path", limit=1)[0]
-        video_dir = find_full_path(fbe.get_facemap_root_data_dir(), video_file).parent
-        root_dir = find_root_directory(fbe.get_facemap_root_data_dir(), video_dir)
+        video_dir = find_full_path(get_facemap_root_data_dir(), video_file).parent
+        root_dir = find_root_directory(get_facemap_root_data_dir(), video_dir)
 
         model_id = (FacemapPoseEstimationTask & key).fetch1("model_id")
-        processed_dir = Path(fbe.get_facemap_processed_data_dir())
+        processed_dir = Path(get_facemap_processed_data_dir())
         output_dir = (
             processed_dir / video_dir.relative_to(root_dir) / f"facemap_{model_id}"
         )
