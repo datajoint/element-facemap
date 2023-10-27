@@ -181,7 +181,12 @@ class FacemapModel(dj.Manual):
             ]
         )
         
-        file_entry = dict(model_id=model_id, model_file=full_model_path)
+        cls.File.insert1(
+            dict(
+                model_id=model_id, 
+                model_file=full_model_path,
+            ),
+        )
 
         cls.BodyPart.insert(body_part_entry)
         cls.File.insert1(file_entry)
