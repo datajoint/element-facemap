@@ -13,6 +13,7 @@ import os
 import pickle
 import shutil
 from . import facial_behavior_estimation as fbe
+from .facial_behavior_estimation import get_facemap_root_data_dir, get_facemap_processed_data_dir
 
 schema = dj.schema()
 
