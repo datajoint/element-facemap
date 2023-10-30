@@ -42,10 +42,6 @@ def activate(
         linking_module (str): a module (or name) containing the required dependencies.
 
     Dependencies:
-    Upstream tables:
-        + Session: A parent table to VideoRecording, identifying a recording session
-        + Equipment: A parent table to VideoRecording, identifying video recording equipment
-        + VideoRecording: A parent table to FacemapInferenceTask, identifying videos to be used in inference
     Functions:
         + get_facemap_root_data_dir() -> list
             Retrieves the root data directory(s) with face recordings for all
