@@ -205,7 +205,7 @@ class FacemapModel(dj.Manual):
 class FacemapPoseEstimationTask(dj.Manual):
     """Staging table for pairing of video recordings and Facemap parameters before processing.
 
-    Attributes:
+    Attributes: s
         fbe.VideoRecording (foreign key) : Primary key for VideoRecording table.
         FacemapModel (foreign key) : Primary key for the facemap model table
         pose_estimation_output_dir ( varchar(255), optional) : output dir storing the results
@@ -228,6 +228,20 @@ class FacemapPoseEstimationTask(dj.Manual):
 
     @classmethod
     def infer_output_dir(cls, key, relative=True, mkdir=True):
+        """Infer an output directory for an entry in the FacemapPoseEstimationTask table.
+
+        Args:
+            key (_type_): Primary key from the FacemapPoseEstimationTask table.
+            relative (bool, optional): If True, pose_estimation_output_dir is returned relative to
+                imaging_root_dir. Defaults to True.
+            mkdir (bool, optional): If True, create pose_estimation_output_dir. Defaults to True.
+
+        Returns:
+            dir (str): A default output directory for inference results (pose_estimation_output_dir
+                in FacemapPoseEstimationTask) based on the following convention:
+                processed_dir / relative_video_dir / {facemap_recordingid}_{model_id}
+                e.g.: sub1/sess1/video_files/facemap_recording_id0_model0
+        """
         video_file = (fbe.VideoRecording.File & key).fetch("file_path", limit=1)[0]
         video_dir = find_full_path(get_facemap_root_data_dir(), video_file).parent
         root_dir = find_root_directory(get_facemap_root_data_dir(), video_dir)
@@ -235,7 +249,9 @@ class FacemapPoseEstimationTask(dj.Manual):
         model_id = (FacemapPoseEstimationTask & key).fetch1("model_id")
         processed_dir = Path(get_facemap_processed_data_dir())
         output_dir = (
-            processed_dir / video_dir.relative_to(root_dir) / f"facemap_{model_id}"
+            processed_dir
+            / video_dir.relative_to(root_dir)
+            / f"facemap_recordingid{key['recording_id']}_model{model_id}"
         )
 
         if mkdir:
@@ -249,16 +265,14 @@ class FacemapPoseEstimationTask(dj.Manual):
 
         Args:
             model_id (int): User Specified model identification number
-            session_key (dict):
+            key (dict): Primary key from FacemapPoseEstimationTask table
             relative_video_paths (list): list of relative videos in VideoRecording.File table
             task_mode (str, optional): 'load' or 'trigger. Defaults to 'trigger'.
             bbox (list, optional): Bounding box for processing. Defaults to [].
         """
-        device_id = (fbe.VideoRecording & key).fetch("device_id")
         vrec_key = (fbe.VideoRecording & key).fetch("key")
-
         model_key = (FacemapModel & f"model_id={model_id}").fetch1("KEY")
-        pose_estimation_output_dir = cls.infer_output_dir(vrec_key)
+        pose_estimation_output_dir = cls.infer_output_dir(key)
 
         facemap_pose_estimation_task_insert = {
             **vrec_key,
