@@ -226,11 +226,11 @@ class FacemapModelTrainingTask(dj.Manual):
     -> FacemapTrainFileSet                  # video(s) and files for training
     -> FacemapTrainParamSet                 # Initially specified ROIs
     ---
-    train_output_dir                        : varchar(255)  # Trained model output directory
-    selected_frame_ind=null                 : blob          # Optional, array of frames to run training on   
-    refined_model_name='refined_model'      : varchar(128)  # Specify name of finetuned/trained model filepath
-    -> facemap_inference.FacemapModel.proj(retrain_model_id='model_id')
-    model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
+    train_output_dir                                                    : varchar(255)  # Trained model output directory
+    selected_frame_ind=null                                             : blob          # Optional, array of frames to run training on   
+    refined_model_name='refined_model'                                  : varchar(128)  # Specify name of finetuned/trained model filepath
+    -> facemap_inference.FacemapModel.proj(retrain_model_id='model_id') : varchar(64)   # Specify retrain_model_id
+    model_description=None                                              : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
 
     def infer_output_dir(self, key, relative=True, mkdir=True):
