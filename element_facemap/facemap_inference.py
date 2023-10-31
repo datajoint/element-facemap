@@ -280,14 +280,15 @@ class FacemapPoseEstimationTask(dj.Manual):
         """
         pose_estimation_output_dir = cls.infer_output_dir(key)
 
-        facemap_pose_estimation_task_insert = {
-            **key,
-            "pose_estimation_output_dir": pose_estimation_output_dir,
-            "task_description": task_description,
-            "task_mode": task_mode,
-            "bbox": bbox,
-        }
-        cls.insert1(facemap_pose_estimation_task_insert)
+        cls.insert1(
+            dict(
+                **key,
+                pose_estimation_output_dir=pose_estimation_output_dir,
+                task_description=task_description,
+                task_mode=task_mode,
+                bbox=bbox,
+            ),
+        )
 
     insert_pose_estimation_task = generate
 
