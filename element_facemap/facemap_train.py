@@ -214,8 +214,8 @@ class FacemapModelTrainingTask(dj.Manual):
     Attributes:
         FacemapTrainFileSet (foreign key): FacemapTrainFileSet Key.
         FacemapTrainParamSet (foreign key): TrainingParamSet key.
-        training_task_id (int): Unique ID for training task.
         train_output_dir( varchar(255) ): Relative output directory for trained model
+        selected_frame_ind (blob) : Array of frames to run training on, if not specified all frames used.
         refined_model_name ( varchar(32) ): Name for retrained model
         retrain_model_id (smallint): Model index, of FacemapModel table, to be used for retraining
         model_description ( varchar(255) ): Optional. Model Description for insertion into FacemapModel
@@ -225,10 +225,10 @@ class FacemapModelTrainingTask(dj.Manual):
     definition = """      # Specification for a facemap model training instance
     -> FacemapTrainFileSet                  # video(s) and files for training
     -> FacemapTrainParamSet                 # Initially specified ROIs
-    training_task_id                        : smallint
     ---
     train_output_dir                        : varchar(255)  # Trained model output directory
-    refined_model_name='refined_model'      : varchar(32)   # Specify name of finetuned/trained model filepath
+    selected_frame_ind=null                 : blob          # Optional, array of frames to run training on   
+    refined_model_name='refined_model'      : varchar(128)  # Specify name of finetuned/trained model filepath
     -> facemap_inference.FacemapModel.proj(retrain_model_id='model_id')
     model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
@@ -256,7 +256,6 @@ class FacemapModelTrainingTask(dj.Manual):
     def insert_facemap_training_task(
         cls,
         file_set_id,
-        training_task_id,
         paramset_idx,
         refined_model_name="refined_model",
         model_description=None,
@@ -267,7 +266,6 @@ class FacemapModelTrainingTask(dj.Manual):
         cls.insert1(
             dict(
                 **key,
-                training_task_id=training_task_id,
                 train_output_dir=inferred_output_dir.as_posix(),
                 refined_model_name=refined_model_name,
                 model_description=model_description,
