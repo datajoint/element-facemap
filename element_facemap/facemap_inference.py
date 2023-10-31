@@ -205,7 +205,7 @@ class FacemapModel(dj.Manual):
 class FacemapPoseEstimationTask(dj.Manual):
     """Staging table for pairing of video recordings and Facemap parameters before processing.
 
-    Attributes: s
+    Attributes:
         fbe.VideoRecording (foreign key) : Primary key for VideoRecording table.
         FacemapModel (foreign key) : Primary key for the facemap model table
         pose_estimation_output_dir ( varchar(255), optional) : output dir storing the results
@@ -220,10 +220,10 @@ class FacemapPoseEstimationTask(dj.Manual):
     -> fbe.VideoRecording
     -> FacemapModel
     ---
-    pose_estimation_output_dir   : varchar(255)  # output dir - stores results of Facemap Pose estimation analysis
-    task_mode='trigger'             : enum('load', 'trigger')
-    bbox=null                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
-    task_description=''             : varchar(128)    
+    pose_estimation_output_dir    : varchar(255)  # output dir - stores results of Facemap Pose estimation analysis
+    task_description              : varchar(128)  # Optional. Addtional task description
+    task_mode='trigger'           : enum('load', 'trigger')
+    bbox=null                     : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     """
 
     @classmethod
@@ -231,7 +231,7 @@ class FacemapPoseEstimationTask(dj.Manual):
         """Infer an output directory for an entry in the FacemapPoseEstimationTask table.
 
         Args:
-            key (_type_): Primary key from the FacemapPoseEstimationTask table.
+            key (dict): Primary key from the FacemapPoseEstimationTask table.
             relative (bool, optional): If True, pose_estimation_output_dir is returned relative to
                 imaging_root_dir. Defaults to True.
             mkdir (bool, optional): If True, create pose_estimation_output_dir. Defaults to True.
@@ -260,24 +260,30 @@ class FacemapPoseEstimationTask(dj.Manual):
         return output_dir.relative_to(processed_dir) if relative else output_dir
 
     @classmethod
-    def generate(cls, key, model_id: int, task_mode: str = "trigger", bbox: list = []):
+    def generate(
+        cls,
+        key,
+        model_id: int,
+        task_description: str = "",
+        task_mode: str = "trigger",
+        bbox: list = [],
+    ):
         """Generate a unique pose estimation task for each of the relative_video_paths
 
         Args:
             model_id (int): User Specified model identification number
             key (dict): Primary key from FacemapPoseEstimationTask table
+                e.g.: {subject="sub1",session_id=0,recording_id=0,model_id=0}
             relative_video_paths (list): list of relative videos in VideoRecording.File table
             task_mode (str, optional): 'load' or 'trigger. Defaults to 'trigger'.
             bbox (list, optional): Bounding box for processing. Defaults to [].
         """
-        vrec_key = (fbe.VideoRecording & key).fetch("key")
-        model_key = (FacemapModel & f"model_id={model_id}").fetch1("KEY")
         pose_estimation_output_dir = cls.infer_output_dir(key)
 
         facemap_pose_estimation_task_insert = {
-            **vrec_key,
-            **model_key,
+            **key,
             "pose_estimation_output_dir": pose_estimation_output_dir,
+            "task_description": task_description,
             "task_mode": task_mode,
             "bbox": bbox,
         }
