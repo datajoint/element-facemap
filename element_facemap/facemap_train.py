@@ -244,7 +244,7 @@ class FacemapModelTrainingTask(dj.Manual):
         output_dir = (
             processed_dir
             / video_dir.relative_to(root_dir)
-            / f"facemap_train_{key['paramset_idx']}"
+            / f"facemap_train_fileset{key['file_set_id']}_paramset{key['paramset_idx']}"
         )
 
         if mkdir:
