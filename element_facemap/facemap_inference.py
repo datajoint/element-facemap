@@ -165,6 +165,7 @@ class FacemapModel(dj.Manual):
         -> master
         ---
         model_file: attach            # model file attachment
+        relative_file_path: varchar(256)   # relative path of model_file
         """
 
     @classmethod
@@ -197,6 +198,9 @@ class FacemapModel(dj.Manual):
             dict(
                 model_id=model_id,
                 model_file=full_model_path,
+                relative_file_path=full_model_path.relative_to(
+                    fbe.get_facemap_root_data_dir()
+                ),
             ),
         )
 

@@ -289,8 +289,20 @@ class FacemapModelTraining(dj.Computed):
     -> FacemapModelTrainingTask
     ---
     train_model_time        : datetime      # Time of creation of train model file
-    facemap_model_reference : smallint      # Reference to index FacemapModel table
     """
+
+    class RetrainedModelFile(dj.Part):
+        """Stores newly trained models
+
+        Args:
+            dj (_type_): _description_
+        """
+
+        definition = """
+        -> master
+        ---
+        -> facemap_inference.FacemapModel.File.proj(retrain_file='relative_file_path') : varchar(256)
+        """
 
     def make(self, key):
         from facemap.pose import pose
@@ -411,6 +423,14 @@ class FacemapModelTraining(dj.Computed):
 
         facemap_inference.FacemapModel().insert_new_model(
             model_id, refined_model_name, model_description, model_output_path
+        )
+
+        self.RetrainedModelFile.insert1(
+            dict(
+                retrain_file=(
+                    facemap_inference.FacemapModel & f"model_id={model_id}"
+                ).fetch1("relative_file_path")
+            ),
         )
 
         train_model_time = datetime.fromtimestamp(
