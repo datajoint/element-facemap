@@ -303,7 +303,7 @@ class FacemapModelTraining(dj.Computed):
         definition = """
         -> master
         ---
-        -> facemap_inference.FacemapModel.File.proj(retrain_file='relative_file_path')
+        -> facemap_inference.FacemapModel.File.proj(retrain_file='model_file')
         """
 
     def make(self, key):
@@ -441,6 +441,5 @@ class FacemapModelTraining(dj.Computed):
             {
                 **key,
                 "train_model_time": train_model_time,
-                "facemap_model_reference": model_id,
             }
         )
