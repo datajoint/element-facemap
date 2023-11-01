@@ -228,7 +228,7 @@ class FacemapModelTrainingTask(dj.Manual):
     ---
     train_output_dir                        : varchar(255)  # Trained model output directory
     selected_frame_ind=null                 : blob          # Optional, array of frames to run training on   
-    refined_model_name='refined_model'      : varchar(128)  # Specify name of finetuned/trained model filepath
+    refined_model_prefix='refined_model_'      : varchar(128)  # Specify prefix of finetuned/trained model filepath
     -> [nullable]facemap_inference.FacemapModel.proj(retrain_model_id='model_id')  # Specify retrain_model_id
     model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
@@ -394,8 +394,8 @@ class FacemapModelTraining(dj.Computed):
         training_params = (
             FacemapTrainParamSet & f'paramset_idx={key["paramset_idx"]}'
         ).fetch1("params")
-        refined_model_name = (FacemapModelTrainingTask & key).fetch1(
-            "refined_model_name"
+        refined_model_prefix = (FacemapModelTrainingTask & key).fetch1(
+            "refined_model_prefix"
         )  # default = "refined_model"
 
         # Train model using train function defined in Pose class
@@ -410,7 +410,7 @@ class FacemapModelTraining(dj.Computed):
         )
 
         # Save Refined Model
-        model_output_path = output_dir / f"{refined_model_name}.pth"
+        model_output_path = output_dir / f"{refined_model_prefix}.pth"
         train_model.save_model(model_output_path)
 
         model_description = (FacemapModelTrainingTask & key).fetch1("model_description")
@@ -423,7 +423,7 @@ class FacemapModelTraining(dj.Computed):
             model_id = 0
 
         facemap_inference.FacemapModel().insert_new_model(
-            model_id, refined_model_name, model_description, model_output_path
+            model_id, refined_model_prefix, model_description, model_output_path
         )
 
         train_model_time = datetime.fromtimestamp(
