@@ -427,9 +427,8 @@ class FacemapModelTraining(dj.Computed):
 
         self.RetrainedModelFile.insert1(
             dict(
-                retrain_file=(
-                    facemap_inference.FacemapModel & f"model_id={model_id}"
-                ).fetch1("model_file")
+                train_model_time=train_model_time,
+                retrain_file=model_output_path,
             ),
         )
 
@@ -438,8 +437,8 @@ class FacemapModelTraining(dj.Computed):
         ).strftime("%Y-%m-%d %H:%M:%S")
 
         self.insert1(
-            {
+            dict(
                 **key,
-                "train_model_time": train_model_time,
-            }
+                train_model_time=train_model_time,
+            )
         )
