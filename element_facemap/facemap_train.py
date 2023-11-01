@@ -296,8 +296,8 @@ class FacemapModelTraining(dj.Computed):
     class RetrainedModelFile(dj.Part):
         """Stores newly trained models
 
-        Args:
-            dj (_type_): _description_
+        Attributes:
+            FacemapModelTraining (foreign key):
         """
 
         definition = """
@@ -412,7 +412,6 @@ class FacemapModelTraining(dj.Computed):
         model_output_path = output_dir / f"{refined_model_name}.pth"
         train_model.save_model(model_output_path)
 
-        model_id = (FacemapModelTrainingTask & key).fetch1("model_id")
         model_description = (FacemapModelTrainingTask & key).fetch1("model_description")
 
         # Insert newly trained model results into FacemapModel table
