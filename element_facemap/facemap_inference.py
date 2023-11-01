@@ -137,7 +137,7 @@ class FacemapModel(dj.Manual):
     definition = """
     model_id   : int                    # user assigned ID associated with a unique model
     ---
-    model_name : varchar(64)            # name of model 
+    model_name : varchar(64)            # optional name/prefix of model 
     model_description: varchar(1000)    # optional model description
     """
 
