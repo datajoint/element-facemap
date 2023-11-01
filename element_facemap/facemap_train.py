@@ -195,6 +195,7 @@ class FacemapTrainParamSet(dj.Lookup):
         if param_query:
             existing_paramset_idx = param_query.fetch1("paramset_idx")
             if existing_paramset_idx == int(paramset_idx):  # If existing_idx same:
+                print(f"Paramset already exists at index {paramset_idx}")
                 return  # job done
         else:
             cls.insert1(
