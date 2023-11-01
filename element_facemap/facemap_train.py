@@ -229,7 +229,7 @@ class FacemapModelTrainingTask(dj.Manual):
     train_output_dir                                                    : varchar(255)  # Trained model output directory
     selected_frame_ind=null                                             : blob          # Optional, array of frames to run training on   
     refined_model_name='refined_model'                                  : varchar(128)  # Specify name of finetuned/trained model filepath
-    -> facemap_inference.FacemapModel.proj(retrain_model_id='model_id') : varchar(64)   # Specify retrain_model_id
+    -> facemap_inference.FacemapModel.proj(retrain_model_id='model_id') # Specify retrain_model_id
     model_description=None                                              : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
 
@@ -303,7 +303,7 @@ class FacemapModelTraining(dj.Computed):
         definition = """
         -> master
         ---
-        -> facemap_inference.FacemapModel.File.proj(retrain_file='relative_file_path') : varchar(256)
+        -> facemap_inference.FacemapModel.File.proj(retrain_file='relative_file_path')
         """
 
     def make(self, key):
