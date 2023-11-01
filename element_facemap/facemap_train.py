@@ -442,6 +442,6 @@ class FacemapModelTraining(dj.Computed):
             dict(
                 **key,
                 retrain_model_id=model_id,
-                retrain_file=model_output_path,
+                retrain_model_file=model_output_path,
             ),
         )
