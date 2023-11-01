@@ -159,6 +159,7 @@ class FacemapModel(dj.Manual):
         Attributes:
             FacemapModel (foreign key): Facemap model primary key.
             model_file ( attach ): filepath of facemap model, relative to root data dir
+
         """
 
         definition = """
