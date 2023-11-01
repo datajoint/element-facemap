@@ -260,6 +260,7 @@ class FacemapModelTrainingTask(dj.Manual):
         refined_model_name="refined_model",
         model_description=None,
         retrain_model_id=None,
+        selected_frame_ind=None,
     ):
         key = {"file_set_id": file_set_id, "paramset_idx": paramset_idx}
         inferred_output_dir = cls().infer_output_dir(key, relative=True, mkdir=True)
@@ -269,6 +270,7 @@ class FacemapModelTrainingTask(dj.Manual):
                 train_output_dir=inferred_output_dir.as_posix(),
                 refined_model_name=refined_model_name,
                 model_description=model_description,
+                selected_frame_ind=selected_frame_ind,
                 retrain_model_id=retrain_model_id,
             ),
         )
