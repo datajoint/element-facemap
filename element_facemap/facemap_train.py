@@ -438,7 +438,7 @@ class FacemapModelTraining(dj.Computed):
 
         self.RetrainedModelFile.insert1(
             dict(
-                train_model_time=train_model_time,
+                **key,
                 retrain_file=model_output_path,
             ),
         )
