@@ -21,7 +21,7 @@ _linking_module = None
 def activate(
     facemap_train_schema_name: str,
     fbe_schema_name: str = None,
-    facemap_model_schema_name: str = None,
+    facemap_inference_schema_name: str = None,
     *,
     create_schema: bool = True,
     create_tables: bool = True,
@@ -33,7 +33,7 @@ def activate(
         facemap_train_schema_name (str): schema name on the database server to activate
             the `facemap_train` schema of element-facemap
         fbe_schema_name (str):  Schema name on the database server to activate the 'facial_behavioral_estimation
-        facemap_model_schema_name (str): Schema name on the database server to activate the
+        facemap_inference_schema_name (str): Schema name on the database server to activate the
             `facemap_inference` schema of element-facemap
         create_schema (bool): when True (default), create schema in the database if it
                             does not yet exist.
@@ -74,9 +74,9 @@ def activate(
         linking_module=linking_module,
     )
 
-    # activate facial pose model schema
+    # activate facemap inference schema
     facemap_inference.activate(
-        facemap_model_schema_name,
+        facemap_inference_schema_name,
         create_schema=create_schema,
         create_tables=create_tables,
         linking_module=linking_module,
