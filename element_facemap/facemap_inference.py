@@ -158,7 +158,7 @@ class FacemapModel(dj.Manual):
 
         Attributes:
             FacemapModel (foreign key): Facemap model primary key.
-            model_file ( attach ): filepath of facemap model, relative to root data dir
+            model_file ( attach ): file attachment of facemap model, stored as binary in db
 
         """
 
@@ -166,7 +166,6 @@ class FacemapModel(dj.Manual):
         -> master
         ---
         model_file: attach            # model file attachment
-        relative_file_path: varchar(256)   # relative path of model_file
         """
 
     @classmethod
@@ -199,8 +198,6 @@ class FacemapModel(dj.Manual):
             dict(
                 model_id=model_id,
                 model_file=full_model_path,
-                relative_file_path=full_model_path.relative_to(
-                    fbe.get_facemap_root_data_dir()[0]
                 ),
             ),
         )
