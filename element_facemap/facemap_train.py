@@ -226,11 +226,11 @@ class FacemapModelTrainingTask(dj.Manual):
     -> FacemapTrainFileSet                  # video(s) and files for training
     -> FacemapTrainParamSet                 # Initially specified ROIs
     ---
-    train_output_dir                                                    : varchar(255)  # Trained model output directory
-    selected_frame_ind=null                                             : blob          # Optional, array of frames to run training on   
-    refined_model_name='refined_model'                                  : varchar(128)  # Specify name of finetuned/trained model filepath
-    -> [nullable]facemap_inference.FacemapModel.proj(retrain_model_id='model_id') # Specify retrain_model_id
-    model_description=None                                              : varchar(255)  # Optional, model desc for insertion into FacemapModel     
+    train_output_dir                        : varchar(255)  # Trained model output directory
+    selected_frame_ind=null                 : blob          # Optional, array of frames to run training on   
+    refined_model_name='refined_model'      : varchar(128)  # Specify name of finetuned/trained model filepath
+    -> [nullable]facemap_inference.FacemapModel.proj(retrain_model_id='model_id')  # Specify retrain_model_id
+    model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
 
     def infer_output_dir(self, key, relative=True, mkdir=True):
@@ -302,8 +302,9 @@ class FacemapModelTraining(dj.Computed):
 
         definition = """
         -> master
+        -> facemap_inference.FacemapModel.proj(retrain_model_id='model_id')  # link to facemap model table
         ---
-        -> facemap_inference.FacemapModel.File.proj(retrain_file='model_file')
+        retrain_model_file: attach          # retrained model file attachment 
         """
 
     def make(self, key):
@@ -439,6 +440,7 @@ class FacemapModelTraining(dj.Computed):
         self.RetrainedModelFile.insert1(
             dict(
                 **key,
+                retrain_model_id=model_id,
                 retrain_file=model_output_path,
             ),
         )
