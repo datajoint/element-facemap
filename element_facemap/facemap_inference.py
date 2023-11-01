@@ -200,7 +200,7 @@ class FacemapModel(dj.Manual):
                 model_id=model_id,
                 model_file=full_model_path,
                 relative_file_path=full_model_path.relative_to(
-                    fbe.get_facemap_root_data_dir()
+                    fbe.get_facemap_root_data_dir()[0]
                 ),
             ),
         )
