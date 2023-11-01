@@ -258,7 +258,7 @@ class FacemapModelTrainingTask(dj.Manual):
         cls,
         file_set_id,
         paramset_idx,
-        refined_model_name="refined_model",
+        refined_model_prefix="refined_model",
         model_description=None,
         retrain_model_id=None,
         selected_frame_ind=None,
@@ -269,7 +269,7 @@ class FacemapModelTrainingTask(dj.Manual):
             dict(
                 **key,
                 train_output_dir=inferred_output_dir.as_posix(),
-                refined_model_name=refined_model_name,
+                refined_model_prefix=refined_model_prefix,
                 model_description=model_description,
                 selected_frame_ind=selected_frame_ind,
                 retrain_model_id=retrain_model_id,
