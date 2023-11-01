@@ -425,13 +425,6 @@ class FacemapModelTraining(dj.Computed):
             model_id, refined_model_name, model_description, model_output_path
         )
 
-        self.RetrainedModelFile.insert1(
-            dict(
-                train_model_time=train_model_time,
-                retrain_file=model_output_path,
-            ),
-        )
-
         train_model_time = datetime.fromtimestamp(
             model_output_path.stat().st_mtime
         ).strftime("%Y-%m-%d %H:%M:%S")
@@ -441,4 +434,11 @@ class FacemapModelTraining(dj.Computed):
                 **key,
                 train_model_time=train_model_time,
             )
+        )
+
+        self.RetrainedModelFile.insert1(
+            dict(
+                train_model_time=train_model_time,
+                retrain_file=model_output_path,
+            ),
         )
