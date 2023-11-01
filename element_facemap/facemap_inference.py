@@ -198,7 +198,6 @@ class FacemapModel(dj.Manual):
             dict(
                 model_id=model_id,
                 model_file=full_model_path,
-                ),
             ),
         )
 
