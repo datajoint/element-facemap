@@ -429,7 +429,7 @@ class FacemapModelTraining(dj.Computed):
             dict(
                 retrain_file=(
                     facemap_inference.FacemapModel & f"model_id={model_id}"
-                ).fetch1("relative_file_path")
+                ).fetch1("model_file")
             ),
         )
 
