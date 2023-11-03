@@ -234,6 +234,7 @@ class FacemapModelTrainingTask(dj.Manual):
     model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
 
+    @classmethod
     def infer_output_dir(self, key, relative=True, mkdir=True):
         video_file = (FacemapTrainFileSet.VideoFile & key).fetch(
             "video_file_path", limit=1
