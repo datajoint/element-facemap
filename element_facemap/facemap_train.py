@@ -228,10 +228,10 @@ class FacemapModelTrainingTask(dj.Manual):
     -> FacemapTrainParamSet                 # Initially specified ROIs
     ---
     train_output_dir                        : varchar(255)  # Trained model output directory
-    selected_frame_ind=null                 : blob          # Optional, array of frames to run training on   
+    selected_frame_ind=null                 : blob          # Optional, array of frame indices to run training on   
     refined_model_prefix=''                 : varchar(128)  # Specify prefix of finetuned/trained model filepath
     -> [nullable]facemap_inference.FacemapModel.proj(retrain_model_id='model_id')  # Specify retrain_model_id
-    model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
+    model_description=''                    : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
 
     @classmethod
