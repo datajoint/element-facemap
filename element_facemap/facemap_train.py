@@ -231,7 +231,7 @@ class FacemapModelTrainingTask(dj.Manual):
     selected_frame_ind=null                 : blob          # Optional, array of frames to run training on   
     refined_model_prefix=''                 : varchar(128)  # Specify prefix of finetuned/trained model filepath
     -> [nullable]facemap_inference.FacemapModel.proj(retrain_model_id='model_id')  # Specify retrain_model_id
-    model_description=None                  : varchar(255)  # Optional, model desc for insertion into FacemapModel     
+    model_description=''                    : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
 
     def infer_output_dir(self, key, relative=True, mkdir=True):
