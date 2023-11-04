@@ -218,7 +218,7 @@ class FacemapModelTrainingTask(dj.Manual):
         train_output_dir( varchar(255) ): Relative output directory for trained model
         selected_frame_ind (blob) : Array of frames to run training on, if not specified all frames used.
         refined_model_name ( varchar(32) ): Name for retrained model
-        retrain_model_id (smallint): Model index, of FacemapModel table, to be used for retraining
+        base_model_id (smallint): Model index, of FacemapModel table, to be used for retraining
         model_description ( varchar(255) ): Optional. Model Description for insertion into FacemapModel
 
     """
@@ -229,8 +229,8 @@ class FacemapModelTrainingTask(dj.Manual):
     ---
     train_output_dir                        : varchar(255)  # Trained model output directory
     selected_frame_ind=null                 : blob          # Optional, array of frame indices to run training on   
-    refined_model_prefix=''                 : varchar(128)  # Specify prefix of finetuned/trained model filepath
-    -> [nullable]facemap_inference.FacemapModel.proj(retrain_model_id='model_id')  # Specify retrain_model_id
+    refined_model_name=''                   : varchar(128)  # Specify name of finetuned/trained model filepath
+    -> [nullable]facemap_inference.FacemapModel.proj(base_model_id='model_id')  # Specify base model to be retrained
     model_description=''                    : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
 
@@ -261,7 +261,7 @@ class FacemapModelTrainingTask(dj.Manual):
         paramset_idx,
         refined_model_prefix="",
         model_description=None,
-        retrain_model_id=None,
+        base_model_id=None,
         selected_frame_ind=None,
     ):
         key = {"file_set_id": file_set_id, "paramset_idx": paramset_idx}
@@ -273,7 +273,7 @@ class FacemapModelTrainingTask(dj.Manual):
                 refined_model_prefix=refined_model_prefix,
                 model_description=model_description,
                 selected_frame_ind=selected_frame_ind,
-                retrain_model_id=retrain_model_id,
+                base_model_id=base_model_id,
             ),
         )
 
@@ -304,7 +304,7 @@ class FacemapModelTraining(dj.Computed):
 
         definition = """
         -> master
-        -> facemap_inference.FacemapModel.proj(retrain_model_id='model_id')  # link to facemap model table
+        -> facemap_inference.FacemapModel.proj(base_model_id='model_id')  # link to facemap model table
         ---
         retrain_model_file: attach          # retrained model file attachment 
         """
@@ -337,14 +337,14 @@ class FacemapModelTraining(dj.Computed):
         # Create a pose model object, specifying the video files
         train_model = pose.Pose(filenames=[video_files])  # facemap expects list of list
         train_model.pose_prediction_setup()  # Sets default facemap model as train_model.net, handles empty bbox
-        retrain_model_id = (FacemapModelTrainingTask & key).fetch1("retrain_model_id")
+        base_model_id = (FacemapModelTrainingTask & key).fetch1("base_model_id")
 
         if (
-            retrain_model_id is not None
+            base_model_id is not None
         ):  # Retrain an existing model from the facemap_inference.FacemapModel table
             # Fetch model file attachment so that model_file (.pth) is availible in Path.cwd()
             model_file = (
-                facemap_inference.FacemapModel.File & {"model_id": retrain_model_id}
+                facemap_inference.FacemapModel.File & {"model_id": base_model_id}
             ).fetch1("model_file")
 
             # Set train_model object to load preexisting model
@@ -396,8 +396,8 @@ class FacemapModelTraining(dj.Computed):
         training_params = (
             FacemapTrainParamSet & f'paramset_idx={key["paramset_idx"]}'
         ).fetch1("params")
-        refined_model_prefix = (FacemapModelTrainingTask & key).fetch1(
-            "refined_model_prefix"
+        refined_model_name = (FacemapModelTrainingTask & key).fetch1(
+            "refined_model_name"
         )  # default = "refined_model"
 
         # Train model using train function defined in Pose class
@@ -412,7 +412,7 @@ class FacemapModelTraining(dj.Computed):
         )
 
         # Save Refined Model
-        refined_model_name = f"{refined_model_prefix}_refined_model.pth"
+        refined_model_name = f"{refined_model_name}_{output_dir.stem}_refined_model.pth"
         model_output_path = output_dir / refined_model_name
         train_model.save_model(model_output_path)
 
@@ -427,7 +427,7 @@ class FacemapModelTraining(dj.Computed):
 
         facemap_inference.FacemapModel().insert_new_model(
             model_id,
-            f"{refined_model_prefix}_refined_model.pth",
+            refined_model_name,
             model_description,
             model_output_path,
         )
@@ -446,7 +446,7 @@ class FacemapModelTraining(dj.Computed):
         self.RetrainedModelFile.insert1(
             dict(
                 **key,
-                retrain_model_id=model_id,
+                base_model_id=model_id,
                 retrain_model_file=model_output_path,
             ),
         )
