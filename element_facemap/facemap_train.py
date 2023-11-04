@@ -304,8 +304,8 @@ class FacemapModelTraining(dj.Computed):
 
         definition = """
         -> master
-        -> facemap_inference.FacemapModel.proj(base_model_id='model_id')  # link to facemap model table
         ---
+        -> facemap_inference.FacemapModel.proj(base_model_id='model_id')  # link to facemap model table
         retrain_model_file: attach          # retrained model file attachment 
         """
 
