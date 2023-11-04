@@ -219,7 +219,7 @@ class FacemapModelTrainingTask(dj.Manual):
         selected_frame_ind (blob) : Array of frames to run training on, if not specified all frames used.
         refined_model_name ( varchar(32) ): Name for retrained model
         base_model_id (smallint): Model index, of FacemapModel table, to be used for retraining
-        model_description ( varchar(255) ): Optional. Model Description for insertion into FacemapModel
+        model_description ( varchar(1000) ): Optional. Model Description for insertion into FacemapModel
 
     """
 
@@ -231,7 +231,7 @@ class FacemapModelTrainingTask(dj.Manual):
     selected_frame_ind=null                 : blob          # Optional, array of frame indices to run training on   
     refined_model_name='refined_model'      : varchar(128)  # Specify name of finetuned/retrained model 
     -> [nullable]facemap_inference.FacemapModel.proj(base_model_id='model_id')  # Specify base model to be retrained
-    model_description=''                    : varchar(255)  # Optional, model desc for insertion into FacemapModel     
+    model_description=''                    : varchar(1000)  # Optional, model desc for insertion into FacemapModel     
     """
 
     @classmethod
