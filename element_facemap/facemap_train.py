@@ -215,7 +215,7 @@ class FacemapModelTrainingTask(dj.Manual):
     Attributes:
         FacemapTrainFileSet (foreign key): FacemapTrainFileSet Key.
         FacemapTrainParamSet (foreign key): TrainingParamSet key.
-        train_output_dir( varchar(255) ): Relative output directory for trained model
+        training_output_dir( varchar(255) ): Relative output directory for trained model
         selected_frame_ind (blob) : Array of frames to run training on, if not specified all frames used.
         refined_model_name ( varchar(32) ): Name for retrained model
         base_model_id (smallint): Model index, of FacemapModel table, to be used for retraining
@@ -227,9 +227,9 @@ class FacemapModelTrainingTask(dj.Manual):
     -> FacemapTrainFileSet                  # video(s) and files for training
     -> FacemapTrainParamSet                 # Initially specified ROIs
     ---
-    train_output_dir                        : varchar(255)  # Trained model output directory
+    training_output_dir                     : varchar(255)  # Trained model output directory
     selected_frame_ind=null                 : blob          # Optional, array of frame indices to run training on   
-    refined_model_name=''                   : varchar(128)  # Specify name of finetuned/trained model filepath
+    refined_model_name='refined_model'      : varchar(128)  # Specify name of finetuned/retrained model 
     -> [nullable]facemap_inference.FacemapModel.proj(base_model_id='model_id')  # Specify base model to be retrained
     model_description=''                    : varchar(255)  # Optional, model desc for insertion into FacemapModel     
     """
@@ -259,7 +259,7 @@ class FacemapModelTrainingTask(dj.Manual):
         cls,
         file_set_id,
         paramset_idx,
-        refined_model_prefix="",
+        refined_model_name="refined_model",
         model_description=None,
         base_model_id=None,
         selected_frame_ind=None,
@@ -269,8 +269,8 @@ class FacemapModelTrainingTask(dj.Manual):
         cls.insert1(
             dict(
                 **key,
-                train_output_dir=inferred_output_dir.as_posix(),
-                refined_model_prefix=refined_model_prefix,
+                training_output_dir=inferred_output_dir.as_posix(),
+                refined_model_name=refined_model_name,
                 model_description=model_description,
                 selected_frame_ind=selected_frame_ind,
                 base_model_id=base_model_id,
@@ -315,8 +315,10 @@ class FacemapModelTraining(dj.Computed):
         import torch
         import cv2
 
-        train_output_dir = (FacemapModelTrainingTask & key).fetch1("train_output_dir")
-        output_dir = find_full_path(get_facemap_root_data_dir(), train_output_dir)
+        training_output_dir = (FacemapModelTrainingTask & key).fetch1(
+            "training_output_dir"
+        )
+        output_dir = find_full_path(get_facemap_root_data_dir(), training_output_dir)
 
         video_files = [
             find_full_path(get_facemap_root_data_dir(), fp).as_posix()
@@ -412,7 +414,7 @@ class FacemapModelTraining(dj.Computed):
         )
 
         # Save Refined Model
-        refined_model_name = f"{refined_model_name}_{output_dir.stem}_refined_model.pth"
+        refined_model_name = f"{refined_model_name}_{output_dir.stem}.pth"
         model_output_path = output_dir / refined_model_name
         train_model.save_model(model_output_path)
 
