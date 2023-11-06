@@ -230,7 +230,7 @@ class FacemapModelTrainingTask(dj.Manual):
     training_output_dir                     : varchar(255)  # Trained model output directory
     selected_frame_ind=null                 : blob          # Optional, array of frame indices to run training on   
     refined_model_name='refined_model'      : varchar(128)  # Specify name of finetuned/retrained model 
-    -> [nullable]facemap_inference.FacemapModel.proj(base_model_id='model_id')  # Specify base model to be retrained
+    -> facemap_inference.FacemapModel.proj(base_model_id='model_id')  # Specify base model from FacemapModel to be retrained
     model_description=''                    : varchar(1000)  # Optional, model desc for insertion into FacemapModel     
     """
 
@@ -341,24 +341,22 @@ class FacemapModelTraining(dj.Computed):
         train_model.pose_prediction_setup()  # Sets default facemap model as train_model.net, handles empty bbox
         base_model_id = (FacemapModelTrainingTask & key).fetch1("base_model_id")
 
-        if (
-            base_model_id is not None
-        ):  # Retrain an existing model from the facemap_inference.FacemapModel table
-            # Fetch model file attachment so that model_file (.pth) is availible in Path.cwd()
-            model_file = (
-                facemap_inference.FacemapModel.File & {"model_id": base_model_id}
-            ).fetch1("model_file")
+        # Retrain an existing model from the facemap_inference.FacemapModel table
+        # Fetch model file attachment so that model_file (.pth) is availible in Path.cwd()
+        model_file = (
+            facemap_inference.FacemapModel.File & {"model_id": base_model_id}
+        ).fetch1("model_file")
 
-            # Set train_model object to load preexisting model
-            train_model.model_name = model_file
+        # Set train_model object to load preexisting model
+        train_model.model_name = model_file
 
-            # Overwrite default train_model.net
-            train_model.net.load_state_dict(
-                torch.load(model_file, map_location=train_model.device)
-            )
+        # Overwrite default train_model.net
+        train_model.net.load_state_dict(
+            torch.load(model_file, map_location=train_model.device)
+        )
 
-            # link model to torch device
-            train_model.net.to(train_model.device)
+        # link model to torch device
+        train_model.net.to(train_model.device)
 
         # Convert videos to images for train input
         pre_selected_frame_ind = (FacemapModelTrainingTask & key).fetch1(
