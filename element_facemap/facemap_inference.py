@@ -264,7 +264,6 @@ class FacemapPoseEstimationTask(dj.Manual):
     def generate(
         cls,
         key,
-        model_id: int,
         task_description: str = "",
         task_mode: str = "trigger",
         bbox: list = [],
@@ -272,7 +271,6 @@ class FacemapPoseEstimationTask(dj.Manual):
         """Generate a unique pose estimation task for each of the relative_video_paths
 
         Args:
-            model_id (int): User Specified model identification number
             key (dict): Primary key from FacemapPoseEstimationTask table
                 e.g.: {subject="sub1",session_id=0,recording_id=0,model_id=0}
             relative_video_paths (list): list of relative videos in VideoRecording.File table
