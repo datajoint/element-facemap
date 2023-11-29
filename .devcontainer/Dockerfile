@@ -32,9 +32,7 @@ COPY ./ /tmp/element-facemap/
 RUN \
     # pipeline dependencies
     apt-get install gcc g++ ffmpeg libsm6 libxext6 -y && \
-    pip install numpy Cython && \
     pip install --no-cache-dir -e /tmp/element-facemap[elements,tests] && \
-    caimanmanager.py install && \
     # clean up
     rm -rf /tmp/element-facemap && \
     apt-get clean
