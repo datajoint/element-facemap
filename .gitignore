@@ -116,5 +116,17 @@ temp*
 **/#*#
 **/.#*
 
+# datajoint, notes, nwb export
+dj_local_c*.json
+temp*
+temp/*
+*nwb
+
 # docs
-/docs/site
+/docs/site/
+/docs/src/tutorials/*ipynb
+/docs/mike-mkdocs*
+element_miniscope/qc.py
+
+# DevContainer/Codespaces
+example_data/
