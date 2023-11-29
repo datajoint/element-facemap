@@ -30,7 +30,7 @@ setup(
         "ipykernel>=6.0.1",
         "opencv-python",
         "element-interface @ git+https://github.com/datajoint/element-interface.git",
-        ""
+        "facemap @ git+https://github.com/kushalbakshi/facemap.git",
     ],
     extras_require={
         "elements": [

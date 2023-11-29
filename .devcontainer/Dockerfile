@@ -32,7 +32,7 @@ COPY ./ /tmp/element-facemap/
 RUN \
     # pipeline dependencies
     apt-get install gcc g++ ffmpeg libsm6 libxext6 libgl1 libegl1 -y && \
-    git clone https://github.com/kushalbakshi/facemap.git && \
+    # git clone https://github.com/kushalbakshi/facemap.git && \
     # pip install ./facemap[gui] && \
     pip install --no-cache-dir -e /tmp/element-facemap[elements,tests] && \
     # clean up
@@ -43,7 +43,7 @@ ENV DJ_HOST fakeservices.datajoint.io
 ENV DJ_USER root
 ENV DJ_PASS simple
 
-ENV MINISCOPE_ROOT_DATA_DIR /workspaces/element-facemap/example_data
+ENV FACEMAP_ROOT_DATA_DIR /workspaces/element-facemap/example_data
 ENV DATABASE_PREFIX neuro_
 
 USER vscode
