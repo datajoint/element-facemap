@@ -34,7 +34,7 @@ RUN \
     apt-get install gcc g++ ffmpeg libsm6 libxext6 libgl1 libegl1 -y && \
     git clone https://github.com/kushalbakshi/facemap.git && \
     # pip install ./facemap[gui] && \
-    # pip install --no-cache-dir -e /tmp/element-facemap[elements,tests] && \
+    pip install --no-cache-dir -e /tmp/element-facemap[elements,tests] && \
     # clean up
     rm -rf /tmp/element-facemap && \
     apt-get clean
