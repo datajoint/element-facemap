@@ -384,13 +384,9 @@ class FacemapPoseEstimation(dj.Computed):
 
             bbox = (FacemapPoseEstimationTask & key).fetch1("bbox") or []
 
-            # Model Name of interest should be specified by user during facemap task params manual update
-            model_id = (FacemapPoseEstimationTask & key).fetch("model_id")
-
-            # Fetch model(.pt) file attachment to present working directory
-            facemap_model_name = (FacemapModel.File & f'model_id="{model_id}"').fetch1(
-                "model_file"
-            )
+            facemap_model_name = (
+                FacemapModel.File & f'model_id="{key["model_id"]}"'
+            ).fetch1("model_file")
 
             facemap_model_path = Path.cwd() / facemap_model_name
             models_root_dir = model_loader.get_models_dir()
