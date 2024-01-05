@@ -336,6 +336,15 @@ class FacemapPoseEstimation(dj.Computed):
             "task_mode", "pose_estimation_output_dir"
         )
 
+        if not output_dir:
+            output_dir = FacemapPoseEstimationTask.infer_output_dir(
+                key, relative=True, mkdir=True
+            )
+            # update pose_estimation_output_dir
+            FacemapPoseEstimationTask.update1(
+                {**key, "pose_estimation_output_dir": output_dir.as_posix()}
+            )
+
         output_dir = find_full_path(fbe.get_facemap_root_data_dir(), output_dir)
         video_files = (FacemapPoseEstimationTask * fbe.VideoRecording.File & key).fetch(
             "file_path"
