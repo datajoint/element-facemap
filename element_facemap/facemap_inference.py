@@ -222,7 +222,7 @@ class FacemapPoseEstimationTask(dj.Manual):
     -> FacemapModel
     ---
     pose_estimation_output_dir='' : varchar(255)  # output dir - stores results of Facemap Pose estimation analysis
-    task_description              : varchar(128)  # Optional. Addtional task description
+    task_description=''           : varchar(128)  # Optional. Addtional task description
     task_mode='trigger'           : enum('load', 'trigger')
     bbox=null                     : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     """
