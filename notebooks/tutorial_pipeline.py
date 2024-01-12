@@ -53,7 +53,7 @@ subject.activate(db_prefix + "subject", linking_module=__name__)
 session.activate(db_prefix + "session", linking_module=__name__)
 Session = session.Session
 
-fbe.activate(db_prefix + "facemap_fbe", linking_module=__name__)
+fbe.activate(db_prefix + "facemap", linking_module=__name__)
 facemap_inference.activate(db_prefix + "facemap_inference", linking_module=__name__)
 
 
