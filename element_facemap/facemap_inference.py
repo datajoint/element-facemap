@@ -138,7 +138,7 @@ class FacemapPoseModel(dj.Manual):
     model_description=''      : varchar(1000)    # optional model description
     """
 
-    class TrackedBodyPart(dj.Part):
+    class BodyPart(dj.Part):
         """Body parts associated with a given model
 
         Attributes:
@@ -182,7 +182,7 @@ class FacemapPoseModel(dj.Manual):
             )
         )
 
-        cls.TrackedBodyPart.insert(
+        cls.BodyPart.insert(
             [
                 dict(
                     model_id=model_id,
@@ -313,14 +313,14 @@ class FacemapInference(dj.Computed):
 
         Attributes:
             FacemapInference (foreign key): FacemapInference primary key.
-            FacemapPoseModel.TrackedBodyPart (foreign key): TrackedBodyPart primary key.
+            FacemapPoseModel.BodyPart (foreign key): BodyPart primary key.
             x_pos (longblob): X position.
             y_pos (longblob): Y position.
             likelihood (longblob): Model confidence."""
 
         definition = """ # uses facemap h5 output for body part position
         -> master
-        -> FacemapPoseModel.TrackedBodyPart
+        -> FacemapPoseModel.BodyPart
         ---
         x_pos       : longblob      # x position
         y_pos       : longblob      # y position
