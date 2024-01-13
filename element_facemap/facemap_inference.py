@@ -347,15 +347,6 @@ class FacemapInference(dj.Computed):
         facemap_result_path = output_dir / f"{vid_name}_FacemapPose.h5"
         full_metadata_path = output_dir / f"{vid_name}_FacemapPose_metadata.pkl"
 
-        # Create Symbolic Links to raw video data files from outbox directory
-        video_symlinks = []
-        for video_file in video_files:
-            video_symlink = output_dir / video_file.name
-            if video_symlink.exists():
-                video_symlink.unlink()
-            video_symlink.symlink_to(video_file)
-            video_symlinks.append(video_symlink.as_posix())
-
         # Trigger Facemap Pose Estimation Inference
         if (
             facemap_result_path.exists() & full_metadata_path.exists()
@@ -392,6 +383,15 @@ class FacemapInference(dj.Computed):
 
             facemap_model_path = Path.cwd() / facemap_model_name
             models_root_dir = model_loader.get_models_dir()
+
+            # Create Symbolic Links to raw video data files from outbox directory
+            video_symlinks = []
+            for video_file in video_files:
+                video_symlink = output_dir / video_file.name
+                if video_symlink.exists():
+                    video_symlink.unlink()
+                video_symlink.symlink_to(video_file)
+                video_symlinks.append(video_symlink.as_posix())
 
             # copy this model file to the facemap model root directory (~/.facemap/models/)
             shutil.copy(facemap_model_path, models_root_dir)
