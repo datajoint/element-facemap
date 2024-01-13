@@ -295,7 +295,7 @@ class FacemapInference(dj.Computed):
 
     Attributes:
         FacemapInferenceTask (foreign key): FacemapInferenceTask primary key.
-        inference_start_time (datetime): time of generation of this set of facemap results.
+        inference_completion_time (datetime): time of generation of this set of facemap results.
         inference_run_duration (datetime): duration of model.
         total_frame_count (int): Number of frames in all video files.
     """
@@ -303,7 +303,7 @@ class FacemapInference(dj.Computed):
     definition = """
     -> FacemapInferenceTask
     ---
-    inference_start_time: datetime  # time of generation of this set of facemap results
+    inference_completion_time: datetime  # time of generation of this set of facemap results
     inference_run_duration: float # seconds
     total_frame_count: int          # frame count across all video files          
     """
@@ -360,7 +360,7 @@ class FacemapInference(dj.Computed):
             self.insert1(
                 {
                     **key,
-                    "inference_start_time": creation_time,
+                    "inference_completion_time": creation_time,
                     "inference_run_duration": inference_duration,
                     "total_frame_count": total_frame_count,
                 }
