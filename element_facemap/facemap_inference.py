@@ -123,7 +123,7 @@ class BodyPart(dj.Lookup):
 
 
 @schema
-class FacemapPoseModel(dj.Manual):
+class FacemapModel(dj.Manual):
     """Trained Models stored for facial pose inference
 
     Attributes:
@@ -154,7 +154,7 @@ class FacemapPoseModel(dj.Manual):
         """Relative paths of facemap models with respect to facemap_root_data_dir
 
         Attributes:
-            FacemapPoseModel (foreign key): FacemapPoseModel primary key.
+            FacemapModel (foreign key): FacemapModel primary key.
             model_file ( attach ): file attachment of facemap model, stored as binary in
             the database.
 
@@ -206,7 +206,7 @@ class FacemapInferenceTask(dj.Manual):
 
     Attributes:
         fbe.VideoRecording (foreign key) : Primary key for VideoRecording table.
-        FacemapPoseModel (foreign key) : Primary key for the facemap model table
+        FacemapModel (foreign key) : Primary key for the facemap model table
         facemap_inference_output_dir ( varchar(255), optional) : output dir storing the
         results of pose analysis.
         task_mode (enum) : Default 'load'. 'load' or 'trigger' analysis.
@@ -217,7 +217,7 @@ class FacemapInferenceTask(dj.Manual):
     definition = """
     # Staging table for pairing of recording and Facemap parameters before processing.
     -> fbe.VideoRecording
-    -> FacemapPoseModel
+    -> FacemapModel
     ---
     facemap_inference_output_dir    : varchar(255)  # output dir - stores results of Facemap inference analysis
     task_description              : varchar(128)  # Optional. Addtional task description
@@ -313,14 +313,14 @@ class FacemapInference(dj.Computed):
 
         Attributes:
             FacemapInference (foreign key): FacemapInference primary key.
-            FacemapPoseModel.BodyPart (foreign key): BodyPart primary key.
+            FacemapModel.BodyPart (foreign key): BodyPart primary key.
             x_pos (longblob): X position.
             y_pos (longblob): Y position.
             likelihood (longblob): Model confidence."""
 
         definition = """ # uses facemap h5 output for body part position
         -> master
-        -> FacemapPoseModel.BodyPart
+        -> FacemapModel.BodyPart
         ---
         x_pos       : longblob      # x position
         y_pos       : longblob      # y position
@@ -386,9 +386,9 @@ class FacemapInference(dj.Computed):
             model_id = (FacemapInferenceTask & key).fetch("model_id")
 
             # Fetch model(.pt) file attachment to present working directory
-            facemap_model_name = (
-                FacemapPoseModel.File & f'model_id="{model_id}"'
-            ).fetch1("model_file")
+            facemap_model_name = (FacemapModel.File & f'model_id="{model_id}"').fetch1(
+                "model_file"
+            )
 
             facemap_model_path = Path.cwd() / facemap_model_name
             models_root_dir = model_loader.get_models_dir()
@@ -427,9 +427,7 @@ class FacemapInference(dj.Computed):
                 and x/y coordinates of each body part for a camera_id, similar to
                 output of facemap inference data.
         """
-        model_name = (FacemapPoseModel & f'model_id={key["model_id"]}').fetch1(
-            "model_name"
-        )
+        model_name = (FacemapModel & f'model_id={key["model_id"]}').fetch1("model_name")
 
         if body_parts == "all":
             body_parts = (cls.BodyPartPosition & key).fetch("body_part")
