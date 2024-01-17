@@ -220,7 +220,7 @@ class FacemapInferenceTask(dj.Manual):
     -> FacemapModel
     ---
     facemap_inference_output_dir    : varchar(255)  # output dir - stores results of Facemap inference analysis
-    task_description              : varchar(128)  # Optional. Addtional task description
+    task_description              : varchar(128)  # Optional. Additional task description
     task_mode='load'           : enum('load', 'trigger')
     bbox=null                     : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     """
