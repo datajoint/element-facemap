@@ -219,7 +219,7 @@ class FacemapInferenceTask(dj.Manual):
     -> fbe.VideoRecording
     -> FacemapModel
     ---
-    facemap_inference_output_dir    : varchar(255)  # output dir - stores results of Facemap inference analysis
+    facemap_inference_output_dir='' : varchar(255)  # output dir - stores results of Facemap inference analysis
     task_description=''             : varchar(128)  # Optional. Additional task description
     task_mode='load'                : enum('load', 'trigger')
     bbox=null                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
@@ -334,6 +334,15 @@ class FacemapInference(dj.Computed):
             "task_mode", "facemap_inference_output_dir"
         )
 
+        if not output_dir:
+            output_dir = FacemapInferenceTask.infer_output_dir(
+                key, relative=True, mkdir=True
+            )
+            # update pose_estimation_output_dir
+            FacemapInferenceTask.update1(
+                {**key, "facemap_inference_output_dir": output_dir.as_posix()}
+            )
+
         output_dir = find_full_path(fbe.get_facemap_root_data_dir(), output_dir)
         video_files = (FacemapInferenceTask * fbe.VideoRecording.File & key).fetch(
             "file_path"
@@ -373,13 +382,10 @@ class FacemapInference(dj.Computed):
 
             bbox = (FacemapInferenceTask & key).fetch1("bbox") or []
 
-            # Model Name of interest should be specified by user during facemap task params manual update
-            model_id = (FacemapInferenceTask & key).fetch("model_id")
-
             # Fetch model(.pt) file attachment to present working directory
-            facemap_model_name = (FacemapModel.File & f'model_id="{model_id}"').fetch1(
-                "model_file"
-            )
+            facemap_model_name = (
+                FacemapModel.File & f'model_id="{key["model_id"]}"'
+            ).fetch1("model_file")
 
             facemap_model_path = Path.cwd() / facemap_model_name
             models_root_dir = model_loader.get_models_dir()
