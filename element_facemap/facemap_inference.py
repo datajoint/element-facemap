@@ -1,17 +1,14 @@
+import pickle
+import shutil
 import importlib
 import inspect
-from datetime import datetime
-from glob import glob
-from pathlib import Path
-from typing import List, Tuple
 import datajoint as dj
 import numpy as np
 import pandas as pd
+from datetime import datetime
+from pathlib import Path
 from element_interface.utils import find_full_path, find_root_directory
 
-import os
-import pickle
-import shutil
 from . import facial_behavior_estimation as fbe
 from .facial_behavior_estimation import (
     get_facemap_root_data_dir,
@@ -35,7 +32,7 @@ def activate(
 
     Args:
         facemap_model_schema_name (str): Schema name on the database server to activate the
-            `facemap_pose_model` schema of element-facemap
+            `facemap_inference` schema of element-facemap
         fbe_schema_name (str):  Schema name on the database server to activate the 'facial_behavioral_estimation
         create_schema (bool): When True (default), create schema in the database if it
             does not yet exist.
@@ -48,7 +45,7 @@ def activate(
     Upstream tables:
         + Session: A parent table to VideoRecording, identifying a recording session
         + Equipment: A parent table to VideoRecording, identifying video recording equipment
-        + VideoRecording: A parent table to FacemapPoseEstimationTask, identifying videos to be used in inference
+        + VideoRecording: A parent table to FacemapInferenceTask, identifying videos to be used in inference
     Functions:
         + get_facemap_root_data_dir() -> list
             Retrieves the root data directory(s) with face recordings for all
@@ -157,8 +154,9 @@ class FacemapModel(dj.Manual):
         """Relative paths of facemap models with respect to facemap_root_data_dir
 
         Attributes:
-            FacemapModel (foreign key): Facemap model primary key.
-            model_file ( attach ): file attachment of facemap model, stored as binary in db
+            FacemapModel (foreign key): FacemapModel primary key.
+            model_file ( attach ): file attachment of facemap model, stored as binary in
+            the database.
 
         """
 
@@ -203,15 +201,15 @@ class FacemapModel(dj.Manual):
 
 
 @schema
-class FacemapPoseEstimationTask(dj.Manual):
+class FacemapInferenceTask(dj.Manual):
     """Staging table for pairing of video recordings and Facemap parameters before processing.
 
     Attributes:
         fbe.VideoRecording (foreign key) : Primary key for VideoRecording table.
         FacemapModel (foreign key) : Primary key for the facemap model table
-        pose_estimation_output_dir ( varchar(255), optional) : output dir storing the results
-            of pose estimation analysis.
-        task_mode (enum) : Default trigger. 'load' or 'trigger' analysis.
+        facemap_inference_output_dir ( varchar(255), optional) : output dir storing the
+        results of pose analysis.
+        task_mode (enum) : Default 'load'. 'load' or 'trigger' analysis.
         bbox (longblob) : Bounding box for cropping the video [x1, x2, y1, y2]. If not set, entire frame is used.
         task_description ( varchar(128), optional) : Task description.
     """
@@ -221,25 +219,25 @@ class FacemapPoseEstimationTask(dj.Manual):
     -> fbe.VideoRecording
     -> FacemapModel
     ---
-    pose_estimation_output_dir='' : varchar(255)  # output dir - stores results of Facemap Pose estimation analysis
-    task_description=''           : varchar(128)  # Optional. Addtional task description
-    task_mode='trigger'           : enum('load', 'trigger')
-    bbox=null                     : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
+    facemap_inference_output_dir='' : varchar(255)  # output dir - stores results of Facemap inference analysis
+    task_description=''             : varchar(128)  # Optional. Additional task description
+    task_mode='load'                : enum('load', 'trigger')
+    bbox=null                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     """
 
     @classmethod
     def infer_output_dir(cls, key, relative=True, mkdir=True):
-        """Infer an output directory for an entry in the FacemapPoseEstimationTask table.
+        """Infer an output directory for an entry in the FacemapInferenceTask table.
 
         Args:
-            key (dict): Primary key from the FacemapPoseEstimationTask table.
-            relative (bool, optional): If True, pose_estimation_output_dir is returned relative to
-                imaging_root_dir. Defaults to True.
-            mkdir (bool, optional): If True, create pose_estimation_output_dir. Defaults to True.
+            key (dict): Primary key from the FacemapInferenceTask table.
+            relative (bool, optional): If True, facemap_inference_output_dir is returned
+            relative to facemap_root_dir. Defaults to True.
+            mkdir (bool, optional): If True, create facemap_inference_output_dir. Defaults to True.
 
         Returns:
-            dir (str): A default output directory for inference results (pose_estimation_output_dir
-                in FacemapPoseEstimationTask) based on the following convention:
+            dir (str): A default output directory for inference results (facemap_inference_output_dir
+                in FacemapInferenceTask) based on the following convention:
                 processed_dir / relative_video_dir / {facemap_recordingid}_{model_id}
                 e.g.: sub1/sess1/video_files/facemap_recording_id0_model0
         """
@@ -264,24 +262,24 @@ class FacemapPoseEstimationTask(dj.Manual):
         cls,
         key,
         task_description: str = "",
-        task_mode: str = "trigger",
+        task_mode: str = "load",
         bbox: list = [],
     ):
         """Generate a unique pose estimation task for each of the relative_video_paths
 
         Args:
-            key (dict): Primary key from FacemapPoseEstimationTask table
+            key (dict): Primary key from FacemapInferenceTask table
                 e.g.: {subject="sub1",session_id=0,recording_id=0,model_id=0}
             relative_video_paths (list): list of relative videos in VideoRecording.File table
-            task_mode (str, optional): 'load' or 'trigger. Defaults to 'trigger'.
+            task_mode (str, optional): 'load' or 'trigger. Defaults to 'load'.
             bbox (list, optional): Bounding box for processing. Defaults to [].
         """
-        pose_estimation_output_dir = cls.infer_output_dir(key)
+        facemap_inference_output_dir = cls.infer_output_dir(key)
 
         cls.insert1(
             dict(
                 **key,
-                pose_estimation_output_dir=pose_estimation_output_dir,
+                facemap_inference_output_dir=facemap_inference_output_dir,
                 task_description=task_description,
                 task_mode=task_mode,
                 bbox=bbox,
@@ -292,20 +290,21 @@ class FacemapPoseEstimationTask(dj.Manual):
 
 
 @schema
-class FacemapPoseEstimation(dj.Computed):
+class FacemapInference(dj.Computed):
     """Results of facemap pose estimation
 
     Attributes:
-        FacemapPoseEstimationTask (foreign key): Pose Estimation Task key.
-        post_estimation_time (datetime): time of generation of this set of facemap results.
-        execution_duration (datetime): duration of model
+        FacemapInferenceTask (foreign key): FacemapInferenceTask primary key.
+        inference_completion_time (datetime): time of generation of this set of facemap results.
+        inference_run_duration (datetime): duration of model.
+        total_frame_count (int): Number of frames in all video files.
     """
 
     definition = """
-    -> FacemapPoseEstimationTask
+    -> FacemapInferenceTask
     ---
-    pose_estimation_time: datetime  # time of generation of this set of facemap results
-    pose_estimation_duration: float # seconds
+    inference_completion_time: datetime  # time of generation of this set of facemap results
+    inference_run_duration: float # seconds
     total_frame_count: int          # frame count across all video files          
     """
 
@@ -313,9 +312,8 @@ class FacemapPoseEstimation(dj.Computed):
         """Position of individual body parts by frame index
 
         Attributes:
-            PoseEstimation (foreign key): Pose Estimation key.
-            FacemapModel.BodyPart (foreign key): Body Part key.
-            body_part (longblob): Body part for positional likelihood
+            FacemapInference (foreign key): FacemapInference primary key.
+            FacemapModel.BodyPart (foreign key): BodyPart primary key.
             x_pos (longblob): X position.
             y_pos (longblob): Y position.
             likelihood (longblob): Model confidence."""
@@ -330,23 +328,23 @@ class FacemapPoseEstimation(dj.Computed):
         """
 
     def make(self, key):
-        """.populate() method will launch training for each PoseEstimationTask"""
+        """.populate() method will launch training for each FacemapInferenceTask"""
         # ID model and directories
-        task_mode, output_dir = (FacemapPoseEstimationTask & key).fetch1(
-            "task_mode", "pose_estimation_output_dir"
+        task_mode, output_dir = (FacemapInferenceTask & key).fetch1(
+            "task_mode", "facemap_inference_output_dir"
         )
 
         if not output_dir:
-            output_dir = FacemapPoseEstimationTask.infer_output_dir(
+            output_dir = FacemapInferenceTask.infer_output_dir(
                 key, relative=True, mkdir=True
             )
             # update pose_estimation_output_dir
-            FacemapPoseEstimationTask.update1(
-                {**key, "pose_estimation_output_dir": output_dir.as_posix()}
+            FacemapInferenceTask.update1(
+                {**key, "facemap_inference_output_dir": output_dir.as_posix()}
             )
 
         output_dir = find_full_path(fbe.get_facemap_root_data_dir(), output_dir)
-        video_files = (FacemapPoseEstimationTask * fbe.VideoRecording.File & key).fetch(
+        video_files = (FacemapInferenceTask * fbe.VideoRecording.File & key).fetch(
             "file_path"
         )
 
@@ -357,15 +355,6 @@ class FacemapPoseEstimation(dj.Computed):
         vid_name = Path(video_files[0]).stem
         facemap_result_path = output_dir / f"{vid_name}_FacemapPose.h5"
         full_metadata_path = output_dir / f"{vid_name}_FacemapPose_metadata.pkl"
-
-        # Create Symbolic Links to raw video data files from outbox directory
-        video_symlinks = []
-        for video_file in video_files:
-            video_symlink = output_dir / video_file.name
-            if video_symlink.exists():
-                video_symlink.unlink()
-            video_symlink.symlink_to(video_file)
-            video_symlinks.append(video_symlink.as_posix())
 
         # Trigger Facemap Pose Estimation Inference
         if (
@@ -380,8 +369,8 @@ class FacemapPoseEstimation(dj.Computed):
             self.insert1(
                 {
                     **key,
-                    "pose_estimation_time": creation_time,
-                    "pose_estimation_duration": inference_duration,
+                    "inference_completion_time": creation_time,
+                    "inference_run_duration": inference_duration,
                     "total_frame_count": total_frame_count,
                 }
             )
@@ -391,14 +380,24 @@ class FacemapPoseEstimation(dj.Computed):
         elif task_mode == "trigger":
             from facemap.pose import pose as facemap_pose, model_loader
 
-            bbox = (FacemapPoseEstimationTask & key).fetch1("bbox") or []
+            bbox = (FacemapInferenceTask & key).fetch1("bbox") or []
 
+            # Fetch model(.pt) file attachment to present working directory
             facemap_model_name = (
                 FacemapModel.File & f'model_id="{key["model_id"]}"'
             ).fetch1("model_file")
 
             facemap_model_path = Path.cwd() / facemap_model_name
             models_root_dir = model_loader.get_models_dir()
+
+            # Create Symbolic Links to raw video data files from outbox directory
+            video_symlinks = []
+            for video_file in video_files:
+                video_symlink = output_dir / video_file.name
+                if video_symlink.exists():
+                    video_symlink.unlink()
+                video_symlink.symlink_to(video_file)
+                video_symlinks.append(video_symlink.as_posix())
 
             # copy this model file to the facemap model root directory (~/.facemap/models/)
             shutil.copy(facemap_model_path, models_root_dir)
@@ -419,6 +418,14 @@ class FacemapPoseEstimation(dj.Computed):
                 total_frame_count,
                 creation_time,
             ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
+            self.insert1(
+                {
+                    **key,
+                    "inference_completion_time": creation_time,
+                    "inference_run_duration": inference_duration,
+                    "total_frame_count": total_frame_count,
+                }
+            )
             self.BodyPartPosition.insert(body_part_position_entry)
 
     @classmethod
@@ -426,7 +433,7 @@ class FacemapPoseEstimation(dj.Computed):
         """Returns a pandas dataframe of coordinates of the specified body_part(s)
 
         Args:
-            key (dict): A DataJoint query specifying one FacemapPoseEstimation entry.
+            key (dict): A DataJoint query specifying one FacemapInferenceEstimation entry.
             body_parts (list, optional): Body parts as a list. If "all", all joints
 
         Returns:

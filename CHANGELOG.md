@@ -3,6 +3,18 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.2.0] - 2023-11-29
+
++ Add - Inference module as `facemap_inference.py`
++ Add - DevContainer for codespaces
++ Add - `tutorial_pipeline.py`
++ Add - 60 min tutorial using Jupyter Notebooks
++ Update - General improvements to increase consistency with other DataJoint Elements
+
+## [0.1.7] - 2023-10-18
+
++ Fix - Index `mot_Sv` and `movSv` by `roi_no` in `FacialSignal` 
+
 ## [0.1.6] - 2023-05-22
 
 + Add - Facemap citation
@@ -43,6 +55,8 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
   the diagonal matrix
 + Add - Output directory inferral, if unspecified.
 
+[0.2.0]: https://github.com/datajoint/element-facemap/releases/tag/0.2.0
+[0.1.7]: https://github.com/datajoint/element-facemap/releases/tag/0.1.7
 [0.1.6]: https://github.com/datajoint/element-facemap/releases/tag/0.1.6
 [0.1.5]: https://github.com/datajoint/element-facemap/releases/tag/0.1.5
 [0.1.4]: https://github.com/datajoint/element-facemap/releases/tag/0.1.4
