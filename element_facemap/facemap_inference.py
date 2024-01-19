@@ -418,6 +418,14 @@ class FacemapInference(dj.Computed):
                 total_frame_count,
                 creation_time,
             ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
+            self.insert1(
+                {
+                    **key,
+                    "inference_completion_time": creation_time,
+                    "inference_run_duration": inference_duration,
+                    "total_frame_count": total_frame_count,
+                }
+            )
             self.BodyPartPosition.insert(body_part_position_entry)
 
     @classmethod
