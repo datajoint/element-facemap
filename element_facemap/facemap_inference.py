@@ -286,7 +286,7 @@ class FacemapInferenceTask(dj.Manual):
             ),
         )
 
-    insert_pose_estimation_task = generate
+    insert_facemap_inference_task = generate
 
 
 @schema
@@ -338,7 +338,7 @@ class FacemapInference(dj.Computed):
             output_dir = FacemapInferenceTask.infer_output_dir(
                 key, relative=True, mkdir=True
             )
-            # update pose_estimation_output_dir
+            # update facemap_inference_output_dir
             FacemapInferenceTask.update1(
                 {**key, "facemap_inference_output_dir": output_dir.as_posix()}
             )
@@ -356,7 +356,7 @@ class FacemapInference(dj.Computed):
         facemap_result_path = output_dir / f"{vid_name}_FacemapPose.h5"
         full_metadata_path = output_dir / f"{vid_name}_FacemapPose_metadata.pkl"
 
-        # Trigger Facemap Pose Estimation Inference
+        # Load or Trigger Facemap Pose Estimation Inference
         if (
             facemap_result_path.exists() & full_metadata_path.exists()
         ) or task_mode == "load":  # Load results and do not rerun processing
