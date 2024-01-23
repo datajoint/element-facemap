@@ -286,7 +286,7 @@ class FacemapInferenceTask(dj.Manual):
             ),
         )
 
-    insert_pose_estimation_task = generate
+    insert_facemap_inference_task = generate
 
 
 @schema
