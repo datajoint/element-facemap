@@ -37,6 +37,10 @@ RUN \
     rm -rf /tmp/element-facemap && \
     apt-get clean
 
+# Install Facemap
+RUN git clone https://github.com/kushalbakshi/facemap.git
+RUN pip install ./facemap[gui]
+
 ENV DJ_HOST fakeservices.datajoint.io
 ENV DJ_USER root
 ENV DJ_PASS simple
