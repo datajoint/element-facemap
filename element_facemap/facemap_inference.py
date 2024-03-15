@@ -132,7 +132,7 @@ class FacemapModel(dj.Manual):
 
         Attributes:
             body_part (str): Body part name.
-            body_part_description (str): Detailed body part description. 
+            body_part_description (str): Detailed body part description.
         """
 
         definition = """
@@ -164,7 +164,7 @@ class FacemapModel(dj.Manual):
         full_model_path: str,
     ):
         """Insert a new model into the FacemapModel table and relevant part tables.
-        
+
         Args:
             model_id (int): User specified unique model ID associated with a model.
             model_name (str): Name of model.

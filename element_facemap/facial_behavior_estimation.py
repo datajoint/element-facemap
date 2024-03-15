@@ -443,12 +443,16 @@ class FacialSignal(dj.Imported):
                     roi_no=i,
                     xrange=dataset["rois"][i]["xrange"],
                     yrange=dataset["rois"][i]["yrange"],
-                    xrange_bin=dataset["rois"][i]["xrange_bin"]
-                    if "xrange_bin" in dataset["rois"][i]
-                    else None,
-                    yrange_bin=dataset["rois"][i]["yrange_bin"]
-                    if "yrange_bin" in dataset["rois"][i]
-                    else None,
+                    xrange_bin=(
+                        dataset["rois"][i]["xrange_bin"]
+                        if "xrange_bin" in dataset["rois"][i]
+                        else None
+                    ),
+                    yrange_bin=(
+                        dataset["rois"][i]["yrange_bin"]
+                        if "yrange_bin" in dataset["rois"][i]
+                        else None
+                    ),
                     motion=dataset["motion"][i + 1],
                 )
                 for i in range(len(dataset["rois"]))
@@ -463,9 +467,9 @@ class FacialSignal(dj.Imported):
                     key,
                     roi_no=roi_no,
                     pc_no=i,
-                    singular_value=dataset["motSv"][roi_no][i]
-                    if "motSv" in dataset
-                    else None,
+                    singular_value=(
+                        dataset["motSv"][roi_no][i] if "motSv" in dataset else None
+                    ),
                     motmask=dataset["motMask_reshape"][roi_no + 1][:, :, i],
                     projection=dataset["motSVD"][roi_no + 1][i],
                 )
@@ -481,9 +485,9 @@ class FacialSignal(dj.Imported):
                     key,
                     roi_no=roi_no,
                     pc_no=i,
-                    singular_value=dataset["movSv"][roi_no][i]
-                    if "movSv" in dataset
-                    else None,
+                    singular_value=(
+                        dataset["movSv"][roi_no][i] if "movSv" in dataset else None
+                    ),
                     movmask=dataset["movMask_reshape"][roi_no + 1][:, :, i],
                     projection=dataset["movSVD"][roi_no + 1][i],
                 )
