@@ -123,9 +123,9 @@ class VideoRecording(dj.Manual):
     """Video recorded in an experiment session for Facemap analysis.
 
     Attributes:
-        Session (foreign key) : Primary key for Session table.
-        recording_id (int) : Recording ID.
-        Device (foreign key) : Primary key for Device table.
+        Session (foreign key): Primary key from Session.
+        recording_id (int): Recording ID.
+        Device (foreign key): Primary key from Device.
     """
 
     definition = """
@@ -140,9 +140,9 @@ class VideoRecording(dj.Manual):
         """Relative path of video file with respect to facemap_root_data_dir directory.
 
         Attributes:
-            master (foreign key) : Primary key for VideoRecording table.
-            file_id (smallint) : File ID.
-            file_path ( varchar(255) ) : Filepath of video, relative to root directory.
+            master (foreign key): Primary key from VideoRecording.
+            file_id (smallint): File ID.
+            file_path (str): Filepath of video, relative to root directory.
         """
 
         definition = """
@@ -158,13 +158,13 @@ class RecordingInfo(dj.Imported):
     """Information extracted from video file.
 
     Attributes:
-        VideoRecording (foreign key) : Primary key for VideoRecording table.
-        px_height (int) : Height in pixels.
-        px_width (int) : Width in pixels.
-        nframes (int) : Number of frames.
-        fps (int) : Frames per second in Hz.
-        recording_duration (float) : Video duration in seconds.
-        recording_time (datetime, optional) : Time at the beginning of the recording.
+        VideoRecording (foreign key): Primary key for VideoRecording table.
+        px_height (int): Height in pixels.
+        px_width (int): Width in pixels.
+        nframes (int): Number of frames.
+        fps (int): Frames per second in Hz.
+        recording_duration (float): Video duration in seconds.
+        recording_time (datetime, optional): Time at the beginning of the recording.
     """
 
     definition = """
@@ -225,15 +225,15 @@ class FacemapTask(dj.Manual):
     """Staging table for pairing of recording and Facemap parameters before processing.
 
     Attributes:
-        VideoRecording (foreign key) : Primary key for VideoRecording table.
-        facemap_task_id (smallint) : Facemap task ID
-        facemap_output_dir ( varchar(255), optional) : output dir storing the results
+        VideoRecording (foreign key): Primary key for VideoRecording table.
+        facemap_task_id (smallint): Facemap task ID
+        facemap_output_dir (str, optional): output dir storing the results
             of Facemap analysis.
-        task_mode (enum) : Default load. Load or trigger analysis.
-        facemap_params (longblob) : content of facemap's _proc.npy as dict.
-        do_mot_svd (bool) : Default 1. Do motion singular value decomposition.
-        do_mov_svd (bool) : Default 0. Do movie singular value decomposition.
-        task_description ( varchar(128), optional) : Task description.
+        task_mode (enum): Default load. Load or trigger analysis.
+        facemap_params (longblob): content of facemap's _proc.npy as dict.
+        do_mot_svd (bool): Default True. Do motion singular value decomposition.
+        do_mov_svd (bool): Default False. Do movie singular value decomposition.
+        task_description (str, optional): Task description.
     """
 
     definition = """
@@ -271,9 +271,9 @@ class FacemapProcessing(dj.Computed):
     """Automated table to run Facemap with inputs from FacemapTask.
 
     Attributes:
-        FacemapTask (foreign key) : Primary key for FacemapTask table.
-        processing_time (datetime) : Time of generation of the facemap results.
-        package_version ( varchar(16), optional) : Facemap package version.
+        FacemapTask (foreign key): Primary key from FacemapTask.
+        processing_time (datetime): Time of generation of the facemap results.
+        package_version (str, optional): Facemap package version.
     """
 
     definition = """
@@ -346,14 +346,14 @@ class FacialSignal(dj.Imported):
         """Region's properties.
 
         Attributes:
-            master (foreign key) : Primary key of the FacialSignal table.
-            roi_no (int) : Region number.
-            roi_name ( varchar(16), optional ) : User-friendly name of the roi.
-            xrange (longblob) : 1d np.array - x pixel indices.
-            yrange (longblob) : 1d np.array - y pixel indices.
-            xrange_bin (longblob) : 1d np.array - binned x pixel indices.
-            yrange_bin (longblob) : 1d np.array - binned y pixel indices.
-            motion (longblob) : 1d np.array - absolute motion energies (nframes).
+            master (foreign key): Primary key of the FacialSignal table.
+            roi_no (int): Region number.
+            roi_name (str, optional): User-friendly name of the roi.
+            xrange (longblob): 1d np.array - x pixel indices.
+            yrange (longblob): 1d np.array - y pixel indices.
+            xrange_bin (longblob): 1d np.array - binned x pixel indices.
+            yrange_bin (longblob): 1d np.array - binned y pixel indices.
+            motion (longblob): 1d np.array - absolute motion energies (nframes).
         """
 
         definition = """
@@ -372,11 +372,11 @@ class FacialSignal(dj.Imported):
         """Components of the SVD from motion video.
 
         Attributes:
-            master.Region (foreign key) : Primary key of the FacialSignal.Region table.
-            pc_no (int) : Principle component (PC) number.
-            singular_value (float, optional) : singular value corresponding to the PC.
-            motmask (longblob) : PC (y, x).
-            projection (longblob) : projections onto the principle component (nframes).
+            master.Region (foreign key): Primary key from FacialSignal.Region.
+            pc_no (int): Principle component (PC) number.
+            singular_value (float, optional): singular value corresponding to the PC.
+            motmask (longblob): PC (y, x).
+            projection (longblob): projections onto the principle component (nframes).
         """
 
         definition = """
@@ -392,11 +392,11 @@ class FacialSignal(dj.Imported):
         """Components of the SVD from movie video.
 
         Attributes:
-            master.Region (foreign key) : Primary key of the FacialSignal.Region table.
-            pc_no (int) : principle component (PC) number.
-            singular_value (float, optional) : Singular value corresponding to the PC.
-            movmask (longblob) : PC (y, x)
-            projection (longblob) : Projections onto the principle component (nframes).
+            master.Region (foreign key): Primary key of the FacialSignal.Region table.
+            pc_no (int): principle component (PC) number.
+            singular_value (float, optional): Singular value corresponding to the PC.
+            movmask (longblob): PC (y, x)
+            projection (longblob): Projections onto the principle component (nframes).
         """
 
         definition = """
@@ -412,10 +412,10 @@ class FacialSignal(dj.Imported):
         """Average frames for movie and motion videos.
 
         Attributes:
-            master (foreign key) : Primary key of the FacialSignal table.
-            sbin (int) : Spatial bin size.
-            avgframe (longblob) : 2d np.array - average binned frame.
-            avgmotion (longblob) : 2d nd.array - average binned motion frame.
+            master (foreign key): Primary key from FacialSignal.
+            sbin (int): Spatial bin size.
+            avgframe (longblob): 2d np.array - average binned frame.
+            avgmotion (longblob): 2d nd.array - average binned motion frame.
         """
 
         definition = """

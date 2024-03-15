@@ -26,7 +26,7 @@ def activate(
     *,
     create_schema: bool = True,
     create_tables: bool = True,
-    linking_module: str = None,
+    linking_module=None,
 ):
     """Activate schema.
 
@@ -43,18 +43,9 @@ def activate(
 
     Dependencies:
     Upstream tables:
-        + Session: A parent table to VideoRecording, identifying a recording session
-        + Equipment: A parent table to VideoRecording, identifying video recording equipment
-        + VideoRecording: A parent table to FacemapInferenceTask, identifying videos to be used in inference
-    Functions:
-        + get_facemap_root_data_dir() -> list
-            Retrieves the root data directory(s) with face recordings for all
-            subject/sessions. Returns a string for the full path to the root data directory.
-        + get_facemap_processed_data_dir(session_key: dict) -> str
-            Optional function to retrieve the desired output directory
-            for Facemap files for a given session. If unspecified,
-            the output is stored in the video folder for the session, which is the default behavior of Facemap.
-            Returns a string of the absolute path of the output directory.
+        + Session: A parent table to VideoRecording, identifying a recording session.
+        + Equipment: A parent table to VideoRecording, identifying video recording equipment.
+        + VideoRecording: A parent table to FacemapInferenceTask, identifying videos to be used in inference.
     """
     if isinstance(linking_module, str):
         linking_module = importlib.import_module(linking_module)
@@ -68,15 +59,12 @@ def activate(
     global _linking_module
     _linking_module = linking_module
 
-    # activate facial behavioral extimation (fbe) schema
     fbe.activate(
         fbe_schema_name,
         create_schema=create_schema,
         create_tables=create_tables,
         linking_module=linking_module,
     )
-
-    # activate facial pose model schema
     schema.activate(
         facemap_model_schema_name,
         create_schema=create_schema,
@@ -88,11 +76,11 @@ def activate(
 # ----------------------------- Table declarations ----------------------
 @schema
 class BodyPart(dj.Lookup):
-    """Body parts tracked by Facemap models
+    """Body parts tracked by Facemap models.
 
     Attributes:
-        body_part ( varchar(32) ): Body part short name.
-        body_part_description ( varchar(1000),optional ): Full description
+        body_part (str): Body part short name.
+        body_part_description (str, optional): Detailed body part description.
 
     """
 
@@ -124,11 +112,12 @@ class BodyPart(dj.Lookup):
 
 @schema
 class FacemapModel(dj.Manual):
-    """Trained Models stored for facial pose inference
+    """Trained Models stored for facial pose inference.
 
     Attributes:
-        model_id(int) : User specified ID associated with a unique model
-        model_name( varchar(64) ): Name of model, filepath.stem
+        model_id (int): User specified unique model ID associated with a model.
+        model_name (str): Name of model.
+        model_description (str, optional): Detailed model description.
     """
 
     definition = """
@@ -142,8 +131,9 @@ class FacemapModel(dj.Manual):
         """Body parts associated with a given model
 
         Attributes:
-            body_part ( varchar(32) ): Body part name, (location specfication)
-            body_part_description ( varchar(1000) ): Optional. Longer description."""
+            body_part (str): Body part name.
+            body_part_description (str): Detailed body part description. 
+        """
 
         definition = """
         -> master
@@ -154,16 +144,15 @@ class FacemapModel(dj.Manual):
         """Relative paths of facemap models with respect to facemap_root_data_dir
 
         Attributes:
-            FacemapModel (foreign key): FacemapModel primary key.
-            model_file ( attach ): file attachment of facemap model, stored as binary in
-            the database.
+            FacemapModel (foreign key): Primary key from FacemapModel.
+            model_file (attach): Facemap model file.
 
         """
 
         definition = """
         -> master
         ---
-        model_file: attach            # model file attachment
+        model_file: attach      # model file attachment. Stored as binary in database.
         """
 
     @classmethod
@@ -174,6 +163,14 @@ class FacemapModel(dj.Manual):
         model_description: str,
         full_model_path: str,
     ):
+        """Insert a new model into the FacemapModel table and relevant part tables.
+        
+        Args:
+            model_id (int): User specified unique model ID associated with a model.
+            model_name (str): Name of model.
+            model_description (str): Detailed model description.
+            full_model_path (str): Full path to the model file.
+        """
         cls.insert1(
             dict(
                 model_id=model_id,
@@ -202,32 +199,31 @@ class FacemapModel(dj.Manual):
 
 @schema
 class FacemapInferenceTask(dj.Manual):
-    """Staging table for pairing of video recordings and Facemap parameters before processing.
+    """A pairing of video recordings and Facemap model.
 
     Attributes:
-        fbe.VideoRecording (foreign key) : Primary key for VideoRecording table.
-        FacemapModel (foreign key) : Primary key for the facemap model table
-        facemap_inference_output_dir ( varchar(255), optional) : output dir storing the
-        results of pose analysis.
-        task_mode (enum) : Default 'load'. 'load' or 'trigger' analysis.
-        bbox (longblob) : Bounding box for cropping the video [x1, x2, y1, y2]. If not set, entire frame is used.
-        task_description ( varchar(128), optional) : Task description.
+        fbe.VideoRecording (foreign key): Primary key from VideoRecording table.
+        FacemapModel (foreign key): Primary key from FacemapModel table.
+        facemap_inference_output_dir (str): output dir storing the results of pose analysis.
+        task_mode (str): One of 'load' (load computed analysis results) or 'trigger' (trigger computation).
+        bbox (longblob, nullable) : Bounding box for cropping the video [x1, x2, y1, y2]. If not set, entire frame is used.
+        task_description (str, optional) : Task description.
     """
 
     definition = """
-    # Staging table for pairing of recording and Facemap parameters before processing.
+    # Staging table for pairing of recording and Facemap model.
     -> fbe.VideoRecording
     -> FacemapModel
     ---
-    facemap_inference_output_dir='' : varchar(255)  # output dir - stores results of Facemap inference analysis
+    facemap_inference_output_dir    : varchar(255)  # Output directory of processed results of Facemap inference analysis relative to root directory.
     task_description=''             : varchar(128)  # Optional. Additional task description
-    task_mode='load'                : enum('load', 'trigger')
+    task_mode='load'                : enum('load', 'trigger') 
     bbox=null                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     """
 
     @classmethod
-    def infer_output_dir(cls, key, relative=True, mkdir=True):
-        """Infer an output directory for an entry in the FacemapInferenceTask table.
+    def infer_output_dir(cls, key, relative=False, mkdir=False):
+        """Infer an output directory for an entry in FacemapInferenceTask table.
 
         Args:
             key (dict): Primary key from the FacemapInferenceTask table.
@@ -291,12 +287,12 @@ class FacemapInferenceTask(dj.Manual):
 
 @schema
 class FacemapInference(dj.Computed):
-    """Results of facemap pose estimation
+    """Perform facemap pose estimation.
 
     Attributes:
-        FacemapInferenceTask (foreign key): FacemapInferenceTask primary key.
-        inference_completion_time (datetime): time of generation of this set of facemap results.
-        inference_run_duration (datetime): duration of model.
+        FacemapInferenceTask (foreign key): Primary key from FacemapInferenceTask.
+        inference_completion_time (datetime): Inference completion datetime.
+        inference_run_duration (datetime): Duration to inference completion.
         total_frame_count (int): Number of frames in all video files.
     """
 
@@ -309,11 +305,11 @@ class FacemapInference(dj.Computed):
     """
 
     class BodyPartPosition(dj.Part):
-        """Position of individual body parts by frame index
+        """Position of individual body parts by frame index.
 
         Attributes:
-            FacemapInference (foreign key): FacemapInference primary key.
-            FacemapModel.BodyPart (foreign key): BodyPart primary key.
+            FacemapInference (foreign key): Primary key from FacemapInference.
+            FacemapModel.BodyPart (foreign key): Primary key from FacemapModel.BodyPart.
             x_pos (longblob): X position.
             y_pos (longblob): Y position.
             likelihood (longblob): Model confidence."""
@@ -471,6 +467,8 @@ class FacemapInference(dj.Computed):
 
 
 def _load_facemap_results(key, facemap_result_path, full_metadata_path):
+    """Load facemap results from h5 and metadata files."""
+
     from facemap import utils
 
     with open(full_metadata_path, "rb") as f:
