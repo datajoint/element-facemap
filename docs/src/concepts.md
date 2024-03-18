@@ -3,7 +3,7 @@
 ## Facial Motion Tracking
 
 Neuroscience often involves studying relationships between neural activity and subject behavior. Many mammals, including mice[^1], exhibit facial expressions that
-convey information about emotional and neuronal states. Facemap[^2] is software designed
+convey information about emotional and neuronal states. Facemap[^2,3] is software designed
 to automate the process of quantifying facial movements, including whisker, eye, and pupil
 movements, using computer vision.
 
@@ -19,16 +19,9 @@ the subject's facial movement.
     expressions of emotion states and their neuronal correlates in mice. Science,
     368(6486), 89-94.
 
-[^2]: Syeda, A., Zhong, L., Tung, R., Long, W., Pachitariu, M., & Stringer, C. (2022).
-    Facemap: a framework for modeling neural activity based on orofacial tracking.
-    bioRxiv, 2022-11
+[^2]: Syeda, A., Zhong, L., Tung, R., Long, W., Pachitariu, M.*, & Stringer, C.* (2024). Facemap: a framework for modeling neural activity based on orofacial tracking. Nature Neuroscience, 27(1), 187-195.
 
-## Key Partnerships
-
-Element Facemap was developed in collaboration with Hui Chen Lu's Lab at Indiana
-University Bloomington.  Our team also works with the Facemap developers to promote
-integration and interoperability between Facemap and the DataJoint Element Facemap (see
-[Sustainability Roadmap](https://datajoint.com/docs/community/partnerships/facemap/)).
+[^3]: Stringer, C.*, Pachitariu, M.*, Steinmetz, N., Reddy, C. B., Carandini, M., & Harris, K. D. (2019). Spontaneous behaviors drive multidimensional, brainwide activity. Science, 364(6437), eaav7893.
 
 ## Element Features
 
@@ -41,40 +34,4 @@ Major features include:
 - Queueing and triggering of Facemap analysis.
 - Ingestion of analysis outcomes as motion and video principle components.
 
-## Element Architecture
 
-Each node in the following diagram represents the analysis code in the workflow and the
-corresponding tables in the database.  Within the workflow, Element Facemap connects to
-upstream Elements including Lab, Animal, and Session. For more detailed documentation on
-each table, see the API docs for the respective schemas.
-
-![element-facemap diagram](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/attached_facemap_element.svg)
-
-### `subject` schema ([API docs](../element-animal/api/element_animal/subject))
-
-Although not required, most choose to connect the `Session` table to a `Subject`
-  table.
-
-| Table | Description |
-| --- | --- |
-| Subject | Basic information of the research subject. |
-
-### `session` schema ([API docs](../element-session/api/element_session/session_with_datetime))
-
-| Table | Description |
-| --- | --- |
-| Session | Unique experimental session identifier. |
-
-### `facial_behavior_estimation` schema ([API docs](./api/element_facemap/facial_behavior_estimation))
-
-| Table | Description |
-| --- | --- |
-| VideoRecording | Video(s) from one recording session, for Facial Motion Tracking. |
-| RecordingInfo | Information extracted from video file. |
-| FacemapTask | Staging table for pairing of recording and Facemap parameters before processing.|
-| FacemapProcessing | Automated table to execute Facemap with inputs from FacemapTask. |
-| FacialSignal | Results of the Facemap analysis. |
-| FacialSignal.Region | Region properties. |
-| FacialSignal.MotionSVD | Components of the SVD from motion video. |
-| FacialSignal.MovieSVD | Components of the SVD from movie video. |
-| FacialSignal.Summary | Average frames for movie and motion videos. |
