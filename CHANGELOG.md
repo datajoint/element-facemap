@@ -8,7 +8,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 + Add - Inference module as `facemap_inference.py`
 + Add - DevContainer for codespaces
 + Add - `tutorial_pipeline.py`
-+ Add - 60 min tutorial using Jupyter Notebooks
++ Add - 60 min tutorial for `facemap_inference` using Jupyter Notebooks
 + Update - General improvements to increase consistency with other DataJoint Elements
 
 ## [0.1.7] - 2023-10-18
