@@ -8,7 +8,7 @@ DataJoint Element for modeling neural activity based on orofacial tracking using
 
 ## Data Pipeline Diagram
 
-![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipeline.svg)
+![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipeline_facemap_inference.svg)
 
 + We have designed two variations of the pipeline to handle different use cases. Displayed above is the latest `facemap_inference` schema. Details on all of the `facemap` schemas can be found in the [Data Pipeline](./pipeline.md) documentation page.
 

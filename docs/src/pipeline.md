@@ -13,13 +13,13 @@ The element is composed of two main schemas, `facemap_behavior_estimation` and `
 
 - The `facemap_behavior_estimation` schema is designed to handle the analysis and ingestion Facemap's SVD analysis for pupil and ROI tracking.
 
-     ![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipeline_behavior_estimation.svg)
+     ![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipeline_facial_behavior_estimation.svg)
 
 ### `facemap_inference` module
 
 - The `facemap_inference` schema is designed to handle the analysis and ingestion of Facemap's pose estimation and tracking key points on the mouse face.
 
-     ![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipeline_inference.svg)
+     ![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipeline_facemap_inference.svg)
 
 ## Table Descriptions
 
