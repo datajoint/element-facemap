@@ -10,10 +10,9 @@ from element_lab.lab import User as Experimenter
 from element_session import session_with_datetime as session
 from element_session.session_with_datetime import Session
 from element_facemap import (
-    facial_behavior_estimation as fbe,
+    facial_behavior_estimation,
     facemap_inference,
 )
-import element_interface
 
 
 if "custom" not in dj.config:
@@ -53,7 +52,7 @@ subject.activate(db_prefix + "subject", linking_module=__name__)
 session.activate(db_prefix + "session", linking_module=__name__)
 Session = session.Session
 
-fbe.activate(db_prefix + "facemap", linking_module=__name__)
+facial_behavior_estimation.activate(db_prefix + "facemap_svd", linking_module=__name__)
 facemap_inference.activate(db_prefix + "facemap_inference", linking_module=__name__)
 
 
