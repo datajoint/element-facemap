@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="830pt" height="373pt" viewBox="0.00 0.00 830.00 373.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 369)">
+<title>%3</title>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-369 826,-369 826,4 -4,4"/>
+<!-- facemap_inference.FacemapModel.BodyPart -->
+<g id="node1" class="node">
+<title>facemap_inference.FacemapModel.BodyPart</title>
+<g id="a_node1"><a xlink:title="→ facemap_inference.FacemapModel→ facemap_inference.BodyPart">
+<polygon fill="transparent" stroke="transparent" points="212,-144 0,-144 0,-125 212,-125 212,-144"/>
+<text text-anchor="middle" x="106" y="-132" font-family="arial" font-size="10.00">facemap_inference.FacemapModel.BodyPart</text>
+</a>
+</g>
+</g>
+<!-- facemap_inference.FacemapInference.BodyPartPosition -->
+<g id="node8" class="node">
+<title>facemap_inference.FacemapInference.BodyPartPosition</title>
+<g id="a_node8"><a xlink:title="→ facemap_inference.FacemapInference→ facemap_inference.FacemapModel.BodyPart------------------------------x_pos                y_pos                likelihood           ">
+<polygon fill="transparent" stroke="transparent" points="611,-19 349,-19 349,0 611,0 611,-19"/>
+<text text-anchor="middle" x="480" y="-7" font-family="arial" font-size="10.00">facemap_inference.FacemapInference.BodyPartPosition</text>
+</a>
+</g>
+</g>
+<!-- facemap_inference.FacemapModel.BodyPart&#45;&gt;facemap_inference.FacemapInference.BodyPartPosition -->
+<g id="edge1" class="edge">
+<title>facemap_inference.FacemapModel.BodyPart-&gt;facemap_inference.FacemapInference.BodyPartPosition</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M132,-124.95C200.42,-102.45 384.89,-41.78 453.67,-19.16"/>
+</g>
+<!-- facemap_inference.BodyPart -->
+<g id="node2" class="node">
+<title>facemap_inference.BodyPart</title>
+<g id="a_node2"><a xlink:title="body_part            ------------------------------body_part_description=&quot;&quot; ">
+<polygon fill="#000000" fill-opacity="0.125490" stroke="transparent" points="177.5,-223 34.5,-223 34.5,-188 177.5,-188 177.5,-223"/>
+<text text-anchor="start" x="42.5" y="-204" font-family="arial" text-decoration="underline" font-size="10.00">facemap_inference.BodyPart</text>
+</a>
+</g>
+</g>
+<!-- facemap_inference.BodyPart&#45;&gt;facemap_inference.FacemapModel.BodyPart -->
+<g id="edge2" class="edge">
+<title>facemap_inference.BodyPart-&gt;facemap_inference.FacemapModel.BodyPart</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M106,-187.8C106,-174.08 106,-155.19 106,-144.27"/>
+</g>
+<!-- facemap_inference.FacemapInferenceTask -->
+<g id="node3" class="node">
+<title>facemap_inference.FacemapInferenceTask</title>
+<g id="a_node3"><a xlink:title="→ fbe.VideoRecording→ facemap_inference.FacemapModel------------------------------facemap_inference_output_dir task_description=&quot;&quot;  task_mode=&quot;load&quot;     bbox=null            ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="682,-152 436,-152 436,-117 682,-117 682,-152"/>
+<text text-anchor="middle" x="559" y="-131.4" font-family="arial" font-size="12.00" fill="darkgreen">facemap_inference.FacemapInferenceTask</text>
+</a>
+</g>
+</g>
+<!-- facemap_inference.FacemapInference -->
+<g id="node5" class="node">
+<title>facemap_inference.FacemapInference</title>
+<g id="a_node5"><a xlink:title="→ facemap_inference.FacemapInferenceTask------------------------------inference_completion_time inference_run_duration total_frame_count    ">
+<ellipse fill="#ff0000" fill-opacity="0.125490" stroke="#ff0000" stroke-opacity="0.125490" cx="480" cy="-68" rx="13" ry="13"/>
+<text text-anchor="middle" x="480" y="-64.9" font-family="arial" font-size="12.00" fill="#7f0000" fill-opacity="0.627451">facemap_inference.FacemapInference</text>
+</a>
+</g>
+</g>
+<!-- facemap_inference.FacemapInferenceTask&#45;&gt;facemap_inference.FacemapInference -->
+<g id="edge3" class="edge">
+<title>facemap_inference.FacemapInferenceTask-&gt;facemap_inference.FacemapInference</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M538.66,-116.89C522.93,-104.05 501.86,-86.85 489.72,-76.94"/>
+</g>
+<!-- subject.Subject -->
+<g id="node4" class="node">
+<title>subject.Subject</title>
+<g id="a_node4"><a xlink:title="subject              ------------------------------subject_nickname=&quot;&quot;  sex                  subject_birth_date   subject_description=&quot;&quot; ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="810,-365 712,-365 712,-330 810,-330 810,-365"/>
+<text text-anchor="start" x="720" y="-345.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">subject.Subject</text>
+</a>
+</g>
+</g>
+<!-- session.Session -->
+<g id="node7" class="node">
+<title>session.Session</title>
+<g id="a_node7"><a xlink:title="→ subject.Subjectsession_datetime     ------------------------------session_id=null      ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="813,-294 709,-294 709,-259 813,-259 813,-294"/>
+<text text-anchor="start" x="717" y="-274.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">session.Session</text>
+</a>
+</g>
+</g>
+<!-- subject.Subject&#45;&gt;session.Session -->
+<g id="edge4" class="edge">
+<title>subject.Subject-&gt;session.Session</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M761,-329.8C761,-318.95 761,-304.87 761,-294.05"/>
+</g>
+<!-- facemap_inference.FacemapInference&#45;&gt;facemap_inference.FacemapInference.BodyPartPosition -->
+<g id="edge5" class="edge">
+<title>facemap_inference.FacemapInference-&gt;facemap_inference.FacemapInference.BodyPartPosition</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M480,-54.74C480,-43.97 480,-28.56 480,-19.06"/>
+</g>
+<!-- facemap_inference.FacemapModel -->
+<g id="node6" class="node">
+<title>facemap_inference.FacemapModel</title>
+<g id="a_node6"><a xlink:title="model_id             ------------------------------model_name           model_description=&quot;&quot; ">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="426.5,-223 221.5,-223 221.5,-188 426.5,-188 426.5,-223"/>
+<text text-anchor="start" x="229.5" y="-203.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">facemap_inference.FacemapModel</text>
+</a>
+</g>
+</g>
+<!-- facemap_inference.FacemapModel&#45;&gt;facemap_inference.FacemapModel.BodyPart -->
+<g id="edge6" class="edge">
+<title>facemap_inference.FacemapModel-&gt;facemap_inference.FacemapModel.BodyPart</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M271.78,-187.97C228.07,-174.14 167.46,-154.95 132.94,-144.03"/>
+</g>
+<!-- facemap_inference.FacemapModel&#45;&gt;facemap_inference.FacemapInferenceTask -->
+<g id="edge7" class="edge">
+<title>facemap_inference.FacemapModel-&gt;facemap_inference.FacemapInferenceTask</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M380.29,-187.97C417.36,-177.09 465.71,-162.89 502.76,-152.01"/>
+</g>
+<!-- facemap_inference.FacemapModel.File -->
+<g id="node11" class="node">
+<title>facemap_inference.FacemapModel.File</title>
+<g id="a_node11"><a xlink:title="→ facemap_inference.FacemapModel------------------------------model_file           ">
+<polygon fill="transparent" stroke="transparent" points="418,-144 230,-144 230,-125 418,-125 418,-144"/>
+<text text-anchor="middle" x="324" y="-132" font-family="arial" font-size="10.00">facemap_inference.FacemapModel.File</text>
+</a>
+</g>
+</g>
+<!-- facemap_inference.FacemapModel&#45;&gt;facemap_inference.FacemapModel.File -->
+<g id="edge8" class="edge">
+<title>facemap_inference.FacemapModel-&gt;facemap_inference.FacemapModel.File</title>
+<path fill="none" stroke="#000000" stroke-width="2" stroke-opacity="0.250980" d="M324,-187.8C324,-174.08 324,-155.19 324,-144.27"/>
+</g>
+<!-- fbe.VideoRecording -->
+<g id="node10" class="node">
+<title>fbe.VideoRecording</title>
+<g id="a_node10"><a xlink:title="→ session.Sessionrecording_id         ------------------------------→ Device">
+<polygon fill="#00ff00" fill-opacity="0.188235" stroke="#00ff00" stroke-opacity="0.188235" points="822,-223 700,-223 700,-188 822,-188 822,-223"/>
+<text text-anchor="start" x="708" y="-203.4" font-family="arial" text-decoration="underline" font-size="12.00" fill="darkgreen">fbe.VideoRecording</text>
+</a>
+</g>
+</g>
+<!-- session.Session&#45;&gt;fbe.VideoRecording -->
+<g id="edge9" class="edge">
+<title>session.Session-&gt;fbe.VideoRecording</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M761,-258.8C761,-247.95 761,-233.87 761,-223.05"/>
+</g>
+<!-- fbe.VideoRecording.File -->
+<g id="node9" class="node">
+<title>fbe.VideoRecording.File</title>
+<g id="a_node9"><a xlink:title="→ fbe.VideoRecordingfile_id              ------------------------------file_path            ">
+<polygon fill="transparent" stroke="transparent" points="821.5,-144 700.5,-144 700.5,-125 821.5,-125 821.5,-144"/>
+<text text-anchor="start" x="708.5" y="-133" font-family="arial" text-decoration="underline" font-size="10.00">fbe.VideoRecording.File</text>
+</a>
+</g>
+</g>
+<!-- fbe.VideoRecording&#45;&gt;facemap_inference.FacemapInferenceTask -->
+<g id="edge10" class="edge">
+<title>fbe.VideoRecording-&gt;facemap_inference.FacemapInferenceTask</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M712.62,-187.97C680.75,-177.09 639.19,-162.89 607.34,-152.01"/>
+</g>
+<!-- fbe.VideoRecording&#45;&gt;fbe.VideoRecording.File -->
+<g id="edge11" class="edge">
+<title>fbe.VideoRecording-&gt;fbe.VideoRecording.File</title>
+<path fill="none" stroke="#000000" stroke-width="0.75" stroke-opacity="0.250980" d="M761,-187.8C761,-174.08 761,-155.19 761,-144.27"/>
+</g>
+</g>
+</svg>
