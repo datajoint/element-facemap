@@ -1,4 +1,4 @@
-## Key Partnerships
+# Key Partnerships
 
 Element Facemap was developed in collaboration with Hui Chen Lu's Lab at Indiana
 University Bloomington. 

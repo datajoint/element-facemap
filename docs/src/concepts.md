@@ -2,18 +2,14 @@
 
 ## Facial Motion Tracking
 
-Neuroscience often involves studying relationships between neural activity and subject behavior. Many mammals, including mice[^1], exhibit facial expressions that
-convey information about emotional and neuronal states. Facemap[^2,3] is software designed
-to automate the process of quantifying facial movements, including whisker, eye, and pupil
-movements, using computer vision.
+Neuroscience research often involves understanding the connections between neural activity and subject behavior. Many mammals, including mice, exhibit facial expressions that provide insights into their emotional and neuronal states[^1]. Facemap[^2]<sup>,</sup>[^3] is an open-source software developed to streamline the quantification of facial movements such as whisker, eye, and pupil motions through computer vision techniques.
 
-Facemap allows users to designate regions of interest (ROIs) as either rectangles or
-ellipses drawn on top of example frames. The software then runs singular value
-decomposition on these regions on both the raw movie frames and frame-wise difference
-values, which indicate motion. The result of this principle component analysis is a set
-of components, each representing distinct facial features. For best results, researchers
-should use fixed camera recordings, ensuring that all motion within the ROIs reflects
-the subject's facial movement.
+In its initial versions, Facemap empowered researchers to identify regions of interest (ROIs) on the animal's face as either rectangles or ellipses, using example frames from video recordings. The software utilized singular value decomposition on these ROIs across both raw movie frames and frame-wise difference values to detect motion. This process, grounded in principle component analysis, yielded a set of components that represent distinct facial features. To achieve optimal results, it was recommended to use video recordings from fixed cameras to ensure that all captured motions were attributable to the subject's facial movements.[^2]
+
+The latest iteration of Facemap introduces the ability to track keypoints across the animal's face. This feature marks a departure from solely relying on predefined ROIs, allowing for more dynamic and precise analysis of facial expressions and movements.[^3]
+
++ **KeyPoints Detection**: Facemap now employs cutting-edge machine learning algorithms to automatically detect and track specific facial landmarks, such as the tips of whiskers, the corners of the eyes, and the edges of the mouth. This approach enables a finer-grained analysis of facial expressions, enhancing the software's utility in behavioral neuroscience research.
++ **Dynamic Tracking**: Unlike the static ROIs, keypoints move with the subject across frames. This dynamic tracking ensures that more subtle facial movements are captured, providing richer datasets for analysis.
 
 [^1]: Dolensek, N., Gehrlach, D. A., Klein, A. S., & Gogolla, N. (2020). Facial
     expressions of emotion states and their neuronal correlates in mice. Science,
@@ -31,7 +27,7 @@ create Element Facemap.
 Major features include:
 
 - Ingestion and storage of input video metadata.
-- Queueing and triggering of Facemap analysis.
+- Queueing and triggering of Facemap analysis on multiple sessions.
 - Ingestion of analysis outcomes as motion and video principle components.
-
+- Ingestion of analysis outcomes from inference of facial keypoints.
 

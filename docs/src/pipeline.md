@@ -5,13 +5,13 @@ corresponding table in the database.  Within the pipeline, Element Facemap
 connects to upstream Elements including Lab, Animal, and Session. For more 
 detailed documentation on each table, see the API docs for the respective schemas.
 
-The element is composed of two main schemas, `facemap_behavior_estimation` and `facemap_inference`. The `facemap_behavior_estimation` schema is designed to handle the analysis and ingestion Facemap's SVD analysis for pupil and ROI tracking. The `facemap_inference` schema is designed to handle the analysis and ingestion of Facemap's pose estimation and tracking key points on the mouse face.
+The element is composed of two main schemas, `facial_behavior_estimation` and `facemap_inference`. The `facial_behavior_estimation` schema is designed to handle the analysis and ingestion Facemap's SVD analysis for pupil and ROI tracking. The `facemap_inference` schema is designed to handle the analysis and ingestion of Facemap's pose estimation and tracking key points on the mouse face.
 
 ## Diagrams
 
-### `facemap_behavior_estimation` module
+### `facial_behavior_estimation` module
 
-- The `facemap_behavior_estimation` schema is designed to handle the analysis and ingestion Facemap's SVD analysis for pupil and ROI tracking.
+- The `facial_behavior_estimation` schema is designed to handle the analysis and ingestion Facemap's SVD analysis for pupil and ROI tracking.
 
      ![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipeline_facial_behavior_estimation.svg)
 
