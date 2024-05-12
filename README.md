@@ -1,20 +1,23 @@
-# DataJoint Element - Facemap
+# DataJoint Element for orofacial tracking with Facemap
 
-DataJoint Element for modeling neural activity based on orofacial tracking using [Facemap](https://github.com/MouseLand/facemap). This Element supports facemap analysis using distinct keypoints on the mouse face, and computing the singular value decomposition and pupil tracking. DataJoint Elements collectively standardize and automate data collection and analysis for neuroscience experiments. Each Element is a modular pipeline for data storage and processing with corresponding database tables that can be combined with other Elements to assemble a fully functional pipeline. This repository also provides a tutorial environment and notebooks to learn the pipeline.
+DataJoint Element for modeling neural activity based on orofacial tracking using [Facemap](https://github.com/MouseLand/facemap). This Element supports facemap analysis using distinct keypoints on the mouse face, and computing the singular value decomposition and pupil tracking. 
+
+DataJoint Elements collectively standardize and automate data collection and analysis for neuroscience experiments. Each Element is a modular pipeline for data storage and processing with corresponding database tables that can be combined with other Elements to assemble a fully functional pipeline. This repository also provides a tutorial environment and notebooks to learn the pipeline.
 
 ## Experiment Flowchart
 
-![flowchart](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/diagram_flowchart.svg)
+![flowchart](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/flowchart.svg)
 
 ## Data Pipeline Diagram
 
-![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipline_facemap_inference.svg)
+![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipeline_facemap_inference.svg)
 
-+ We have designed two variations of the pipline for different use cases. Displayed above is the pipeline for the `facemap_inference` schema. Details on the pipeline for `facial_behavior_estimation` can be found in the [Data Pipeline](https://datajoint.com/docs/elements/element-facemap/latest/pipeline/)
++ We have designed two variations of the pipeline for different use cases. Displayed above is the pipeline for the `facemap_inference` schema. Details on the pipeline for `facial_behavior_estimation` can be found in the [Data Pipeline](https://datajoint.com/docs/elements/element-facemap/latest/pipeline/)
 
 ## Getting Started
 
 + Please fork this repository.
+
 + Clone the repository to your computer
 
     ```bash
@@ -27,7 +30,8 @@ DataJoint Element for modeling neural activity based on orofacial tracking using
     pip install -e .
     ```
 
-+ [Interactive tutorial on GitHub Codespaces](#interactive-tutorial)
++ [Interactive tutorial on GitHub Codespaces](https://github.com/datajoint/element-facemap#interactive-tutorial)
+
 + [Documentation](https://datajoint.com/docs/elements/element-facemap)
 
 ## Support
@@ -67,6 +71,6 @@ MYSQL_VER=8.0 docker compose -f docker-compose-db.yaml up --build -d
 
 ### Instructions
 
-1. We recommend you start by navigating to the `notebooks` directory on the left panel and go through the `tutorial.ipynb` Jupyter notebook. Execute the cells in the notebook to begin your walk through of the tutorial.
+1. We recommend you start by navigating to the `notebooks` directory on the left panel and go through the `tutorial.ipynb` Jupyter notebook. Execute the cells in the notebook to begin your walkthrough of the tutorial.
 
 2. Once you are done, see the options available to you in the menu in the bottom-left corner. For example, in Codespace you will have an option to `Stop Current Codespace` but when running Dev Container on your own machine the equivalent option is `Reopen folder locally`. By default, GitHub will also automatically stop the Codespace after 30 minutes of inactivity.  Once the Codespace is no longer being used, we recommend deleting the Codespace.
