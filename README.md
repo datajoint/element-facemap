@@ -1,4 +1,4 @@
-# DataJoint Element for orofacial tracking with Facemap
+# DataJoint Element for orofacial motion tracking with Facemap
 
 DataJoint Element for modeling neural activity based on orofacial tracking using [Facemap](https://github.com/MouseLand/facemap). This Element supports facemap analysis using distinct keypoints on the mouse face, and computing the singular value decomposition and pupil tracking. 
 
