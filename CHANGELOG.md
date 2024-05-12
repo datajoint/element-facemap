@@ -3,6 +3,10 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.2.1] - 2024-05-12
++ Fix - Links in README
++ Update - README and docs
+
 ## [0.2.0] - 2023-11-29
 
 + Add - Inference module as `facemap_inference.py`
