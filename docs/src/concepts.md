@@ -9,6 +9,7 @@ In its initial versions, Facemap empowered researchers to identify regions of in
 The latest iteration of Facemap introduces the ability to track keypoints across the animal's face. This feature marks a departure from solely relying on predefined ROIs, allowing for more dynamic and precise analysis of facial expressions and movements.[^3]
 
 + **KeyPoints Detection**: Facemap now employs cutting-edge machine learning algorithms to automatically detect and track specific facial landmarks, such as the tips of whiskers, the corners of the eyes, and the edges of the mouth. This approach enables a finer-grained analysis of facial expressions, enhancing the software's utility in behavioral neuroscience research.
+
 + **Dynamic Tracking**: Unlike the static ROIs, keypoints move with the subject across frames. This dynamic tracking ensures that more subtle facial movements are captured, providing richer datasets for analysis.
 
 [^1]: Dolensek, N., Gehrlach, D. A., Klein, A. S., & Gogolla, N. (2020). Facial
@@ -30,4 +31,3 @@ Major features include:
 - Queueing and triggering of Facemap analysis on multiple sessions.
 - Ingestion of analysis outcomes as motion and video principle components.
 - Ingestion of analysis outcomes from inference of facial keypoints.
-

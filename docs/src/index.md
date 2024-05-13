@@ -18,15 +18,15 @@ DataJoint Element for modeling neural activity based on orofacial tracking using
 
 + Clone the repository to your computer
 
-  ```bash
-  git clone https://github.com/<enter_github_username>/element-facemap
-  ```
+    ```bash
+    git clone https://github.com/<enter_github_username>/element-facemap.git
+    ```
 
 + Install with `pip`
-
-  ```bash
-  pip install -e .
-  ```
+    
+    ```bash
+    pip install -e .
+    ```
 
 + [Data Pipeline](./pipeline.md) - Pipeline and table descriptions
 
