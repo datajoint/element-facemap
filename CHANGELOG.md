@@ -3,6 +3,11 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.2.2] - 2024-05-12
+
++ Fix - Fix docs by updating `mkdocs`
++ Update - Remove the `pypi_release` from `release.yaml`
+
 ## [0.2.1] - 2024-05-12
 + Fix - Links in README
 + Update - README and docs
