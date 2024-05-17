@@ -3,7 +3,7 @@
 + Element Facemap includes an [interactive tutorial on GitHub Codespaces](https://github.com/datajoint/element-facemap#interactive-tutorial), which is configured for users to run the pipeline.
 
 + DataJoint Elements are modular and can be connected into a complete pipeline.  In the interactive tutorial is an example Jupyter notebook that combines four DataJoint Elements - Lab, Animal, Session, and Facemap.  The notebook describes the pipeline and provides instructions for running the pipeline.  For convenience, these notebook is also rendered on this website:
-   + [Tutorial notebook](inference_tutorial.ipynb)
+   + [Tutorial notebook](./inference_tutorial.ipynb)
 
 ## Installation Instructions for Active Projects
 
