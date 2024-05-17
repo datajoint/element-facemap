@@ -93,6 +93,7 @@ plugins:
       default_handler: python
       handlers:
         python:
+          paths: [../]
           options:
             members_order: source
             group_by_category: false
