@@ -8,7 +8,7 @@ from typing import List, Tuple
 import cv2
 import datajoint as dj
 import numpy as np
-from element_interface.utils import find_full_path, find_root_directory
+from element_interface.utils import find_full_path, find_root_directory, memoized_result
 
 schema = dj.schema()
 
@@ -320,17 +320,20 @@ class FacemapProcessing(dj.Computed):
                 for video_file in video_files
             ]
 
-            facemap_run(
-                filenames=video_files,
-                savepath=output_dir.as_posix(),
-                **params,
-            )
+            @memoized_result(uniqueness_dict=params, output_directory=output_dir)
+            def run_facemap_process():
+                facemap_run(
+                    filenames=video_files,
+                    savepath=output_dir.as_posix(),
+                    **params,
+                )
+
+            run_facemap_process()
 
         results_proc_fp = next(output_dir.glob("*_proc.npy"))
         creation_time = datetime.fromtimestamp(results_proc_fp.stat().st_ctime)
-        key = {**key, "processing_time": creation_time}
 
-        self.insert1(key)
+        self.insert1({**key, "processing_time": creation_time})
 
 
 @schema
