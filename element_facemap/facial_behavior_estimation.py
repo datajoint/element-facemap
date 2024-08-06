@@ -314,9 +314,7 @@ class FacemapProcessing(dj.Computed):
             video_files = (FacemapTask * VideoRecording.File & key).fetch("file_path")
             # video files are sequentially acquired, not simultaneously
             video_files = [
-                [
-                    find_full_path(get_facemap_root_data_dir(), video_file).as_posix()
-                ]
+                [find_full_path(get_facemap_root_data_dir(), video_file).as_posix()]
                 for video_file in video_files
             ]
 
@@ -446,14 +444,16 @@ class FacialSignal(dj.Imported):
 
         motion_svd_rois = []
         if dataset["fullSVD"]:
-            region_entries.append(dict(
-                key,
-                roi_no=0,
-                roi_name="FullSVD",
-                xrange=np.arange(dataset["Lx"][0]),
-                yrange=np.arange(dataset["Ly"][0]),
-                motion=motions.pop(),
-            ))
+            region_entries.append(
+                dict(
+                    key,
+                    roi_no=0,
+                    roi_name="FullSVD",
+                    xrange=np.arange(dataset["Lx"][0]),
+                    yrange=np.arange(dataset["Ly"][0]),
+                    motion=motions.pop(),
+                )
+            )
             motion_svd_rois.append(0)
         # Region
         if dataset["rois"] is not None:
@@ -465,7 +465,8 @@ class FacialSignal(dj.Imported):
                     motion = motions.pop()
                 else:
                     motion = None
-                region_entries.append(dict(
+                region_entries.append(
+                    dict(
                         key,
                         roi_no=roi_no,
                         roi_name=roi_name,
@@ -474,40 +475,59 @@ class FacialSignal(dj.Imported):
                         xrange_bin=roi.get("xrange_bin"),
                         yrange_bin=roi.get("yrange_bin"),
                         motion=motion,
-                    ))
+                    )
+                )
         # MotionSVD
         if any(np.any(x) for x in dataset.get("motSVD", [False])):
             for roi_idx, roi_no in enumerate(motion_svd_rois):
-                roi_idx += int(not dataset["fullSVD"])  # skip the first entry if fullSVD is False
+                roi_idx += int(
+                    not dataset["fullSVD"]
+                )  # skip the first entry if fullSVD is False
                 motSVD = dataset["motSVD"][roi_idx]
                 motMask = dataset["motMask_reshape"][roi_idx]
-                motSv = dataset["motSv"][roi_idx] if "motSv" in dataset else np.full(motSVD.shape[-1], np.nan)
+                motSv = (
+                    dataset["motSv"][roi_idx]
+                    if "motSv" in dataset
+                    else np.full(motSVD.shape[-1], np.nan)
+                )
                 motion_svd_entries.extend(
-                    [dict(
-                        key,
-                        roi_no=roi_no,
-                        pc_no=idx,
-                        singular_value=s,
-                        motmask=m,
-                        projection=p,
-                    ) for idx, (s, m, p) in enumerate(zip(motSv, motMask, motSVD))]
+                    [
+                        dict(
+                            key,
+                            roi_no=roi_no,
+                            pc_no=idx,
+                            singular_value=s,
+                            motmask=m,
+                            projection=p,
+                        )
+                        for idx, (s, m, p) in enumerate(zip(motSv, motMask, motSVD))
+                    ]
                 )
         # MovieSVD
         if any(np.any(x) for x in dataset.get("movSVD", [False])):
             for roi_idx, roi_no in enumerate(motion_svd_rois):
-                roi_idx += int(not dataset["fullSVD"])  # skip the first entry if fullSVD is False
+                roi_idx += int(
+                    not dataset["fullSVD"]
+                )  # skip the first entry if fullSVD is False
                 movSVD = dataset["movSVD"][roi_idx]
                 movMask = dataset["movMask_reshape"][roi_idx]
-                movSv = dataset["movSv"][roi_idx] if "movSv" in dataset else np.full(movSVD.shape[-1], np.nan)
+                movSv = (
+                    dataset["movSv"][roi_idx]
+                    if "movSv" in dataset
+                    else np.full(movSVD.shape[-1], np.nan)
+                )
                 motion_svd_entries.extend(
-                    [dict(
-                        key,
-                        roi_no=roi_no,
-                        pc_no=idx,
-                        singular_value=s,
-                        motmask=m,
-                        projection=p,
-                    ) for idx, (s, m, p) in enumerate(zip(movSv, movMask, movSVD))]
+                    [
+                        dict(
+                            key,
+                            roi_no=roi_no,
+                            pc_no=idx,
+                            singular_value=s,
+                            motmask=m,
+                            projection=p,
+                        )
+                        for idx, (s, m, p) in enumerate(zip(movSv, movMask, movSVD))
+                    ]
                 )
 
         self.insert1(key)
