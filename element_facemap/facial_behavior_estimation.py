@@ -1,11 +1,9 @@
 import importlib
 import inspect
 from datetime import datetime
-from glob import glob
 from pathlib import Path
 from typing import List, Tuple
 
-import cv2
 import datajoint as dj
 import numpy as np
 from element_interface.utils import find_full_path, find_root_directory, memoized_result
@@ -185,6 +183,7 @@ class RecordingInfo(dj.Imported):
 
     def make(self, key):
         """Populates the RecordingInfo table."""
+        import cv2
 
         file_paths = (VideoRecording.File & key).fetch("file_path")
 
