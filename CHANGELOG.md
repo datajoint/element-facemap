@@ -6,6 +6,7 @@ Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 ## [0.3.0] - 2024-08-20
 
 + Update - Attribute names in `FacialSignal` table
++ Update - FacemapSVD handles all ROIs and FullSVD analysis
 
 ## [0.2.2] - 2024-05-12
 
