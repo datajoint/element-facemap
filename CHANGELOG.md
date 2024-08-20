@@ -3,6 +3,10 @@
 Observes [Semantic Versioning](https://semver.org/spec/v2.0.0.html) standard and
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) convention.
 
+## [0.3.0] - 2024-08-20
+
++ Update - Attribute names in `FacialSignal` table
+
 ## [0.2.2] - 2024-05-12
 
 + Fix - Fix docs by updating `mkdocs`

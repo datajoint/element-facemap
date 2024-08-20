@@ -376,19 +376,19 @@ class FacialSignal(dj.Imported):
 
         Attributes:
             master.Region (foreign key): Primary key from FacialSignal.Region.
-            pc_no (int): principal component (PC) number.
-            singular_value (float, optional): singular value corresponding to the PC.
-            motmask (longblob): PC (y, x).
-            projection (longblob): projections onto the principal component (nframes).
+            component_id (int): component number.
+            singular_value (float, optional): singular value corresponding to the component.
+            motmask (longblob): (y, x).
+            projection (longblob): projections onto the component (nframes).
         """
 
         definition = """
         -> master.Region
-        pc_no               : int         # principal component (PC) number
+        component_id               : int         # component number
         ---
-        singular_value=null : float       # singular value corresponding to the PC
-        motmask             : longblob    # PC (y, x)
-        projection          : longblob    # projections onto the principal component (nframes)
+        singular_value=null : float       # singular value corresponding to the component
+        motmask             : longblob    # (y, x)
+        projection          : longblob    # projections onto the component (nframes)
         """
 
     class MovieSVD(dj.Part):
@@ -396,19 +396,19 @@ class FacialSignal(dj.Imported):
 
         Attributes:
             master.Region (foreign key): Primary key of the FacialSignal.Region table.
-            pc_no (int): principal component (PC) number.
-            singular_value (float, optional): Singular value corresponding to the PC.
-            movmask (longblob): PC (y, x)
-            projection (longblob): Projections onto the principal component (nframes).
+            component_id (int): component number.
+            singular_value (float, optional): Singular value corresponding to the component.
+            movmask (longblob): (y, x)
+            projection (longblob): Projections onto the component (nframes).
         """
 
         definition = """
         -> master.Region
-        pc_no               : int         # principal component (PC) number
+        component_id               : int         # component number
         ---
-        singular_value=null : float       # singular value corresponding to the PC
-        movmask             : longblob    # PC (y, x)
-        projection          : longblob    # projections onto the principal component (nframes)
+        singular_value=null : float       # singular value corresponding to the component
+        movmask             : longblob    # (y, x)
+        projection          : longblob    # projections onto the component (nframes)
         """
 
     class Summary(dj.Part):
@@ -494,7 +494,7 @@ class FacialSignal(dj.Imported):
                         dict(
                             key,
                             roi_no=roi_no,
-                            pc_no=idx,
+                            component_id=idx,
                             singular_value=s,
                             motmask=m,
                             projection=p,
@@ -520,7 +520,7 @@ class FacialSignal(dj.Imported):
                         dict(
                             key,
                             roi_no=roi_no,
-                            pc_no=idx,
+                            component_id=idx,
                             singular_value=s,
                             motmask=m,
                             projection=p,
