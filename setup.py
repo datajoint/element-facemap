@@ -28,9 +28,10 @@ setup(
     install_requires=[
         "datajoint>=0.13.0",
         "ipykernel>=6.0.1",
+        "scikit-learn==1.4.*",
         "opencv-python",
         "element-interface @ git+https://github.com/datajoint/element-interface.git",
-        "facemap @ git+https://github.com/kushalbakshi/facemap.git",
+        "facemap @ git+https://github.com/datajoint/facemap.git",
     ],
     extras_require={
         "elements": [
@@ -40,5 +41,6 @@ setup(
             "element-session @ git+https://github.com/datajoint/element-session.git",
         ],
         "tests": ["pytest", "pytest-cov", "shutils"],
+        "facemap_gui": ["facemap[gui] @ git+https://github.com/datajoint/facemap.git"],
     },
 )

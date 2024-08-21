@@ -1,14 +1,12 @@
 import importlib
 import inspect
 from datetime import datetime
-from glob import glob
 from pathlib import Path
 from typing import List, Tuple
 
-import cv2
 import datajoint as dj
 import numpy as np
-from element_interface.utils import find_full_path, find_root_directory
+from element_interface.utils import find_full_path, find_root_directory, memoized_result
 
 schema = dj.schema()
 
@@ -185,6 +183,7 @@ class RecordingInfo(dj.Imported):
 
     def make(self, key):
         """Populates the RecordingInfo table."""
+        import cv2
 
         file_paths = (VideoRecording.File & key).fetch("file_path")
 
@@ -301,33 +300,37 @@ class FacemapProcessing(dj.Computed):
             # update processing_output_dir
             FacemapTask.update1({**key, "facemap_output_dir": output_dir.as_posix()})
 
+        output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
+
         if task_mode == "trigger":
             from facemap.process import run as facemap_run
 
             params = (FacemapTask & key).fetch1("facemap_params")
 
+            valid_args = inspect.getfullargspec(facemap_run).args
+            params = {k: v for k, v in params.items() if k in valid_args}
+
             video_files = (FacemapTask * VideoRecording.File & key).fetch("file_path")
+            # video files are sequentially acquired, not simultaneously
             video_files = [
-                [
-                    find_full_path(get_facemap_root_data_dir(), video_file).as_posix()
-                    for video_file in video_files
-                ]
+                [find_full_path(get_facemap_root_data_dir(), video_file).as_posix()]
+                for video_file in video_files
             ]
 
-            output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
-            facemap_run(
-                video_files,
-                sbin=params["sbin"],
-                proc=params,
-                savepath=output_dir.as_posix(),
-                motSVD=params["motSVD"],
-                movSVD=params["movSVD"],
-            )
+            @memoized_result(uniqueness_dict=params, output_directory=output_dir)
+            def _run_facemap_process():
+                facemap_run(
+                    filenames=video_files,
+                    savepath=output_dir.as_posix(),
+                    **params,
+                )
 
-        _, creation_time = get_loader_result(key, FacemapTask)
-        key = {**key, "processing_time": creation_time}
+            _run_facemap_process()
 
-        self.insert1(key)
+        results_proc_fp = next(output_dir.glob("*_proc.npy"))
+        creation_time = datetime.fromtimestamp(results_proc_fp.stat().st_ctime)
+
+        self.insert1({**key, "processing_time": creation_time})
 
 
 @schema
@@ -358,14 +361,14 @@ class FacialSignal(dj.Imported):
 
         definition = """
         -> master
-        roi_no        : int         # Region number
+        roi_no          : int         # Region number (roi_no=0 is FullSVD if exists)
         ---
-        roi_name=''   : varchar(16) # user-friendly name of the roi
-        xrange        : longblob    # 1d np.array - x pixel indices
-        yrange        : longblob    # 1d np.array - y pixel indices
-        xrange_bin    : longblob    # 1d np.array - binned x pixel indices
-        yrange_bin    : longblob    # 1d np.array - binned y pixel indices
-        motion        : longblob    # 1d np.array - absolute motion energies (nframes)
+        roi_name=''     : varchar(16) # user-friendly name of the roi
+        xrange=null     : longblob    # 1d np.array - x pixel indices
+        yrange=null     : longblob    # 1d np.array - y pixel indices
+        xrange_bin=null : longblob    # 1d np.array - binned x pixel indices
+        yrange_bin=null : longblob    # 1d np.array - binned y pixel indices
+        motion=null     : longblob    # 1d np.array - absolute motion energies (nframes)
         """
 
     class MotionSVD(dj.Part):
@@ -373,19 +376,19 @@ class FacialSignal(dj.Imported):
 
         Attributes:
             master.Region (foreign key): Primary key from FacialSignal.Region.
-            pc_no (int): Principle component (PC) number.
-            singular_value (float, optional): singular value corresponding to the PC.
-            motmask (longblob): PC (y, x).
-            projection (longblob): projections onto the principle component (nframes).
+            component_id (int): component number.
+            singular_value (float, optional): singular value corresponding to the component.
+            motmask (longblob): (y, x).
+            projection (longblob): projections onto the component (nframes).
         """
 
         definition = """
         -> master.Region
-        pc_no               : int         # principle component (PC) number
+        component_id               : int         # component number
         ---
-        singular_value=null : float       # singular value corresponding to the PC
-        motmask             : longblob    # PC (y, x)
-        projection          : longblob    # projections onto the principle component (nframes)
+        singular_value=null : float       # singular value corresponding to the component
+        motmask             : longblob    # (y, x)
+        projection          : longblob    # projections onto the component (nframes)
         """
 
     class MovieSVD(dj.Part):
@@ -393,19 +396,19 @@ class FacialSignal(dj.Imported):
 
         Attributes:
             master.Region (foreign key): Primary key of the FacialSignal.Region table.
-            pc_no (int): principle component (PC) number.
-            singular_value (float, optional): Singular value corresponding to the PC.
-            movmask (longblob): PC (y, x)
-            projection (longblob): Projections onto the principle component (nframes).
+            component_id (int): component number.
+            singular_value (float, optional): Singular value corresponding to the component.
+            movmask (longblob): (y, x)
+            projection (longblob): Projections onto the component (nframes).
         """
 
         definition = """
         -> master.Region
-        pc_no               : int         # principle component (PC) number
+        component_id               : int         # component number
         ---
-        singular_value=null : float       # singular value corresponding to the PC
-        movmask             : longblob    # PC (y, x)
-        projection          : longblob    # projections onto the principle component (nframes)
+        singular_value=null : float       # singular value corresponding to the component
+        movmask             : longblob    # (y, x)
+        projection          : longblob    # projections onto the component (nframes)
         """
 
     class Summary(dj.Part):
@@ -414,121 +417,127 @@ class FacialSignal(dj.Imported):
         Attributes:
             master (foreign key): Primary key from FacialSignal.
             sbin (int): Spatial bin size.
-            avgframe (longblob): 2d np.array - average binned frame.
-            avgmotion (longblob): 2d nd.array - average binned motion frame.
+            avgframe (longblob): 2d np.array (y, x) - average binned frame
+            avgmotion (longblob): 2d nd.array (y, x) - average binned motion frame
         """
 
         definition = """
         -> master
         ---
         sbin          : int         # spatial bin size
-        avgframe      : longblob    # 2d np.array - average binned frame
-        avgmotion     : longblob    # 2d nd.array - average binned motion frame
+        avgframe      : longblob    # 2d np.array (y, x) - average binned frame
+        avgmotion     : longblob    # 2d nd.array (y, x) - average binned motion frame
         """
 
     def make(self, key):
         """Populates the FacialSignal table by transferring the results from default
         Facemap outputs to the database."""
 
-        dataset, _ = get_loader_result(key, FacemapTask)
-        # Only motion SVD region type is supported.
-        dataset["rois"] = [x for x in dataset["rois"] if x["rtype"] == "motion SVD"]
+        output_dir = (FacemapTask & key).fetch1("facemap_output_dir")
+        output_dir = find_full_path(get_facemap_root_data_dir(), output_dir)
+        results_proc_fp = next(output_dir.glob("*_proc.npy"))
+        dataset = np.load(results_proc_fp, allow_pickle=True).item()
 
-        self.insert1(key)
+        region_entries, motion_svd_entries, movie_svd_entries = [], [], []
+        motions = dataset["motion"].copy()
 
-        self.Region.insert(
-            [
+        motion_svd_rois = []
+        if dataset["fullSVD"]:
+            region_entries.append(
                 dict(
                     key,
-                    roi_no=i,
-                    xrange=dataset["rois"][i]["xrange"],
-                    yrange=dataset["rois"][i]["yrange"],
-                    xrange_bin=(
-                        dataset["rois"][i]["xrange_bin"]
-                        if "xrange_bin" in dataset["rois"][i]
-                        else None
-                    ),
-                    yrange_bin=(
-                        dataset["rois"][i]["yrange_bin"]
-                        if "yrange_bin" in dataset["rois"][i]
-                        else None
-                    ),
-                    motion=dataset["motion"][i + 1],
+                    roi_no=0,
+                    roi_name="FullSVD",
+                    xrange=np.arange(dataset["Lx"][0]),
+                    yrange=np.arange(dataset["Ly"][0]),
+                    motion=motions.pop(),
                 )
-                for i in range(len(dataset["rois"]))
-                if dataset["rois"][i]["rtype"] == "motion SVD"
-            ]
-        )
-
+            )
+            motion_svd_rois.append(0)
+        # Region
+        if dataset["rois"] is not None:
+            for i, roi in enumerate(dataset["rois"]):
+                roi_no = i + int(dataset["fullSVD"])
+                roi_name = f"{roi['rtype']}_{roi['iROI']}"
+                if roi["rtype"] == "motion SVD":
+                    motion_svd_rois.append(roi_no)
+                    motion = motions.pop()
+                else:
+                    motion = None
+                region_entries.append(
+                    dict(
+                        key,
+                        roi_no=roi_no,
+                        roi_name=roi_name,
+                        xrange=roi["xrange"],
+                        yrange=roi["yrange"],
+                        xrange_bin=roi.get("xrange_bin"),
+                        yrange_bin=roi.get("yrange_bin"),
+                        motion=motion,
+                    )
+                )
         # MotionSVD
         if any(np.any(x) for x in dataset.get("motSVD", [False])):
-            entry = [
-                dict(
-                    key,
-                    roi_no=roi_no,
-                    pc_no=i,
-                    singular_value=(
-                        dataset["motSv"][roi_no][i] if "motSv" in dataset else None
-                    ),
-                    motmask=dataset["motMask_reshape"][roi_no + 1][:, :, i],
-                    projection=dataset["motSVD"][roi_no + 1][i],
+            for roi_idx, roi_no in enumerate(motion_svd_rois):
+                roi_idx += int(
+                    not dataset["fullSVD"]
+                )  # skip the first entry if fullSVD is False
+                motSVD = dataset["motSVD"][roi_idx]
+                motMask = dataset["motMask_reshape"][roi_idx]
+                motSv = (
+                    dataset["motSv"][roi_idx]
+                    if "motSv" in dataset
+                    else np.full(motSVD.shape[-1], np.nan)
                 )
-                for roi_no in range(len(dataset["rois"]))
-                for i in range(dataset["motSVD"][roi_no + 1].shape[1])
-            ]
-            self.MotionSVD.insert(entry)
-
+                motion_svd_entries.extend(
+                    [
+                        dict(
+                            key,
+                            roi_no=roi_no,
+                            component_id=idx,
+                            singular_value=s,
+                            motmask=m,
+                            projection=p,
+                        )
+                        for idx, (s, m, p) in enumerate(zip(motSv, motMask, motSVD))
+                    ]
+                )
         # MovieSVD
         if any(np.any(x) for x in dataset.get("movSVD", [False])):
-            entry = [
-                dict(
-                    key,
-                    roi_no=roi_no,
-                    pc_no=i,
-                    singular_value=(
-                        dataset["movSv"][roi_no][i] if "movSv" in dataset else None
-                    ),
-                    movmask=dataset["movMask_reshape"][roi_no + 1][:, :, i],
-                    projection=dataset["movSVD"][roi_no + 1][i],
+            for roi_idx, roi_no in enumerate(motion_svd_rois):
+                roi_idx += int(
+                    not dataset["fullSVD"]
+                )  # skip the first entry if fullSVD is False
+                movSVD = dataset["movSVD"][roi_idx]
+                movMask = dataset["movMask_reshape"][roi_idx]
+                movSv = (
+                    dataset["movSv"][roi_idx]
+                    if "movSv" in dataset
+                    else np.full(movSVD.shape[-1], np.nan)
                 )
-                for roi_no in range(len(dataset["rois"]))
-                for i in range(dataset["movSVD"][roi_no + 1].shape[1])
-            ]
-            self.MovieSVD.insert(entry)
+                motion_svd_entries.extend(
+                    [
+                        dict(
+                            key,
+                            roi_no=roi_no,
+                            component_id=idx,
+                            singular_value=s,
+                            motmask=m,
+                            projection=p,
+                        )
+                        for idx, (s, m, p) in enumerate(zip(movSv, movMask, movSVD))
+                    ]
+                )
 
-        # Summary
+        self.insert1(key)
+        self.Region.insert(region_entries)
+        self.MotionSVD.insert(motion_svd_entries)
+        self.MovieSVD.insert(movie_svd_entries)
         self.Summary.insert1(
             dict(
                 key,
                 sbin=dataset["sbin"],
-                avgframe=dataset["avgframe"][0],
-                avgmotion=dataset["avgmotion"][0],
+                avgframe=dataset["avgframe_reshape"],
+                avgmotion=dataset["avgmotion_reshape"],
             )
         )
-
-
-# ---------------- HELPER FUNCTIONS ----------------
-
-
-def get_loader_result(
-    key: dict, table: dj.user_tables.TableMeta
-) -> Tuple[np.array, datetime]:
-    """Retrieve the facemap analysis results.
-
-    Args:
-        key (dict): A primary key for an entry in the provided table.
-        table (dj.Table): DataJoint user table from which loaded results are retrieved (i.e. FacemapTask).
-
-    Returns:
-        loaded_dataset (np.array): The results of the facemap analysis.
-        creation_time (datetime): Date and time that the results files were created.
-    """
-    output_dir = (table & key).fetch1("facemap_output_dir")
-
-    output_path = find_full_path(get_facemap_root_data_dir(), output_dir)
-    output_file = glob(output_path.as_posix() + "/*_proc.npy")[0]
-
-    loaded_dataset = np.load(output_file, allow_pickle=True).item()
-    creation_time = datetime.fromtimestamp(Path(output_file).stat().st_ctime)
-
-    return loaded_dataset, creation_time
