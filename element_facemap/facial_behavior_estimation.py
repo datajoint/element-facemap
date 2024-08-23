@@ -283,6 +283,14 @@ class FacemapProcessing(dj.Computed):
     package_version=''  : varchar(16)
     """
 
+    class File(dj.Part):
+        definition = """
+        -> master
+        file_name: varchar(255)
+        ---
+        file: filepath@facemap-processed
+        """
+
     # Process only the VideoRecordings that have their Info inserted.
     @property
     def key_source(self):
@@ -331,6 +339,17 @@ class FacemapProcessing(dj.Computed):
         creation_time = datetime.fromtimestamp(results_proc_fp.stat().st_ctime)
 
         self.insert1({**key, "processing_time": creation_time})
+        # Insert result files
+        self.File.insert(
+            [
+                {
+                    **key,
+                    "file_name": f.relative_to(output_dir).as_posix(),
+                    "file": f,
+                }
+                for f in (results_proc_fp,)
+            ]
+        )
 
 
 @schema

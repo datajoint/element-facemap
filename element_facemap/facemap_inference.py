@@ -323,8 +323,19 @@ class FacemapInference(dj.Computed):
         likelihood  : longblob      # model evaluated likelihood
         """
 
+    class File(dj.Part):
+        definition = """
+        -> master
+        file_name: varchar(255)
+        ---
+        file: filepath@facemap-processed
+        """
+
     def make(self, key):
-        """.populate() method will launch training for each FacemapInferenceTask"""
+        """
+        Calls facemap.pose.Pose to run pose estimation on the video files using the specified model.
+        Video files and model are specified in the FacemapInferenceTask table.
+        """
         # ID model and directories
         task_mode, output_dir = (FacemapInferenceTask & key).fetch1(
             "task_mode", "facemap_inference_output_dir"
@@ -353,27 +364,9 @@ class FacemapInference(dj.Computed):
         full_metadata_path = output_dir / f"{vid_name}_FacemapPose_metadata.pkl"
 
         # Load or Trigger Facemap Pose Estimation Inference
-        if (
+        if task_mode == "trigger" and not (
             facemap_result_path.exists() & full_metadata_path.exists()
-        ) or task_mode == "load":  # Load results and do not rerun processing
-            (
-                body_part_position_entry,
-                inference_duration,
-                total_frame_count,
-                creation_time,
-            ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
-            self.insert1(
-                {
-                    **key,
-                    "inference_completion_time": creation_time,
-                    "inference_run_duration": inference_duration,
-                    "total_frame_count": total_frame_count,
-                }
-            )
-            self.BodyPartPosition.insert(body_part_position_entry)
-            return
-
-        elif task_mode == "trigger":
+        ):
             from facemap.pose import pose as facemap_pose, model_loader
 
             bbox = (FacemapInferenceTask & key).fetch1("bbox") or []
@@ -382,9 +375,10 @@ class FacemapInference(dj.Computed):
             facemap_model_name = (
                 FacemapModel.File & f'model_id="{key["model_id"]}"'
             ).fetch1("model_file")
-
             facemap_model_path = Path.cwd() / facemap_model_name
+            # copy this model file to the facemap model root directory (~/.facemap/models/)
             models_root_dir = model_loader.get_models_dir()
+            shutil.copy(facemap_model_path, models_root_dir)
 
             # Create Symbolic Links to raw video data files from outbox directory
             video_symlinks = []
@@ -394,9 +388,6 @@ class FacemapInference(dj.Computed):
                     video_symlink.unlink()
                 video_symlink.symlink_to(video_file)
                 video_symlinks.append(video_symlink.as_posix())
-
-            # copy this model file to the facemap model root directory (~/.facemap/models/)
-            shutil.copy(facemap_model_path, models_root_dir)
 
             # Instantiate Pose object, with filenames specified as video files, and bounding specified in params
             # Assumes GUI to be none as we are running CLI implementation
@@ -408,21 +399,32 @@ class FacemapInference(dj.Computed):
             )
             pose.run()
 
-            (
-                body_part_position_entry,
-                inference_duration,
-                total_frame_count,
-                creation_time,
-            ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
-            self.insert1(
+        (
+            body_part_position_entry,
+            inference_duration,
+            total_frame_count,
+            creation_time,
+        ) = _load_facemap_results(key, facemap_result_path, full_metadata_path)
+        self.insert1(
+            {
+                **key,
+                "inference_completion_time": creation_time,
+                "inference_run_duration": inference_duration,
+                "total_frame_count": total_frame_count,
+            }
+        )
+        self.BodyPartPosition.insert(body_part_position_entry)
+        # Insert result files
+        self.File.insert(
+            [
                 {
                     **key,
-                    "inference_completion_time": creation_time,
-                    "inference_run_duration": inference_duration,
-                    "total_frame_count": total_frame_count,
+                    "file_name": f.relative_to(output_dir).as_posix(),
+                    "file": f,
                 }
-            )
-            self.BodyPartPosition.insert(body_part_position_entry)
+                for f in (facemap_result_path, full_metadata_path)
+            ]
+        )
 
     @classmethod
     def get_trajectory(cls, key: dict, body_parts: list = "all") -> pd.DataFrame:
@@ -468,7 +470,6 @@ class FacemapInference(dj.Computed):
 
 def _load_facemap_results(key, facemap_result_path, full_metadata_path):
     """Load facemap results from h5 and metadata files."""
-
     from facemap import utils
 
     with open(full_metadata_path, "rb") as f:
