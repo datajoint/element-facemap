@@ -323,6 +323,14 @@ class FacemapInference(dj.Computed):
         likelihood  : longblob      # model evaluated likelihood
         """
 
+    class File(dj.Part):
+        definition = """
+        -> master
+        file_name: varchar(255)
+        ---
+        file: filepath@facemap-processed
+        """
+
     def make(self, key):
         """
         Calls facemap.pose.Pose to run pose estimation on the video files using the specified model.
@@ -406,6 +414,17 @@ class FacemapInference(dj.Computed):
             }
         )
         self.BodyPartPosition.insert(body_part_position_entry)
+        # Insert result files
+        self.File.insert(
+            [
+                {
+                    **key,
+                    "file_name": f.relative_to(output_dir).as_posix(),
+                    "file": f,
+                }
+                for f in (facemap_result_path, full_metadata_path)
+            ]
+        )
 
     @classmethod
     def get_trajectory(cls, key: dict, body_parts: list = "all") -> pd.DataFrame:

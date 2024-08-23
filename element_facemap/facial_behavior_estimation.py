@@ -347,8 +347,7 @@ class FacemapProcessing(dj.Computed):
                     "file_name": f.relative_to(output_dir).as_posix(),
                     "file": f,
                 }
-                for f in output_dir.rglob("*")
-                if f.is_file()
+                for f in (results_proc_fp, )
             ]
         )
 
