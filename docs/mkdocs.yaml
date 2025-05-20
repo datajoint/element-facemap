@@ -1,7 +1,7 @@
 # ---------------------- PROJECT SPECIFIC ---------------------------
 
 site_name: DataJoint Documentation
-site_url: http://localhost/docs/element/element-facemap
+site_url: https://docs.datajoint.com/elements/element-facemap/
 repo_url: https://github.com/datajoint/element-facemap
 repo_name: datajoint/element-facemap
 nav:
