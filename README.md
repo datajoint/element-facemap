@@ -12,7 +12,7 @@ DataJoint Elements collectively standardize and automate data collection and ana
 
 ![pipeline](https://raw.githubusercontent.com/datajoint/element-facemap/main/images/pipeline_facemap_inference.svg)
 
-+ We have designed two variations of the pipeline for different use cases. Displayed above is the pipeline for the `facemap_inference` schema. Details on the pipeline for `facial_behavior_estimation` can be found in the [Data Pipeline](https://datajoint.com/docs/elements/element-facemap/latest/pipeline/)
++ We have designed two variations of the pipeline for different use cases. Displayed above is the pipeline for the `facemap_inference` schema. Details on the pipeline for `facial_behavior_estimation` can be found in the [Data Pipeline](https://docs.datajoint.com/elements/element-facemap/latest/pipeline/)
 
 ## Getting Started
 
@@ -32,7 +32,7 @@ DataJoint Elements collectively standardize and automate data collection and ana
 
 + [Interactive tutorial on GitHub Codespaces](https://github.com/datajoint/element-facemap#interactive-tutorial)
 
-+ [Documentation](https://datajoint.com/docs/elements/element-facemap)
++ [Documentation](https://docs.datajoint.com/elements/element-facemap/)
 
 ## Support
 

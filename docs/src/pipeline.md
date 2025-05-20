@@ -25,7 +25,7 @@ The element is composed of two main schemas, `facial_behavior_estimation` and `f
 
 ### `lab` schema
 
-- For further details see the [lab schema API docs](https://datajoint.com/docs/elements/element-lab/latest/api/element_lab/lab/)
+- For further details see the [lab schema API docs](https://docs.datajoint.com/elements/element-lab/latest/api/element_lab/lab/)
 
 | Table | Description |
 | --- | --- |
@@ -36,7 +36,7 @@ The element is composed of two main schemas, `facial_behavior_estimation` and `f
 - Although not required, most choose to connect the `Session` table to a `Subject`
   table.
 
-- For further details see the [subject schema API docs](https://datajoint.com/docs/elements/element-animal/latest/api/element_animal/subject/)
+- For further details see the [subject schema API docs](https://docs.datajoint.com/elements/element-animal/latest/api/element_animal/subject/)
 
 | Table | Description |
 | --- | --- |
@@ -44,7 +44,7 @@ The element is composed of two main schemas, `facial_behavior_estimation` and `f
 
 ### `session` schema
 
-- For further details see the [session schema API docs](https://datajoint.com/docs/elements/element-session/latest/api/element_session/session_with_datetime/)
+- For further details see the [session schema API docs](https://docs.datajoint.com/elements/element-session/latest/api/element_session/session_with_datetime/)
 
 | Table | Description |
 | --- | --- |
@@ -52,7 +52,7 @@ The element is composed of two main schemas, `facial_behavior_estimation` and `f
 
 ### `facial_behavior_estimation` schema
 
-- For further details see the [facial_behavior_estimation schema API docs](https://datajoint.com/docs/elements/element-facemap/latest/api/element_facemap/facial_behavior_estimation/)
+- For further details see the [facial_behavior_estimation schema API docs](https://docs.datajoint.com/elements/element-facemap/latest/api/element_facemap/facial_behavior_estimation/)
 
 | Table | Description |
 | --- | --- |
@@ -68,7 +68,7 @@ The element is composed of two main schemas, `facial_behavior_estimation` and `f
 
 ### `facemap_inference` schema
 
-- For further details see the [facemap_inference schema API docs](https://datajoint.com/docs/elements/element-facemap/latest/api/element_facemap/facemap_inference/)
+- For further details see the [facemap_inference schema API docs](https://docs.datajoint.com/elements/element-facemap/latest/api/element_facemap/facemap_inference/)
 
 | Table | Description |
 | --- | --- |
