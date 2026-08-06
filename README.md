@@ -1,3 +1,9 @@
+> ## ⚠️ This is the `datajoint-2.x` branch of a fork
+>
+> Unofficial fork of [`datajoint/element-facemap`](https://github.com/datajoint/element-facemap),
+> ported to **DataJoint 2.x**. Not affiliated with DataJoint. See
+> [why this branch exists](#why-this-branch-exists) at the bottom.
+
 # DataJoint Element for orofacial motion tracking with Facemap
 
 DataJoint Element for modeling neural activity based on orofacial tracking using [Facemap](https://github.com/MouseLand/facemap). This Element supports facemap analysis using distinct keypoints on the mouse face, and computing the singular value decomposition and pupil tracking. 
@@ -74,3 +80,54 @@ MYSQL_VER=8.0 docker compose -f docker-compose-db.yaml up --build -d
 1. We recommend you start by navigating to the `notebooks` directory on the left panel and go through the `tutorial.ipynb` Jupyter notebook. Execute the cells in the notebook to begin your walkthrough of the tutorial.
 
 2. Once you are done, see the options available to you in the menu in the bottom-left corner. For example, in Codespace you will have an option to `Stop Current Codespace` but when running Dev Container on your own machine the equivalent option is `Reopen folder locally`. By default, GitHub will also automatically stop the Codespace after 30 minutes of inactivity.  Once the Codespace is no longer being used, we recommend deleting the Codespace.
+
+
+---
+
+## Why this branch exists
+
+Upstream `element-facemap` was last committed on 2025-05-20 and targets DataJoint
+`>=0.13`. DataJoint **2.0.0** shipped 2026-02-03 as a self-described complete
+rewrite; the current release is 2.3.2. Because the element's dependency pin
+admits 2.x, `pip install element-facemap` on a fresh environment today resolves
+DataJoint 2.x and produces an installation in which the element cannot be
+imported. No element has a 2.x branch and there is no open migration issue or
+PR anywhere in the `datajoint` org.
+
+This branch is a working port. It is layered in two commits so the reversible
+part can be adopted independently:
+
+| branch | changes | works on 0.14.x | works on 2.x |
+|---|---|---|---|
+| [`compat-fixes`](../../tree/compat-fixes) | 2 lines: `dj.schema`→`dj.Schema`, `boolean`→`bool`, `enum("x")`→`enum('x')` | **yes** | **yes** |
+| `datajoint-2.x` (this branch) | `compat-fixes` **+ 16 × `longblob` → `<blob>`** | **no** | **yes** |
+
+`compat-fixes` is offered upstream as a pull request. This branch is not, because
+`<blob>` has no 0.14.x-compatible spelling — 0.14.9 rejects it with
+`Support for Adapted Attribute types is disabled`.
+
+### The `longblob` change is not cosmetic
+
+Under DataJoint 2.x a `longblob` attribute is a **raw native column**. It
+declares without error and the insert succeeds, but a numpy array written to it
+comes back as `bytes`:
+
+```
+longblob   (as this element declares it)   -> returned type: bytes     round-trip OK: False
+<blob>     (the 2.x codec)                 -> returned type: ndarray   round-trip OK: True
+```
+
+Nothing raises. There is no warning. Existing pipeline code fails later, far
+from the cause, or silently computes on the wrong thing. See the corresponding
+issue on the upstream repo for the full round-trip evidence.
+
+### Using it
+
+```
+pip install git+https://github.com/akshay-jaggi/element-facemap.git@datajoint-2.x
+```
+
+Pin the commit rather than the branch name if you need reproducibility. Every
+change on both branches was applied mechanically with regexes and reviewed; no
+element behaviour was altered, only attribute-type spellings that 2.x renamed or
+replaced.

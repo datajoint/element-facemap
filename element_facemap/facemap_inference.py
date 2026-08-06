@@ -218,7 +218,7 @@ class FacemapInferenceTask(dj.Manual):
     facemap_inference_output_dir    : varchar(255)  # Output directory of processed results of Facemap inference analysis relative to root directory.
     task_description=''             : varchar(128)  # Optional. Additional task description
     task_mode='load'                : enum('load', 'trigger') 
-    bbox=null                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
+    bbox=null                       : <blob>  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     """
 
     @classmethod
@@ -318,9 +318,9 @@ class FacemapInference(dj.Computed):
         -> master
         -> FacemapModel.BodyPart
         ---
-        x_pos       : longblob      # x position
-        y_pos       : longblob      # y position
-        likelihood  : longblob      # model evaluated likelihood
+        x_pos       : <blob>      # x position
+        y_pos       : <blob>      # y position
+        likelihood  : <blob>      # model evaluated likelihood
         """
 
     def make(self, key):

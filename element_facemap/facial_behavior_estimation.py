@@ -242,7 +242,7 @@ class FacemapTask(dj.Manual):
     ---
     facemap_output_dir=''       : varchar(255)  # output directory - storing the results of Facemap analysis
     task_mode='load'            : enum('load', 'trigger')
-    facemap_params              : longblob  # content of facemap's _proc.npy as dict
+    facemap_params              : <blob>  # content of facemap's _proc.npy as dict
     do_mot_svd=1                : bool
     do_mov_svd=0                : bool
     task_description=''         : varchar(128)
@@ -364,11 +364,11 @@ class FacialSignal(dj.Imported):
         roi_no          : int         # Region number (roi_no=0 is FullSVD if exists)
         ---
         roi_name=''     : varchar(16) # user-friendly name of the roi
-        xrange=null     : longblob    # 1d np.array - x pixel indices
-        yrange=null     : longblob    # 1d np.array - y pixel indices
-        xrange_bin=null : longblob    # 1d np.array - binned x pixel indices
-        yrange_bin=null : longblob    # 1d np.array - binned y pixel indices
-        motion=null     : longblob    # 1d np.array - absolute motion energies (nframes)
+        xrange=null     : <blob>    # 1d np.array - x pixel indices
+        yrange=null     : <blob>    # 1d np.array - y pixel indices
+        xrange_bin=null : <blob>    # 1d np.array - binned x pixel indices
+        yrange_bin=null : <blob>    # 1d np.array - binned y pixel indices
+        motion=null     : <blob>    # 1d np.array - absolute motion energies (nframes)
         """
 
     class MotionSVD(dj.Part):
@@ -387,8 +387,8 @@ class FacialSignal(dj.Imported):
         component_id               : int         # component number
         ---
         singular_value=null : float       # singular value corresponding to the component
-        motmask             : longblob    # (y, x)
-        projection          : longblob    # projections onto the component (nframes)
+        motmask             : <blob>    # (y, x)
+        projection          : <blob>    # projections onto the component (nframes)
         """
 
     class MovieSVD(dj.Part):
@@ -407,8 +407,8 @@ class FacialSignal(dj.Imported):
         component_id               : int         # component number
         ---
         singular_value=null : float       # singular value corresponding to the component
-        movmask             : longblob    # (y, x)
-        projection          : longblob    # projections onto the component (nframes)
+        movmask             : <blob>    # (y, x)
+        projection          : <blob>    # projections onto the component (nframes)
         """
 
     class Summary(dj.Part):
@@ -425,8 +425,8 @@ class FacialSignal(dj.Imported):
         -> master
         ---
         sbin          : int         # spatial bin size
-        avgframe      : longblob    # 2d np.array (y, x) - average binned frame
-        avgmotion     : longblob    # 2d nd.array (y, x) - average binned motion frame
+        avgframe      : <blob>    # 2d np.array (y, x) - average binned frame
+        avgmotion     : <blob>    # 2d nd.array (y, x) - average binned motion frame
         """
 
     def make(self, key):
