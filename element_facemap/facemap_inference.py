@@ -15,7 +15,7 @@ from .facial_behavior_estimation import (
     get_facemap_processed_data_dir,
 )
 
-schema = dj.schema()
+schema = dj.Schema()
 
 _linking_module = None
 

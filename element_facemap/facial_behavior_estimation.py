@@ -8,7 +8,7 @@ import datajoint as dj
 import numpy as np
 from element_interface.utils import find_full_path, find_root_directory, memoized_result
 
-schema = dj.schema()
+schema = dj.Schema()
 
 _linking_module = None
 
