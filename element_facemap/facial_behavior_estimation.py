@@ -128,7 +128,7 @@ class VideoRecording(dj.Manual):
 
     definition = """
     -> Session
-    recording_id                : int
+    recording_id                : int32
     ---
     -> Device
     """
@@ -145,7 +145,7 @@ class VideoRecording(dj.Manual):
 
         definition = """
         -> master
-        file_id     : smallint
+        file_id     : int16
         ---
         file_path   : varchar(255)  # filepath of video, relative to root directory
         """
@@ -168,11 +168,11 @@ class RecordingInfo(dj.Imported):
     definition = """
     -> VideoRecording
     ---
-    px_height             : int       # height in pixels
-    px_width              : int       # width in pixels
-    nframes               : int       # number of frames
-    fps                   : int       # frames per second in Hz
-    recording_duration    : float     # video duration in seconds
+    px_height             : int32       # height in pixels
+    px_width              : int32       # width in pixels
+    nframes               : int32       # number of frames
+    fps                   : int32       # frames per second in Hz
+    recording_duration    : float32     # video duration in seconds
     recording_time = NULL : datetime  # time at the beginning of the recording
     """
 
@@ -238,7 +238,7 @@ class FacemapTask(dj.Manual):
     definition = """
     # Staging table for pairing of recording and Facemap parameters before processing.
     -> VideoRecording
-    facemap_task_id             : smallint
+    facemap_task_id             : int16
     ---
     facemap_output_dir=''       : varchar(255)  # output directory - storing the results of Facemap analysis
     task_mode='load'            : enum('load', 'trigger')
@@ -361,7 +361,7 @@ class FacialSignal(dj.Imported):
 
         definition = """
         -> master
-        roi_no          : int         # Region number (roi_no=0 is FullSVD if exists)
+        roi_no          : int32         # Region number (roi_no=0 is FullSVD if exists)
         ---
         roi_name=''     : varchar(16) # user-friendly name of the roi
         xrange=null     : <blob>    # 1d np.array - x pixel indices
@@ -384,9 +384,9 @@ class FacialSignal(dj.Imported):
 
         definition = """
         -> master.Region
-        component_id               : int         # component number
+        component_id               : int32         # component number
         ---
-        singular_value=null : float       # singular value corresponding to the component
+        singular_value=null : float32       # singular value corresponding to the component
         motmask             : <blob>    # (y, x)
         projection          : <blob>    # projections onto the component (nframes)
         """
@@ -404,9 +404,9 @@ class FacialSignal(dj.Imported):
 
         definition = """
         -> master.Region
-        component_id               : int         # component number
+        component_id               : int32         # component number
         ---
-        singular_value=null : float       # singular value corresponding to the component
+        singular_value=null : float32       # singular value corresponding to the component
         movmask             : <blob>    # (y, x)
         projection          : <blob>    # projections onto the component (nframes)
         """
@@ -424,7 +424,7 @@ class FacialSignal(dj.Imported):
         definition = """
         -> master
         ---
-        sbin          : int         # spatial bin size
+        sbin          : int32         # spatial bin size
         avgframe      : <blob>    # 2d np.array (y, x) - average binned frame
         avgmotion     : <blob>    # 2d nd.array (y, x) - average binned motion frame
         """

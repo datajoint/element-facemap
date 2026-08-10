@@ -121,7 +121,7 @@ class FacemapModel(dj.Manual):
     """
 
     definition = """
-    model_id                  : int              # user assigned ID associated with a unique model
+    model_id                  : int32              # user assigned ID associated with a unique model
     ---
     model_name                : varchar(64)      # name of model 
     model_description=''      : varchar(1000)    # optional model description
@@ -152,7 +152,7 @@ class FacemapModel(dj.Manual):
         definition = """
         -> master
         ---
-        model_file: attach      # model file attachment. Stored as binary in database.
+        model_file: <attach>    # model file attachment. Stored as binary in database.
         """
 
     @classmethod
@@ -300,8 +300,8 @@ class FacemapInference(dj.Computed):
     -> FacemapInferenceTask
     ---
     inference_completion_time: datetime  # time of generation of this set of facemap results
-    inference_run_duration: float # seconds
-    total_frame_count: int          # frame count across all video files          
+    inference_run_duration: float32 # seconds
+    total_frame_count: int32          # frame count across all video files          
     """
 
     class BodyPartPosition(dj.Part):
