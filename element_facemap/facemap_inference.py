@@ -15,7 +15,7 @@ from .facial_behavior_estimation import (
     get_facemap_processed_data_dir,
 )
 
-schema = dj.schema()
+schema = dj.Schema()
 
 _linking_module = None
 
@@ -121,7 +121,7 @@ class FacemapModel(dj.Manual):
     """
 
     definition = """
-    model_id                  : int              # user assigned ID associated with a unique model
+    model_id                  : int32              # user assigned ID associated with a unique model
     ---
     model_name                : varchar(64)      # name of model 
     model_description=''      : varchar(1000)    # optional model description
@@ -152,7 +152,7 @@ class FacemapModel(dj.Manual):
         definition = """
         -> master
         ---
-        model_file: attach      # model file attachment. Stored as binary in database.
+        model_file: <attach>    # model file attachment. Stored as binary in database.
         """
 
     @classmethod
@@ -218,7 +218,7 @@ class FacemapInferenceTask(dj.Manual):
     facemap_inference_output_dir    : varchar(255)  # Output directory of processed results of Facemap inference analysis relative to root directory.
     task_description=''             : varchar(128)  # Optional. Additional task description
     task_mode='load'                : enum('load', 'trigger') 
-    bbox=null                       : longblob  # list containing bounding box for cropping the video [x1, x2, y1, y2]
+    bbox=null                       : <blob>  # list containing bounding box for cropping the video [x1, x2, y1, y2]
     """
 
     @classmethod
@@ -300,8 +300,8 @@ class FacemapInference(dj.Computed):
     -> FacemapInferenceTask
     ---
     inference_completion_time: datetime  # time of generation of this set of facemap results
-    inference_run_duration: float # seconds
-    total_frame_count: int          # frame count across all video files          
+    inference_run_duration: float32 # seconds
+    total_frame_count: int32          # frame count across all video files          
     """
 
     class BodyPartPosition(dj.Part):
@@ -318,9 +318,9 @@ class FacemapInference(dj.Computed):
         -> master
         -> FacemapModel.BodyPart
         ---
-        x_pos       : longblob      # x position
-        y_pos       : longblob      # y position
-        likelihood  : longblob      # model evaluated likelihood
+        x_pos       : <blob>      # x position
+        y_pos       : <blob>      # y position
+        likelihood  : <blob>      # model evaluated likelihood
         """
 
     def make(self, key):
