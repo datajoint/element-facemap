@@ -484,10 +484,11 @@ class FacialSignal(dj.Imported):
                 )  # skip the first entry if fullSVD is False
                 motSVD = dataset["motSVD"][roi_idx]
                 motMask = dataset["motMask_reshape"][roi_idx]
+                n_components = motSVD.shape[-1]  # component axis is last, not first
                 motSv = (
                     dataset["motSv"][roi_idx]
-                    if "motSv" in dataset
-                    else np.full(motSVD.shape[-1], np.nan)
+                    if len(dataset.get("motSv", []))
+                    else np.full(n_components, np.nan)
                 )
                 motion_svd_entries.extend(
                     [
@@ -495,11 +496,11 @@ class FacialSignal(dj.Imported):
                             key,
                             roi_no=roi_no,
                             component_id=idx,
-                            singular_value=s,
-                            motmask=m,
-                            projection=p,
+                            singular_value=motSv[idx],
+                            motmask=motMask[..., idx],
+                            projection=motSVD[:, idx],
                         )
-                        for idx, (s, m, p) in enumerate(zip(motSv, motMask, motSVD))
+                        for idx in range(n_components)
                     ]
                 )
         # MovieSVD
@@ -510,22 +511,23 @@ class FacialSignal(dj.Imported):
                 )  # skip the first entry if fullSVD is False
                 movSVD = dataset["movSVD"][roi_idx]
                 movMask = dataset["movMask_reshape"][roi_idx]
+                n_components = movSVD.shape[-1]  # component axis is last, not first
                 movSv = (
                     dataset["movSv"][roi_idx]
-                    if "movSv" in dataset
-                    else np.full(movSVD.shape[-1], np.nan)
+                    if len(dataset.get("movSv", []))
+                    else np.full(n_components, np.nan)
                 )
-                motion_svd_entries.extend(
+                movie_svd_entries.extend(
                     [
                         dict(
                             key,
                             roi_no=roi_no,
                             component_id=idx,
-                            singular_value=s,
-                            motmask=m,
-                            projection=p,
+                            singular_value=movSv[idx],
+                            movmask=movMask[..., idx],
+                            projection=movSVD[:, idx],
                         )
-                        for idx, (s, m, p) in enumerate(zip(movSv, movMask, movSVD))
+                        for idx in range(n_components)
                     ]
                 )
 
